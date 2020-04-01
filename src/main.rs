@@ -44,12 +44,17 @@ fn main() {
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
-    resources.insert(new_map_rooms_and_corridors());
+    let (rooms, map) = new_map_rooms_and_corridors();
+    resources.insert(map);
+    let (player_x, player_y) = rooms[0].center();
 
     world.insert(
         (Player,),
         vec![(
-            Position { x: 40, y: 25 },
+            Position {
+                x: player_x,
+                y: player_y,
+            },
             Renderable {
                 glyph: rltk::to_cp437('@'),
                 fg: RGB::named(rltk::YELLOW),
