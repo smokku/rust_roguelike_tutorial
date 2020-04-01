@@ -24,7 +24,7 @@ impl GameState for State {
         player_input(self, ctx);
         self.schedule.execute(&mut self.world);
 
-        let map = self.resources.get::<Vec<TileType>>().unwrap();
+        let map = self.resources.get::<Map>().unwrap();
         draw_map(&map, ctx);
 
         let query = <(Read<Position>, Read<Renderable>)>::query();
@@ -44,9 +44,9 @@ fn main() {
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
-    let (rooms, map) = new_map_rooms_and_corridors();
+    let map = Map::new_map_rooms_and_corridors();
+    let (player_x, player_y) = map.rooms[0].center();
     resources.insert(map);
-    let (player_x, player_y) = rooms[0].center();
 
     world.insert(
         (Player,),
