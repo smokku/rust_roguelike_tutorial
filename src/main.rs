@@ -14,17 +14,25 @@ struct Renderable {
     bg: RGB,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct LeftMover;
+
 struct State {
     universe: Universe,
     world: World,
+    schedule: Schedule,
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
+        let Self { world, .. } = self;
+
+        self.schedule.execute(world);
+
         let query = <(Read<Position>, Read<Renderable>)>::query();
-        for (pos, render) in query.iter(&mut self.world) {
+        for (pos, render) in query.iter(world) {
             ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
         }
     }
@@ -37,10 +45,9 @@ fn main() {
         .build();
 
     let universe = Universe::new();
-    let world = universe.create_world();
-    let mut gs = State { universe, world };
+    let mut world = universe.create_world();
 
-    gs.world.insert(
+    world.insert(
         (),
         vec![(
             Position { x: 40, y: 25 },
@@ -52,8 +59,8 @@ fn main() {
         )],
     );
 
-    gs.world.insert(
-        (),
+    world.insert(
+        (LeftMover,),
         (0..10).map(|i| {
             (
                 Position { x: i * 7, y: 20 },
@@ -66,5 +73,23 @@ fn main() {
         }),
     );
 
+    let left_walker = SystemBuilder::new("left_walker")
+        .with_query(Write::<Position>::query().filter(tag::<LeftMover>()))
+        .build(|_, mut world, (), query| {
+            for mut pos in query.iter(&mut world) {
+                pos.x -= 1;
+                if pos.x < 0 {
+                    pos.x = 79;
+                }
+            }
+        });
+
+    let schedule = Schedule::builder().add_system(left_walker).build();
+
+    let gs = State {
+        universe,
+        world,
+        schedule,
+    };
     rltk::main_loop(context, gs);
 }
