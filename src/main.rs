@@ -9,6 +9,7 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod visibility_system;
 
 pub struct State {
     pub universe: Universe,
@@ -21,11 +22,11 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
-        player_input(self, ctx);
-        self.schedule.execute(&mut self.world);
+        player_input(&mut self.world, &mut self.resources, ctx);
 
-        let map = self.resources.get::<Map>().unwrap();
-        draw_map(&map, ctx);
+        self.schedule.execute(&mut self.world, &mut self.resources);
+
+        draw_map(&mut self.world, &mut self.resources, ctx);
 
         let query = <(Read<Position>, Read<Renderable>)>::query();
         for (pos, render) in query.iter(&mut self.world) {
@@ -60,10 +61,16 @@ fn main() {
                 fg: RGB::named(rltk::YELLOW),
                 bg: RGB::named(rltk::BLACK),
             },
+            Viewshed {
+                visible_tiles: Vec::new(),
+                range: 8,
+            },
         )],
     );
 
-    let schedule = Schedule::builder().build();
+    let schedule = Schedule::builder()
+        .add_system(visibility_system::build())
+        .build();
 
     let gs = State {
         universe,

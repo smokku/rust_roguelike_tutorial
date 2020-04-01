@@ -1,5 +1,7 @@
 use super::Rect;
-use rltk::{Console, RandomNumberGenerator, Rltk, RGB};
+use super::{Player, Viewshed};
+use legion::prelude::*;
+use rltk::{Algorithm2D, BaseMap, Console, Point, RandomNumberGenerator, Rltk, RGB};
 use std::cmp::{max, min};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -8,6 +10,7 @@ pub enum TileType {
     Floor,
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub rooms: Vec<Rect>,
@@ -93,37 +96,57 @@ impl Map {
     }
 }
 
-pub fn draw_map(map: &Map, ctx: &mut Rltk) {
-    let mut x = 0;
-    let mut y = 0;
-    for tile in map.tiles.iter() {
-        // Render a tile depending upon tile type
-        match tile {
-            TileType::Floor => {
-                ctx.set(
-                    x,
-                    y,
-                    RGB::from_f32(0.5, 0.5, 0.5),
-                    RGB::from_f32(0., 0., 0.),
-                    rltk::to_cp437('.'),
-                );
-            }
-            TileType::Wall => {
-                ctx.set(
-                    x,
-                    y,
-                    RGB::from_f32(0.0, 1.0, 0.0),
-                    RGB::from_f32(0., 0., 0.),
-                    rltk::to_cp437('#'),
-                );
-            }
-        }
+impl BaseMap for Map {
+    fn is_opaque(&self, idx: usize) -> bool {
+        self.tiles[idx] == TileType::Wall
+    }
+}
 
-        // Move the coordinates
-        x += 1;
-        if x > 79 {
-            x = 0;
-            y += 1;
+impl Algorithm2D for Map {
+    fn dimensions(&self) -> Point {
+        Point::new(self.width, self.height)
+    }
+}
+
+pub fn draw_map(world: &mut World, resources: &Resources, ctx: &mut Rltk) {
+    let map = resources.get::<Map>().unwrap();
+
+    let query = Read::<Viewshed>::query().filter(tag::<Player>());
+    for viewshed in query.iter(world) {
+        let mut x = 0;
+        let mut y = 0;
+        for tile in map.tiles.iter() {
+            // Render a tile depending upon tile type
+            let pt = Point::new(x, y);
+            if viewshed.visible_tiles.contains(&pt) {
+                match tile {
+                    TileType::Floor => {
+                        ctx.set(
+                            x,
+                            y,
+                            RGB::from_f32(0.5, 0.5, 0.5),
+                            RGB::from_f32(0., 0., 0.),
+                            rltk::to_cp437('.'),
+                        );
+                    }
+                    TileType::Wall => {
+                        ctx.set(
+                            x,
+                            y,
+                            RGB::from_f32(0.0, 1.0, 0.0),
+                            RGB::from_f32(0., 0., 0.),
+                            rltk::to_cp437('#'),
+                        );
+                    }
+                }
+            }
+
+            // Move the coordinates
+            x += 1;
+            if x > 79 {
+                x = 0;
+                y += 1;
+            }
         }
     }
 }

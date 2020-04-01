@@ -1,4 +1,4 @@
-use super::{Map, Player, Position, State, TileType};
+use super::{Map, Player, Position, TileType};
 use legion::prelude::*;
 use rltk::{Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
@@ -7,7 +7,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, world: &mut World, resources:
     let map = resources.get::<Map>().unwrap();
 
     let query = Write::<Position>::query().filter(tag::<Player>());
-    for mut pos in query.iter(world) {
+    for mut pos in query.iter_mut(world) {
         let destination_x = pos.x + delta_x;
         let destination_y = pos.y + delta_y;
         let destination_idx = map.xy_idx(destination_x, destination_y);
@@ -19,22 +19,22 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, world: &mut World, resources:
     }
 }
 
-pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
+pub fn player_input(world: &mut World, resources: &Resources, ctx: &mut Rltk) {
     // Player movement
     match ctx.key {
         None => {} // Nothing happened
         Some(key) => match key {
             VirtualKeyCode::Left | VirtualKeyCode::Numpad4 | VirtualKeyCode::H => {
-                try_move_player(-1, 0, &mut gs.world, &gs.resources)
+                try_move_player(-1, 0, world, resources)
             }
             VirtualKeyCode::Right | VirtualKeyCode::Numpad6 | VirtualKeyCode::L => {
-                try_move_player(1, 0, &mut gs.world, &gs.resources)
+                try_move_player(1, 0, world, resources)
             }
             VirtualKeyCode::Up | VirtualKeyCode::Numpad8 | VirtualKeyCode::K => {
-                try_move_player(0, -1, &mut gs.world, &gs.resources)
+                try_move_player(0, -1, world, resources)
             }
             VirtualKeyCode::Down | VirtualKeyCode::Numpad2 | VirtualKeyCode::J => {
-                try_move_player(0, 1, &mut gs.world, &gs.resources)
+                try_move_player(0, 1, world, resources)
             }
             _ => {}
         },

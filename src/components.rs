@@ -15,3 +15,9 @@ pub struct Renderable {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Player;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Viewshed {
+    pub visible_tiles: Vec<rltk::Point>,
+    pub range: i32,
+}

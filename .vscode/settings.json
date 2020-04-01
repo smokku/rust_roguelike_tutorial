@@ -3,6 +3,8 @@
         "numpad",
         "renderable",
         "rltk",
-        "roguelike"
+        "roguelike",
+        "schedulable",
+        "viewshed"
     ]
 }
