@@ -44,7 +44,7 @@ fn main() {
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
-    resources.insert(new_map());
+    resources.insert(new_map_rooms_and_corridors());
 
     world.insert(
         (Player,),
