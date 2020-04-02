@@ -1,16 +1,41 @@
-use super::{Map, Player, Position, RunState, State, Viewshed};
+use super::{CombatStats, Map, Player, Position, RunState, State, Viewshed};
 use legion::prelude::*;
-use rltk::{Point, Rltk, VirtualKeyCode};
+use rltk::{console, Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
+use std::collections::HashMap;
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
     let map = gs.resources.get::<Map>().unwrap();
+
+    // Pull all CombatStats for reference later
+    // FIXME: This is required as you cannot access random parts
+    // of ECS during query iteration - world is already borrowed.
+    // This is a sub-optimal pattern and should be implemented some other way.
+    // ECS is designed to work in carefully crafted chunks of data, withouts
+    // accessing data all over the place.
+    let mut combat_stats = HashMap::new();
+    let query = Read::<CombatStats>::query();
+    for (entity, cs) in query.iter_entities(&gs.world) {
+        combat_stats.insert(entity, *cs);
+    }
 
     let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
     for (mut pos, mut viewshed) in query.iter_mut(&mut gs.world) {
         let destination_x = pos.x + delta_x;
         let destination_y = pos.y + delta_y;
         let destination_idx = map.xy_idx(destination_x, destination_y);
+
+        for potential_target in map.tile_content[destination_idx].iter() {
+            let target = combat_stats.get(&*potential_target);
+            match target {
+                None => {}
+                Some(target) => {
+                    // Attack it
+                    console::log(&format!("From Hell's Heart, I stab thee!"));
+                    return; // So we don't move after attacking
+                }
+            }
+        }
 
         if !map.blocked[destination_idx] {
             pos.x = min(79, max(0, destination_x));

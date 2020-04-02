@@ -85,6 +85,12 @@ fn main() {
                 range: 8,
                 dirty: true,
             },
+            CombatStats {
+                max_hp: 30,
+                hp: 30,
+                defense: 2,
+                power: 5,
+            },
         )],
     );
 
@@ -120,6 +126,12 @@ fn main() {
                 },
                 Name {
                     name: format!("{} #{}", name, i),
+                },
+                CombatStats {
+                    max_hp: 16,
+                    hp: 16,
+                    defense: 1,
+                    power: 4,
                 },
             )
         }),
