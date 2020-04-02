@@ -41,7 +41,7 @@ impl GameState for State {
 
         let map = self.resources.get::<Map>().unwrap();
         let query = <(Read<Position>, Read<Renderable>)>::query();
-        for (pos, render) in query.iter(&mut self.world) {
+        for (pos, render) in query.iter(&self.world) {
             let idx = map.xy_idx(pos.x, pos.y);
             if map.visible_tiles[idx] {
                 ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
@@ -89,14 +89,21 @@ fn main() {
 
     world.insert(
         (Monster,),
-        map.rooms.iter().skip(1).map(|room| {
+        map.rooms.iter().skip(1).enumerate().map(|(i, room)| {
             let (x, y) = room.center();
 
             let glyph: u8;
+            let name: String;
             let roll = rng.roll_dice(1, 2);
             match roll {
-                1 => glyph = rltk::to_cp437('g'),
-                _ => glyph = rltk::to_cp437('o'),
+                1 => {
+                    glyph = rltk::to_cp437('g');
+                    name = "Goblin".to_string();
+                }
+                _ => {
+                    glyph = rltk::to_cp437('o');
+                    name = "Orc".to_string();
+                }
             }
             (
                 Position { x, y },
@@ -109,6 +116,9 @@ fn main() {
                     visible_tiles: Vec::new(),
                     range: 8,
                     dirty: true,
+                },
+                Name {
+                    name: format!("{} #{}", name, i),
                 },
             )
         }),

@@ -25,3 +25,8 @@ pub struct Viewshed {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Monster;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Name {
+    pub name: String,
+}
