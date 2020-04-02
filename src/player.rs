@@ -1,4 +1,4 @@
-use super::{Map, Player, Position, TileType};
+use super::{Map, Player, Position, TileType, Viewshed};
 use legion::prelude::*;
 use rltk::{Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
@@ -6,8 +6,8 @@ use std::cmp::{max, min};
 pub fn try_move_player(delta_x: i32, delta_y: i32, world: &mut World, resources: &Resources) {
     let map = resources.get::<Map>().unwrap();
 
-    let query = Write::<Position>::query().filter(tag::<Player>());
-    for mut pos in query.iter_mut(world) {
+    let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
+    for (mut pos, mut viewshed) in query.iter_mut(world) {
         let destination_x = pos.x + delta_x;
         let destination_y = pos.y + delta_y;
         let destination_idx = map.xy_idx(destination_x, destination_y);
@@ -15,6 +15,8 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, world: &mut World, resources:
         if map.tiles[destination_idx] != TileType::Wall {
             pos.x = min(79, max(0, destination_x));
             pos.y = min(49, max(0, destination_y));
+
+            viewshed.dirty = true;
         }
     }
 }
