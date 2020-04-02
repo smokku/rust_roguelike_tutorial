@@ -28,18 +28,24 @@ impl GameState for State {
 
         draw_map(&mut self.world, &mut self.resources, ctx);
 
+        let map = self.resources.get::<Map>().unwrap();
         let query = <(Read<Position>, Read<Renderable>)>::query();
         for (pos, render) in query.iter(&mut self.world) {
-            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+            let idx = map.xy_idx(pos.x, pos.y);
+            if map.visible_tiles[idx] {
+                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+            }
         }
     }
 }
 
 fn main() {
-    use rltk::RltkBuilder;
+    use rltk::{RandomNumberGenerator, RltkBuilder};
     let context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build();
+
+    let mut rng = RandomNumberGenerator::new();
 
     let universe = Universe::new();
     let mut world = universe.create_world();
@@ -47,7 +53,6 @@ fn main() {
 
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
-    resources.insert(map);
 
     world.insert(
         (Player,),
@@ -68,6 +73,35 @@ fn main() {
             },
         )],
     );
+
+    world.insert(
+        (),
+        map.rooms.iter().skip(1).map(|room| {
+            let (x, y) = room.center();
+
+            let glyph: u8;
+            let roll = rng.roll_dice(1, 2);
+            match roll {
+                1 => glyph = rltk::to_cp437('g'),
+                _ => glyph = rltk::to_cp437('o'),
+            }
+            (
+                Position { x, y },
+                Renderable {
+                    glyph,
+                    fg: RGB::named(rltk::RED),
+                    bg: RGB::named(rltk::BLACK),
+                },
+                Viewshed {
+                    visible_tiles: Vec::new(),
+                    range: 8,
+                    dirty: true,
+                },
+            )
+        }),
+    );
+
+    resources.insert(map);
 
     let schedule = Schedule::builder()
         .add_system(visibility_system::build())
