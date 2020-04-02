@@ -30,3 +30,6 @@ pub struct Monster;
 pub struct Name {
     pub name: String,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct BlocksTile;

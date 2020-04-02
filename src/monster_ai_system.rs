@@ -11,8 +11,14 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
         )
         .build(|_, mut world, (map, player_pos), query| {
             for (mut viewshed, name, mut pos) in query.iter_mut(&mut world) {
-                if viewshed.visible_tiles.contains(&**player_pos) {
+                let distance = rltk::DistanceAlg::Pythagoras
+                    .distance2d(Point::new(pos.x, pos.y), **player_pos);
+                if distance < 1.5 {
+                    // Attack goes here
                     console::log(&format!("{} shouts insults", name.name));
+                    return;
+                }
+                if viewshed.visible_tiles.contains(&**player_pos) {
                     let path = rltk::a_star_search(
                         map.xy_idx(pos.x, pos.y) as i32,
                         map.xy_idx(player_pos.x, player_pos.y) as i32,

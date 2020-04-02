@@ -9,6 +9,7 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod map_indexing_system;
 mod monster_ai_system;
 mod visibility_system;
 
@@ -88,7 +89,7 @@ fn main() {
     );
 
     world.insert(
-        (Monster,),
+        (Monster, BlocksTile),
         map.rooms.iter().skip(1).enumerate().map(|(i, room)| {
             let (x, y) = room.center();
 
@@ -129,6 +130,7 @@ fn main() {
     let schedule = Schedule::builder()
         .add_system(visibility_system::build())
         .add_system(monster_ai_system::build())
+        .add_system(map_indexing_system::build())
         .build();
 
     let gs = State {
