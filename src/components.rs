@@ -22,3 +22,6 @@ pub struct Viewshed {
     pub range: i32,
     pub dirty: bool,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Monster;

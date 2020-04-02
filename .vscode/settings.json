@@ -4,6 +4,7 @@
         "renderable",
         "rltk",
         "roguelike",
+        "runstate",
         "schedulable",
         "viewshed"
     ]

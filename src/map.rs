@@ -1,5 +1,4 @@
-use super::Rect;
-use legion::prelude::*;
+use super::{Rect, State};
 use rltk::{Algorithm2D, BaseMap, Console, Point, RandomNumberGenerator, Rltk, RGB};
 use std::cmp::{max, min};
 
@@ -111,8 +110,8 @@ impl Algorithm2D for Map {
     }
 }
 
-pub fn draw_map(_world: &mut World, resources: &Resources, ctx: &mut Rltk) {
-    let map = resources.get::<Map>().unwrap();
+pub fn draw_map(gs: &mut State, ctx: &mut Rltk) {
+    let map = gs.resources.get::<Map>().unwrap();
 
     let mut x = 0;
     let mut y = 0;

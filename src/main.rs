@@ -9,24 +9,35 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod monster_ai_system;
 mod visibility_system;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum RunState {
+    Paused,
+    Running,
+}
 
 pub struct State {
     pub universe: Universe,
     pub world: World,
     pub resources: Resources,
     pub schedule: Schedule,
+    pub runstate: RunState,
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
-        player_input(&mut self.world, &mut self.resources, ctx);
+        if self.runstate == RunState::Running {
+            self.schedule.execute(&mut self.world, &mut self.resources);
+            self.runstate = RunState::Paused;
+        } else {
+            self.runstate = player_input(self, ctx);
+        }
 
-        self.schedule.execute(&mut self.world, &mut self.resources);
-
-        draw_map(&mut self.world, &mut self.resources, ctx);
+        draw_map(self, ctx);
 
         let map = self.resources.get::<Map>().unwrap();
         let query = <(Read<Position>, Read<Renderable>)>::query();
@@ -75,7 +86,7 @@ fn main() {
     );
 
     world.insert(
-        (),
+        (Monster,),
         map.rooms.iter().skip(1).map(|room| {
             let (x, y) = room.center();
 
@@ -105,6 +116,7 @@ fn main() {
 
     let schedule = Schedule::builder()
         .add_system(visibility_system::build())
+        .add_system(monster_ai_system::build())
         .build();
 
     let gs = State {
@@ -112,6 +124,7 @@ fn main() {
         world,
         resources,
         schedule,
+        runstate: RunState::Running,
     };
     rltk::main_loop(context, gs);
 }
