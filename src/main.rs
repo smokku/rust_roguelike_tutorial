@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::{Console, GameState, Rltk, RGB};
+use rltk::{Console, GameState, Point, Rltk, RGB};
 
 mod components;
 pub use components::*;
@@ -63,7 +63,9 @@ fn main() {
     let mut resources = Resources::default();
 
     let map = Map::new_map_rooms_and_corridors();
+
     let (player_x, player_y) = map.rooms[0].center();
+    resources.insert(Point::new(player_x, player_y));
 
     world.insert(
         (Player,),

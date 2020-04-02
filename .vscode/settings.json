@@ -6,6 +6,7 @@
         "roguelike",
         "runstate",
         "schedulable",
-        "viewshed"
+        "viewshed",
+        "viewsheds"
     ]
 }

@@ -1,6 +1,6 @@
 use super::{Map, Player, Position, RunState, State, TileType, Viewshed};
 use legion::prelude::*;
-use rltk::{Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
@@ -17,6 +17,11 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
             pos.y = min(49, max(0, destination_y));
 
             viewshed.dirty = true;
+
+            // Update Player position resource
+            let mut p_pos = gs.resources.get_mut::<Point>().unwrap();
+            p_pos.x = pos.x;
+            p_pos.y = pos.y;
         }
     }
 }
