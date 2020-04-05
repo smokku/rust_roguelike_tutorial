@@ -9,7 +9,9 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod damage_system;
 mod map_indexing_system;
+mod melee_combat_system;
 mod monster_ai_system;
 mod visibility_system;
 
@@ -23,7 +25,7 @@ pub struct State {
     pub universe: Universe,
     pub world: World,
     pub resources: Resources,
-    pub schedule: Schedule,
+    pub schedules: Vec<Schedule>,
     pub runstate: RunState,
 }
 
@@ -32,7 +34,9 @@ impl GameState for State {
         ctx.cls();
 
         if self.runstate == RunState::Running {
-            self.schedule.execute(&mut self.world, &mut self.resources);
+            for schedule in self.schedules.iter_mut() {
+                schedule.execute(&mut self.world, &mut self.resources);
+            }
             self.runstate = RunState::Paused;
         } else {
             self.runstate = player_input(self, ctx);
@@ -84,6 +88,9 @@ fn main() {
                 visible_tiles: Vec::new(),
                 range: 8,
                 dirty: true,
+            },
+            Name {
+                name: "Player".to_string(),
             },
             CombatStats {
                 max_hp: 30,
@@ -139,17 +146,26 @@ fn main() {
 
     resources.insert(map);
 
-    let schedule = Schedule::builder()
-        .add_system(visibility_system::build())
-        .add_system(monster_ai_system::build())
-        .add_system(map_indexing_system::build())
-        .build();
+    let schedules = vec![
+        Schedule::builder()
+            .add_system(visibility_system::build())
+            .add_system(monster_ai_system::build())
+            .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
+            .build(),
+        Schedule::builder()
+            .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
+            .add_thread_local_fn(damage_system::delete_the_dead()) // Grim Reaper of zeroed HP entities
+            .build(),
+        Schedule::builder()
+            .add_system(map_indexing_system::build())
+            .build(),
+    ];
 
     let gs = State {
         universe,
         world,
         resources,
-        schedule,
+        schedules,
         runstate: RunState::Running,
     };
     rltk::main_loop(context, gs);

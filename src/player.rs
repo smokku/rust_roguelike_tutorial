@@ -1,6 +1,6 @@
-use super::{CombatStats, Map, Player, Position, RunState, State, Viewshed};
+use super::{CombatStats, Map, Player, Position, RunState, State, Viewshed, WantsToMelee};
 use legion::prelude::*;
-use rltk::{console, Point, Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
 use std::collections::HashMap;
 
@@ -19,21 +19,19 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
         combat_stats.insert(entity, *cs);
     }
 
+    let mut wants_to_melee = Vec::new();
     let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
-    for (mut pos, mut viewshed) in query.iter_mut(&mut gs.world) {
+    for (entity, (mut pos, mut viewshed)) in query.iter_entities_mut(&mut gs.world) {
         let destination_x = pos.x + delta_x;
         let destination_y = pos.y + delta_y;
         let destination_idx = map.xy_idx(destination_x, destination_y);
 
         for potential_target in map.tile_content[destination_idx].iter() {
-            let target = combat_stats.get(&*potential_target);
-            match target {
-                None => {}
-                Some(target) => {
-                    // Attack it
-                    console::log(&format!("From Hell's Heart, I stab thee!"));
-                    return; // So we don't move after attacking
-                }
+            let cs = combat_stats.get(&*potential_target);
+            if let Some(_cs) = cs {
+                // Store attack target
+                wants_to_melee.push((entity, *potential_target));
+                continue; // So we don't move after attacking
             }
         }
 
@@ -48,6 +46,13 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
             p_pos.x = pos.x;
             p_pos.y = pos.y;
         }
+    }
+
+    // Add WantsToMelee component to all stored entities
+    for (entity, target) in wants_to_melee.iter() {
+        gs.world
+            .add_component(*entity, WantsToMelee { target: *target })
+            .expect("Add target failed");
     }
 }
 

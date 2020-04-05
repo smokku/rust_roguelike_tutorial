@@ -1,3 +1,4 @@
+use legion::prelude::*;
 use rltk::RGB;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -40,4 +41,31 @@ pub struct CombatStats {
     pub hp: i32,
     pub defense: i32,
     pub power: i32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToMelee {
+    pub target: Entity,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct SufferDamage {
+    pub amount: Vec<i32>,
+}
+
+impl SufferDamage {
+    pub fn new_damage(command_buffer: &CommandBuffer, victim: Entity, amount: i32) {
+        command_buffer.exec_mut(move |world| {
+            let mut dmg = if let Some(suffering) = world.get_component::<SufferDamage>(victim) {
+                (*suffering).clone()
+            } else {
+                SufferDamage { amount: Vec::new() }
+            };
+
+            dmg.amount.push(amount);
+            world
+                .add_component(victim, dmg)
+                .expect("Unable to insert damage");
+        });
+    }
 }
