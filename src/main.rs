@@ -10,6 +10,7 @@ pub use player::*;
 mod rect;
 pub use rect::*;
 mod damage_system;
+mod gamelog;
 mod gui;
 mod map_indexing_system;
 mod melee_combat_system;
@@ -82,7 +83,7 @@ impl GameState for State {
             }
         }
 
-        gui::draw_ui(&self.world, ctx);
+        gui::draw_ui(&self.world, &self.resources, ctx);
     }
 }
 
@@ -99,6 +100,9 @@ fn main() {
     let mut resources = Resources::default();
 
     resources.insert(RunState::PreRun);
+    resources.insert(gamelog::GameLog {
+        entries: vec!["Welcome to Rusty Roguelike".to_string()],
+    });
 
     let map = Map::new_map_rooms_and_corridors();
 

@@ -1,8 +1,8 @@
-use super::{CombatStats, Player};
+use super::{gamelog::GameLog, CombatStats, Player};
 use legion::prelude::*;
 use rltk::{Console, Rltk, RGB};
 
-pub fn draw_ui(world: &World, ctx: &mut Rltk) {
+pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     ctx.draw_box(
         0,
         43,
@@ -31,5 +31,14 @@ pub fn draw_ui(world: &World, ctx: &mut Rltk) {
             RGB::named(rltk::RED),
             RGB::named(rltk::BLACK),
         );
+    }
+
+    let log = resources.get::<GameLog>().unwrap();
+    let mut y = 44;
+    for s in log.entries.iter().rev() {
+        if y < 49 {
+            ctx.print(2, y, s);
+        }
+        y += 1;
     }
 }
