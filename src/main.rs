@@ -17,8 +17,11 @@ mod visibility_system;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RunState {
-    Paused,
-    Running,
+    AwaitingInput,
+    PreRun,
+    PlayerTurn,
+    MonsterTurn,
+    WorldTurn,
 }
 
 pub struct State {
@@ -26,21 +29,46 @@ pub struct State {
     pub world: World,
     pub resources: Resources,
     pub schedules: Vec<Schedule>,
-    pub runstate: RunState,
+}
+
+impl State {
+    fn run_systems(&mut self) {
+        for schedule in self.schedules.iter_mut() {
+            schedule.execute(&mut self.world, &mut self.resources);
+        }
+    }
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
+        let mut runstate = *self.resources.get::<RunState>().unwrap();
 
-        if self.runstate == RunState::Running {
-            for schedule in self.schedules.iter_mut() {
-                schedule.execute(&mut self.world, &mut self.resources);
+        match runstate {
+            RunState::PreRun => {
+                self.run_systems();
+                runstate = RunState::AwaitingInput;
             }
-            self.runstate = RunState::Paused;
-        } else {
-            self.runstate = player_input(self, ctx);
+            RunState::AwaitingInput => {
+                runstate = player_input(self, ctx);
+            }
+            RunState::PlayerTurn => {
+                self.run_systems();
+                runstate = RunState::MonsterTurn;
+            }
+            RunState::MonsterTurn => {
+                self.run_systems();
+                runstate = RunState::WorldTurn;
+            }
+            RunState::WorldTurn => {
+                self.run_systems();
+                runstate = RunState::AwaitingInput;
+            }
         }
+
+        self.resources.insert(runstate);
+
+        damage_system::delete_the_dead(&mut self.world, &mut self.resources);
 
         draw_map(self, ctx);
 
@@ -66,6 +94,8 @@ fn main() {
     let universe = Universe::new();
     let mut world = universe.create_world();
     let mut resources = Resources::default();
+
+    resources.insert(RunState::PreRun);
 
     let map = Map::new_map_rooms_and_corridors();
 
@@ -153,13 +183,8 @@ fn main() {
             .build(),
         Schedule::builder()
             .add_system(monster_ai_system::build())
-            .build(),
-        Schedule::builder()
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
-            .build(),
-        Schedule::builder()
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
-            .add_thread_local_fn(damage_system::delete_the_dead()) // Grim Reaper of zeroed HP entities
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())
@@ -171,7 +196,6 @@ fn main() {
         world,
         resources,
         schedules,
-        runstate: RunState::Running,
     };
     rltk::main_loop(context, gs);
 }

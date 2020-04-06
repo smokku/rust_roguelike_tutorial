@@ -1,4 +1,4 @@
-use super::{Map, Monster, Position, Viewshed, WantsToMelee};
+use super::{Map, Monster, Position, RunState, Viewshed, WantsToMelee};
 use legion::prelude::*;
 use rltk::Point;
 
@@ -7,9 +7,13 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
         .write_resource::<Map>()
         .read_resource::<Point>()
         .read_resource::<Entity>()
+        .read_resource::<RunState>()
         .with_query(<(Write<Viewshed>, Write<Position>)>::query().filter(tag::<Monster>()))
         .build(
-            |command_buffer, mut world, (map, player_pos, player_entity), query| {
+            |command_buffer, mut world, (map, player_pos, player_entity, runstate), query| {
+                if **runstate != RunState::MonsterTurn {
+                    return;
+                }
                 for (entity, (mut viewshed, mut pos)) in query.iter_entities_mut(&mut world) {
                     let distance = rltk::DistanceAlg::Pythagoras
                         .distance2d(Point::new(pos.x, pos.y), **player_pos);
