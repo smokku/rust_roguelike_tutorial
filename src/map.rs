@@ -3,9 +3,9 @@ use legion::prelude::*;
 use rltk::{Algorithm2D, BaseMap, Console, Point, RandomNumberGenerator, Rltk, RGB};
 use std::cmp::{max, min};
 
-const MAP_WIDTH: usize = 80;
-const MAP_HEIGHT: usize = 43;
-const MAP_COUNT: usize = MAP_WIDTH * MAP_HEIGHT;
+pub const MAP_WIDTH: usize = 80;
+pub const MAP_HEIGHT: usize = 43;
+pub const MAP_COUNT: usize = MAP_WIDTH * MAP_HEIGHT;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TileType {
@@ -31,13 +31,14 @@ impl Map {
     }
 
     fn apply_room_to_map(&mut self, room: &Rect) {
-        for y in (room.y1 + 1)..=room.y2 {
-            for x in (room.x1 + 1)..=room.x2 {
+        for y in room.y1 + 1..=room.y2 {
+            for x in room.x1 + 1..=room.x2 {
                 let idx = self.xy_idx(x, y);
                 self.tiles[idx] = TileType::Floor;
             }
         }
     }
+
     fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = self.xy_idx(x, y);
@@ -46,6 +47,7 @@ impl Map {
             }
         }
     }
+
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = self.xy_idx(x, y);
@@ -95,7 +97,7 @@ impl Map {
 
         let mut rng = RandomNumberGenerator::new();
 
-        for _ in 0..MAX_ROOMS {
+        for _i in 0..MAX_ROOMS {
             let w = rng.range(MIN_SIZE, MAX_SIZE);
             let h = rng.range(MIN_SIZE, MAX_SIZE);
             let x = rng.roll_dice(1, map.width - w - 1) - 1;
@@ -110,6 +112,7 @@ impl Map {
             }
             if ok {
                 map.apply_room_to_map(&new_room);
+
                 if !map.rooms.is_empty() {
                     let (new_x, new_y) = new_room.center();
                     let (prev_x, prev_y) = map.rooms[map.rooms.len() - 1].center();
@@ -121,9 +124,11 @@ impl Map {
                         map.apply_horizontal_tunnel(prev_x, new_x, new_y);
                     }
                 }
+
                 map.rooms.push(new_room);
             };
         }
+
         map
     }
 }

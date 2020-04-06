@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::{Console, GameState, Point, Rltk, RGB};
+use rltk::{Console, GameState, Point, Rltk};
 
 mod components;
 pub use components::*;
@@ -99,7 +99,7 @@ fn main() {
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
-    let mut rng = RandomNumberGenerator::new();
+    let rng = RandomNumberGenerator::new();
     resources.insert(rng);
     resources.insert(RunState::PreRun);
     resources.insert(gamelog::GameLog {
@@ -115,8 +115,7 @@ fn main() {
     resources.insert(player);
 
     for room in map.rooms.iter().skip(1) {
-        let (x, y) = room.center();
-        spawner::random_monster(&mut world, &mut resources, x, y);
+        spawner::spawn_room(&mut world, &mut resources, room);
     }
 
     resources.insert(map);

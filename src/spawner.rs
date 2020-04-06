@@ -1,6 +1,12 @@
-use super::{BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed};
+use super::{
+    map::MAP_WIDTH, BlocksTile, CombatStats, Monster, Name, Player, Position, Rect, Renderable,
+    Viewshed,
+};
 use legion::prelude::*;
 use rltk::{RandomNumberGenerator, RGB};
+
+const MAX_MONSTERS: i32 = 4;
+const MAX_ITEMS: i32 = 2;
 
 // Spawns the player and returns the entity object.
 pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
@@ -78,4 +84,34 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: u8, name: &str) {
             },
         )],
     );
+}
+
+pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect) {
+    let mut monster_spawn_points = Vec::new();
+
+    // Scope to keep the borrow checker happy
+    {
+        let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
+        let num_monsters = rng.roll_dice(1, MAX_MONSTERS + 2) - 3;
+
+        for _i in 0..num_monsters {
+            let mut added = false;
+            while !added {
+                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
+                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
+                let idx = (y * MAP_WIDTH) + x;
+                if !monster_spawn_points.contains(&idx) {
+                    monster_spawn_points.push(idx);
+                    added = true;
+                }
+            }
+        }
+    }
+
+    // Actually spawn the monsters
+    for idx in monster_spawn_points.iter() {
+        let x = *idx % MAP_WIDTH;
+        let y = *idx / MAP_WIDTH;
+        random_monster(world, resources, x as i32, y as i32);
+    }
 }
