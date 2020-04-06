@@ -15,6 +15,7 @@ mod gui;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
+mod spawner;
 mod visibility_system;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -94,12 +95,12 @@ fn main() {
         .build();
     context.with_post_scanlines(true);
 
-    let mut rng = RandomNumberGenerator::new();
-
     let universe = Universe::new();
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
+    let mut rng = RandomNumberGenerator::new();
+    resources.insert(rng);
     resources.insert(RunState::PreRun);
     resources.insert(gamelog::GameLog {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
@@ -110,78 +111,13 @@ fn main() {
     let (player_x, player_y) = map.rooms[0].center();
     resources.insert(Point::new(player_x, player_y));
 
-    let player = world.insert(
-        (Player,),
-        vec![(
-            Position {
-                x: player_x,
-                y: player_y,
-            },
-            Renderable {
-                glyph: rltk::to_cp437('@'),
-                fg: RGB::named(rltk::YELLOW),
-                bg: RGB::named(rltk::BLACK),
-            },
-            Viewshed {
-                visible_tiles: Vec::new(),
-                range: 8,
-                dirty: true,
-            },
-            Name {
-                name: "Player".to_string(),
-            },
-            CombatStats {
-                max_hp: 30,
-                hp: 30,
-                defense: 2,
-                power: 5,
-            },
-        )],
-    );
-    resources.insert(player[0]);
+    let player = spawner::player(&mut world, player_x, player_y);
+    resources.insert(player);
 
-    world.insert(
-        (Monster, BlocksTile),
-        map.rooms.iter().skip(1).enumerate().map(|(i, room)| {
-            let (x, y) = room.center();
-
-            let glyph: u8;
-            let name: String;
-            let roll = rng.roll_dice(1, 2);
-            match roll {
-                1 => {
-                    glyph = rltk::to_cp437('g');
-                    name = "Goblin".to_string();
-                }
-                _ => {
-                    glyph = rltk::to_cp437('o');
-                    name = "Orc".to_string();
-                }
-            }
-            (
-                Position { x, y },
-                Renderable {
-                    glyph,
-                    fg: RGB::named(rltk::RED),
-                    bg: RGB::named(rltk::BLACK),
-                },
-                Viewshed {
-                    visible_tiles: Vec::new(),
-                    range: 8,
-                    dirty: true,
-                },
-                Name {
-                    name: format!("{} #{}", name, i),
-                },
-                CombatStats {
-                    max_hp: 16,
-                    hp: 16,
-                    defense: 1,
-                    power: 4,
-                },
-            )
-        }),
-    );
+    for room in map.rooms.iter().skip(1) {
+        let (x, y) = room.center();
+        spawner::random_monster(&mut world, &mut resources, x, y);
+    }
 
     resources.insert(map);
 
