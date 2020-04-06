@@ -15,12 +15,17 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
 }
 
 pub fn delete_the_dead() -> Box<dyn Fn(&mut World, &mut Resources) -> ()> {
-    Box::new(|world: &mut World, _resources: &mut Resources| {
+    Box::new(|world: &mut World, resources: &mut Resources| {
         let mut dead = Vec::new();
         let query = Read::<CombatStats>::query();
         for (entity, stats) in query.iter_entities(world) {
             if stats.hp < 1 {
-                dead.push(entity);
+                let player = resources.get::<Entity>().expect("Cannot get Player entity");
+                if entity == *player {
+                    console::log("You are dead");
+                } else {
+                    dead.push(entity);
+                }
             }
         }
         for victim in dead {

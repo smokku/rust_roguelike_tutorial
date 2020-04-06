@@ -35,7 +35,7 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
                         console::log(&format!("{} does not do combat", target));
                     }
                 } else {
-                    console::log("{} does not do combat")
+                    console::log(&format!("{} is already dead, thus cannot do melee", entity))
                 }
             }
         })

@@ -72,7 +72,7 @@ fn main() {
     let (player_x, player_y) = map.rooms[0].center();
     resources.insert(Point::new(player_x, player_y));
 
-    world.insert(
+    let player = world.insert(
         (Player,),
         vec![(
             Position {
@@ -100,6 +100,7 @@ fn main() {
             },
         )],
     );
+    resources.insert(player[0]);
 
     world.insert(
         (Monster, BlocksTile),
@@ -149,7 +150,11 @@ fn main() {
     let schedules = vec![
         Schedule::builder()
             .add_system(visibility_system::build())
+            .build(),
+        Schedule::builder()
             .add_system(monster_ai_system::build())
+            .build(),
+        Schedule::builder()
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
             .build(),
         Schedule::builder()
