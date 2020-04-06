@@ -69,3 +69,11 @@ impl SufferDamage {
         });
     }
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Item;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Potion {
+    pub heal_amount: i32,
+}
