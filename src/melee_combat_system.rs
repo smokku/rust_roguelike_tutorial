@@ -1,4 +1,4 @@
-use super::{CombatStats, Name, SufferDamage, WantsToMelee};
+use super::{gamelog::GameLog, CombatStats, Name, SufferDamage, WantsToMelee};
 use legion::prelude::*;
 use rltk::console;
 
@@ -7,7 +7,8 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
         .with_query(<(Read<WantsToMelee>, Read<Name>, Read<CombatStats>)>::query())
         .read_component::<CombatStats>()
         .read_component::<Name>()
-        .build(|command_buffer, world, _, query| {
+        .write_resource::<GameLog>()
+        .build(|command_buffer, world, log, query| {
             for (entity, (wants_melee, name, stats)) in query.iter_entities_mut(world) {
                 let target = wants_melee.target;
                 if stats.hp > 0 {
@@ -19,14 +20,12 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
                         let damage = i32::max(0, stats.power - target_stats.defense);
 
                         if damage == 0 {
-                            console::log(&format!(
-                                "{} is unable to hurt {}",
-                                &name.name, &target_name
-                            ));
+                            log.entries
+                                .push(format!("{} is unable to hurt {}", &name.name, &target_name));
                         } else {
-                            console::log(&format!(
-                                "{} hits {}, for {} hp (of {}).",
-                                &name.name, &target_name, damage, target_stats.hp
+                            log.entries.push(format!(
+                                "{} hits {}, for {} hp.",
+                                &name.name, &target_name, damage
                             ));
                             SufferDamage::new_damage(&command_buffer, target, damage);
                             command_buffer.remove_component::<WantsToMelee>(entity);
