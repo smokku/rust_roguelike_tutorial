@@ -89,9 +89,10 @@ impl GameState for State {
 
 fn main() {
     use rltk::{RandomNumberGenerator, RltkBuilder};
-    let context = RltkBuilder::simple80x50()
+    let mut context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build();
+    context.with_post_scanlines(true);
 
     let mut rng = RandomNumberGenerator::new();
 
