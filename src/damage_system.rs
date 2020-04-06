@@ -1,6 +1,5 @@
-use super::{CombatStats, Name, SufferDamage};
+use super::{gamelog::GameLog, CombatStats, Name, SufferDamage};
 use legion::prelude::*;
-use rltk::console;
 
 pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("damage")
@@ -16,12 +15,13 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
 
 pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
     let mut dead = Vec::new();
+    let mut log = resources.get_mut::<GameLog>().unwrap();
     let query = Read::<CombatStats>::query();
     for (entity, stats) in query.iter_entities(world) {
         if stats.hp < 1 {
             let player = resources.get::<Entity>().expect("Cannot get Player entity");
             if entity == *player {
-                console::log("You are dead");
+                log.entries.push("You are dead".to_string());
             } else {
                 dead.push(entity);
             }
@@ -33,7 +33,8 @@ pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
         } else {
             "-Unnamed-".to_string()
         };
-        console::log(format!("{} is pushing up the daisies.", name));
+        log.entries
+            .push(format!("{} is pushing up the daisies.", name));
         world.delete(victim);
     }
 }
