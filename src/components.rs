@@ -77,3 +77,14 @@ pub struct Item;
 pub struct Potion {
     pub heal_amount: i32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct InBackpack {
+    pub owner: Entity,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToPickupItem {
+    pub collected_by: Entity,
+    pub item: Entity,
+}

@@ -1,4 +1,7 @@
-use super::{CombatStats, Map, Player, Position, RunState, State, Viewshed, WantsToMelee};
+use super::{
+    gamelog::GameLog, CombatStats, Item, Map, Player, Position, RunState, State, Viewshed,
+    WantsToMelee, WantsToPickupItem,
+};
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
@@ -56,6 +59,36 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
     }
 }
 
+fn get_item(gs: &mut State) {
+    let player_pos = gs.resources.get::<Point>().unwrap();
+    let player_entity = gs.resources.get::<Entity>().unwrap();
+    let mut gamelog = gs.resources.get_mut::<GameLog>().unwrap();
+
+    let mut target_item = None;
+    let query = Read::<Position>::query().filter(tag::<Item>());
+    for (item_entity, position) in query.iter_entities(&gs.world) {
+        if position.x == player_pos.x && position.y == player_pos.y {
+            target_item = Some(item_entity);
+        }
+    }
+
+    match target_item {
+        None => gamelog
+            .entries
+            .push("There is nothing here to pick up.".to_string()),
+        Some(item) => gs
+            .world
+            .add_component(
+                *player_entity,
+                WantsToPickupItem {
+                    collected_by: *player_entity,
+                    item,
+                },
+            )
+            .expect("Unable to insert want to pickup"),
+    }
+}
+
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     // Player movement
     match ctx.key {
@@ -78,6 +111,9 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::Numpad7 | VirtualKeyCode::U => try_move_player(-1, -1, gs),
             VirtualKeyCode::Numpad3 | VirtualKeyCode::N => try_move_player(1, 1, gs),
             VirtualKeyCode::Numpad1 | VirtualKeyCode::B => try_move_player(-1, 1, gs),
+
+            VirtualKeyCode::G => get_item(gs),
+
             _ => return RunState::PlayerTurn,
         },
     }

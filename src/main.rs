@@ -12,6 +12,7 @@ pub use rect::*;
 mod damage_system;
 mod gamelog;
 mod gui;
+mod inventory_system;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
@@ -128,6 +129,7 @@ fn main() {
             .add_system(monster_ai_system::build())
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
+            .add_system(inventory_system::build())
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())
