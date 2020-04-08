@@ -113,6 +113,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::Numpad1 | VirtualKeyCode::B => try_move_player(-1, 1, gs),
 
             VirtualKeyCode::G => get_item(gs),
+            VirtualKeyCode::I => return RunState::ShowInventory,
 
             _ => return RunState::PlayerTurn,
         },

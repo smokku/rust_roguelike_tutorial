@@ -26,6 +26,7 @@ pub enum RunState {
     PlayerTurn,
     MonsterTurn,
     WorldTurn,
+    ShowInventory,
 }
 
 pub struct State {
@@ -45,7 +46,22 @@ impl State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
-        ctx.cls();
+        {
+            ctx.cls();
+            draw_map(self, ctx);
+
+            let map = self.resources.get::<Map>().unwrap();
+            let query = <(Read<Position>, Read<Renderable>)>::query();
+            for (pos, render) in query.iter(&self.world) {
+                let idx = map.xy_idx(pos.x, pos.y);
+                if map.visible_tiles[idx] {
+                    ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+                }
+            }
+
+            gui::draw_ui(&self.world, &self.resources, ctx);
+        }
+
         let mut runstate = *self.resources.get::<RunState>().unwrap();
 
         match runstate {
@@ -68,24 +84,16 @@ impl GameState for State {
                 self.run_systems();
                 runstate = RunState::AwaitingInput;
             }
+            RunState::ShowInventory => {
+                if gui::show_inventory(self, ctx) == gui::ItemMenuResult::Cancel {
+                    runstate = RunState::AwaitingInput;
+                }
+            }
         }
 
         self.resources.insert(runstate);
 
         damage_system::delete_the_dead(&mut self.world, &mut self.resources);
-
-        draw_map(self, ctx);
-
-        let map = self.resources.get::<Map>().unwrap();
-        let query = <(Read<Position>, Read<Renderable>)>::query();
-        for (pos, render) in query.iter(&self.world) {
-            let idx = map.xy_idx(pos.x, pos.y);
-            if map.visible_tiles[idx] {
-                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
-            }
-        }
-
-        gui::draw_ui(&self.world, &self.resources, ctx);
     }
 }
 
