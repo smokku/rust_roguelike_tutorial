@@ -1,6 +1,6 @@
 use super::{
     gamelog::GameLog, CombatStats, InBackpack, Name, Position, Potion, WantsToDrinkPotion,
-    WantsToPickupItem,
+    WantsToDropItem, WantsToPickupItem,
 };
 use legion::prelude::*;
 
@@ -60,6 +60,31 @@ pub fn potion_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static
                     command_buffer.delete(potion_entity);
                 }
                 command_buffer.remove_component::<WantsToDrinkPotion>(entity);
+            }
+        })
+}
+
+pub fn item_drop() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+    SystemBuilder::new("item_drop")
+        .with_query(<(Read<WantsToDropItem>, Read<Position>)>::query())
+        .read_resource::<Entity>()
+        .write_resource::<GameLog>()
+        .read_component::<Name>()
+        .build(|command_buffer, world, (player, gamelog), query| {
+            for (entity, (to_drop, dropper_pos)) in query.iter_entities(&world) {
+                let item_entity = to_drop.item;
+                command_buffer.remove_component::<InBackpack>(item_entity);
+                command_buffer.add_component(item_entity, *dropper_pos);
+
+                let item_name = if let Some(item_name) = world.get_component::<Name>(item_entity) {
+                    item_name.name.clone()
+                } else {
+                    "-Unknown-".to_string()
+                };
+                if entity == **player {
+                    gamelog.entries.push(format!("You drop the {}.", item_name));
+                }
+                command_buffer.remove_component::<WantsToDropItem>(entity);
             }
         })
 }

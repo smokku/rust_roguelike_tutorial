@@ -27,6 +27,7 @@ pub enum RunState {
     MonsterTurn,
     WorldTurn,
     ShowInventory,
+    ShowDropItem,
 }
 
 pub struct State {
@@ -102,6 +103,22 @@ impl GameState for State {
                     runstate = RunState::PlayerTurn
                 }
             },
+            RunState::ShowDropItem => match gui::drop_item_menu(self, ctx) {
+                gui::ItemMenuResult::Cancel => {
+                    runstate = RunState::AwaitingInput;
+                }
+                gui::ItemMenuResult::NoResponse => {}
+                gui::ItemMenuResult::Selected(item_entity) => {
+                    // FIXME: This is hard-coded, as only Items we have so far are Potions
+                    self.world
+                        .add_component(
+                            *self.resources.get::<Entity>().unwrap(),
+                            WantsToDropItem { item: item_entity },
+                        )
+                        .expect("Unable to insert intent");
+                    runstate = RunState::PlayerTurn
+                }
+            },
         }
 
         self.resources.insert(runstate);
@@ -151,6 +168,7 @@ fn main() {
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
             .add_system(inventory_system::build()) // Turns WantsToPickupItem into InBackpack
+            .add_system(inventory_system::item_drop()) // Turns WantsToDropItem into Position
             .add_system(inventory_system::potion_use()) // Turns WantsToDrinkPotion into HP changes
             .build(),
         Schedule::builder()
