@@ -88,3 +88,8 @@ pub struct WantsToPickupItem {
     pub collected_by: Entity,
     pub item: Entity,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToDrinkPotion {
+    pub potion: Entity,
+}

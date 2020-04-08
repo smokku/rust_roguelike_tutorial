@@ -84,11 +84,24 @@ impl GameState for State {
                 self.run_systems();
                 runstate = RunState::AwaitingInput;
             }
-            RunState::ShowInventory => {
-                if gui::show_inventory(self, ctx) == gui::ItemMenuResult::Cancel {
+            RunState::ShowInventory => match gui::show_inventory(self, ctx) {
+                gui::ItemMenuResult::Cancel => {
                     runstate = RunState::AwaitingInput;
                 }
-            }
+                gui::ItemMenuResult::NoResponse => {}
+                gui::ItemMenuResult::Selected(item_entity) => {
+                    // FIXME: This is hard-coded, as only Items we have so far are Potions
+                    self.world
+                        .add_component(
+                            *self.resources.get::<Entity>().unwrap(),
+                            WantsToDrinkPotion {
+                                potion: item_entity,
+                            },
+                        )
+                        .expect("Unable to insert intent");
+                    runstate = RunState::PlayerTurn
+                }
+            },
         }
 
         self.resources.insert(runstate);
@@ -137,7 +150,8 @@ fn main() {
             .add_system(monster_ai_system::build())
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
-            .add_system(inventory_system::build())
+            .add_system(inventory_system::build()) // Turns WantsToPickupItem into InBackpack
+            .add_system(inventory_system::potion_use()) // Turns WantsToDrinkPotion into HP changes
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())

@@ -142,20 +142,20 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
 pub enum ItemMenuResult {
     Cancel,
     NoResponse,
-    Selected,
+    Selected(Entity),
 }
 
 pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
     let player_entity = gs.resources.get::<Entity>().unwrap();
 
     let query = <(Read<InBackpack>, Read<Name>)>::query();
-    let names: Vec<String> = query
-        .iter(&gs.world)
-        .filter(|item| item.0.owner == *player_entity)
-        .map(|item| item.1.name.to_string())
+    let items: Vec<(Entity, String)> = query
+        .iter_entities(&gs.world)
+        .filter(|(_entity, (pack, _name))| pack.owner == *player_entity)
+        .map(|(entity, (_pack, name))| (entity, name.name.clone()))
         .collect();
 
-    let count = names.len();
+    let count = items.len();
 
     let mut y = (25 - (count / 2)) as i32;
     ctx.draw_box(
@@ -181,7 +181,7 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
         "ESC to cancel",
     );
 
-    for (j, name) in names.iter().enumerate() {
+    for (j, (_entity, name)) in items.iter().enumerate() {
         ctx.set(
             17,
             y,
@@ -212,7 +212,14 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
         None => ItemMenuResult::NoResponse,
         Some(key) => match key {
             VirtualKeyCode::Escape => ItemMenuResult::Cancel,
-            _ => ItemMenuResult::NoResponse,
+            _ => {
+                let selection = rltk::letter_to_option(key);
+                if selection >= 0 && selection < count as i32 {
+                    ItemMenuResult::Selected(items[selection as usize].0)
+                } else {
+                    ItemMenuResult::NoResponse
+                }
+            }
         },
     }
 }

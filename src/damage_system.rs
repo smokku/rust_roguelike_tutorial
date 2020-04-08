@@ -1,7 +1,7 @@
 use super::{gamelog::GameLog, CombatStats, Name, SufferDamage};
 use legion::prelude::*;
 
-pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("damage")
         .with_query(<(Write<CombatStats>, Write<SufferDamage>)>::query())
         .build(|command_buffer, world, _, query| {

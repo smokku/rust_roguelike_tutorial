@@ -1,7 +1,10 @@
-use super::{gamelog::GameLog, InBackpack, Name, Position, WantsToPickupItem};
+use super::{
+    gamelog::GameLog, CombatStats, InBackpack, Name, Position, Potion, WantsToDrinkPotion,
+    WantsToPickupItem,
+};
 use legion::prelude::*;
 
-pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("item_collection")
         .with_query(Read::<WantsToPickupItem>::query())
         .read_resource::<Entity>()
@@ -26,6 +29,37 @@ pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 
                         .entries
                         .push(format!("You pick up the {}.", name.name))
                 }
+            }
+        })
+}
+
+pub fn potion_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+    SystemBuilder::new("potion_use")
+        .with_query(<(Read<WantsToDrinkPotion>, Write<CombatStats>)>::query())
+        .read_resource::<Entity>()
+        .write_resource::<GameLog>()
+        .read_component::<Potion>()
+        .read_component::<Name>()
+        .build(|command_buffer, mut world, (player, gamelog), query| {
+            for (entity, (wants_drink, mut stats)) in query.iter_entities_mut(&mut world) {
+                let potion_entity = wants_drink.potion;
+                if let Some(potion) = world.get_component::<Potion>(potion_entity) {
+                    stats.hp = i32::min(stats.max_hp, stats.hp + potion.heal_amount);
+                    let potion_name =
+                        if let Some(potion_name) = world.get_component::<Name>(potion_entity) {
+                            potion_name.name.clone()
+                        } else {
+                            "-Unknown-".to_string()
+                        };
+                    if entity == **player {
+                        gamelog.entries.push(format!(
+                            "You drink the {}, healing {} hp.",
+                            potion_name, potion.heal_amount
+                        ));
+                    }
+                    command_buffer.delete(potion_entity);
+                }
+                command_buffer.remove_component::<WantsToDrinkPotion>(entity);
             }
         })
 }

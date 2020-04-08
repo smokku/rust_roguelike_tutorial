@@ -1,7 +1,7 @@
 use super::{BlocksTile, Map, Position};
 use legion::prelude::*;
 
-pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("map_indexing")
         .with_query(Read::<Position>::query())
         .write_resource::<Map>()

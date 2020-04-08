@@ -2,7 +2,7 @@ use super::{Map, Monster, Position, RunState, Viewshed, WantsToMelee};
 use legion::prelude::*;
 use rltk::Point;
 
-pub fn build() -> std::boxed::Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("monster_ai")
         .write_resource::<Map>()
         .read_resource::<Point>()
