@@ -75,9 +75,7 @@ impl SufferDamage {
 pub struct Item;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Potion {
-    pub heal_amount: i32,
-}
+pub struct Consumable;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct InBackpack {
@@ -91,11 +89,16 @@ pub struct WantsToPickupItem {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct WantsToDrinkPotion {
-    pub potion: Entity,
+pub struct WantsToUseItem {
+    pub item: Entity,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToDropItem {
     pub item: Entity,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ProvidesHealing {
+    pub heal_amount: i32,
 }

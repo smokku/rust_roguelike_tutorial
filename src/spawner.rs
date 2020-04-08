@@ -1,6 +1,6 @@
 use super::{
-    map::MAP_WIDTH, BlocksTile, CombatStats, Item, Monster, Name, Player, Position, Potion, Rect,
-    Renderable, Viewshed,
+    map::MAP_WIDTH, BlocksTile, CombatStats, Consumable, Item, Monster, Name, Player, Position,
+    ProvidesHealing, Rect, Renderable, Viewshed,
 };
 use legion::prelude::*;
 use rltk::{RandomNumberGenerator, RGB};
@@ -90,7 +90,7 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: u8, name: &str) {
 
 fn health_potion(world: &mut World, x: i32, y: i32) {
     world.insert(
-        (Item,),
+        (Item, Consumable),
         vec![(
             Position { x, y },
             Renderable {
@@ -102,7 +102,7 @@ fn health_potion(world: &mut World, x: i32, y: i32) {
             Name {
                 name: "Health Potion".to_string(),
             },
-            Potion { heal_amount: 8 },
+            ProvidesHealing { heal_amount: 8 },
         )],
     );
 }

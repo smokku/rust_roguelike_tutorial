@@ -1,6 +1,6 @@
 use super::{
-    gamelog::GameLog, CombatStats, InBackpack, Name, Position, Potion, WantsToDrinkPotion,
-    WantsToDropItem, WantsToPickupItem,
+    gamelog::GameLog, CombatStats, Consumable, InBackpack, Name, Position, ProvidesHealing,
+    WantsToDropItem, WantsToPickupItem, WantsToUseItem,
 };
 use legion::prelude::*;
 
@@ -33,33 +33,42 @@ pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
         })
 }
 
-pub fn potion_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
-    SystemBuilder::new("potion_use")
-        .with_query(<(Read<WantsToDrinkPotion>, Write<CombatStats>)>::query())
+pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+    SystemBuilder::new("item_use")
+        .with_query(Read::<WantsToUseItem>::query())
         .read_resource::<Entity>()
         .write_resource::<GameLog>()
-        .read_component::<Potion>()
         .read_component::<Name>()
-        .build(|command_buffer, mut world, (player, gamelog), query| {
-            for (entity, (wants_drink, mut stats)) in query.iter_entities_mut(&mut world) {
-                let potion_entity = wants_drink.potion;
-                if let Some(potion) = world.get_component::<Potion>(potion_entity) {
-                    stats.hp = i32::min(stats.max_hp, stats.hp + potion.heal_amount);
-                    let potion_name =
-                        if let Some(potion_name) = world.get_component::<Name>(potion_entity) {
-                            potion_name.name.clone()
+        .read_component::<ProvidesHealing>()
+        .build(|command_buffer, world, (player, gamelog), query| {
+            for (entity, use_item) in query.iter_entities(&world) {
+                let item_entity = use_item.item;
+                if let Some(healer) = world.get_component::<ProvidesHealing>(item_entity) {
+                    let player_entity = **player;
+                    let heal_amount = healer.heal_amount;
+                    command_buffer.exec_mut(move |world| {
+                        let mut stats = world
+                            .get_component_mut::<CombatStats>(player_entity)
+                            .unwrap();
+                        stats.hp = i32::min(stats.max_hp, stats.hp + heal_amount);
+                    });
+                    let item_name =
+                        if let Some(item_name) = world.get_component::<Name>(item_entity) {
+                            item_name.name.clone()
                         } else {
                             "-Unknown-".to_string()
                         };
-                    if entity == **player {
+                    if entity == player_entity {
                         gamelog.entries.push(format!(
                             "You drink the {}, healing {} hp.",
-                            potion_name, potion.heal_amount
+                            item_name, healer.heal_amount
                         ));
                     }
-                    command_buffer.delete(potion_entity);
+                    if let Some(_consumable) = world.get_tag::<Consumable>(item_entity) {
+                        command_buffer.delete(item_entity);
+                    }
                 }
-                command_buffer.remove_component::<WantsToDrinkPotion>(entity);
+                command_buffer.remove_component::<WantsToUseItem>(entity);
             }
         })
 }
