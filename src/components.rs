@@ -12,6 +12,7 @@ pub struct Renderable {
     pub glyph: u8,
     pub fg: RGB,
     pub bg: RGB,
+    pub render_order: i32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

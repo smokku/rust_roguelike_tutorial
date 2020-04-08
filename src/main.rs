@@ -53,7 +53,9 @@ impl GameState for State {
 
             let map = self.resources.get::<Map>().unwrap();
             let query = <(Read<Position>, Read<Renderable>)>::query();
-            for (pos, render) in query.iter(&self.world) {
+            let mut data = query.iter(&self.world).collect::<Vec<_>>();
+            data.sort_by(|a, b| b.1.render_order.cmp(&a.1.render_order));
+            for (pos, render) in data.iter() {
                 let idx = map.xy_idx(pos.x, pos.y);
                 if map.visible_tiles[idx] {
                     ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);

@@ -18,6 +18,7 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
                 glyph: rltk::to_cp437('@'),
                 fg: RGB::named(rltk::YELLOW),
                 bg: RGB::named(rltk::BLACK),
+                render_order: 0,
             },
             Viewshed {
                 visible_tiles: Vec::new(),
@@ -67,6 +68,7 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: u8, name: &str) {
                 glyph,
                 fg: RGB::named(rltk::RED),
                 bg: RGB::named(rltk::BLACK),
+                render_order: 1,
             },
             Viewshed {
                 visible_tiles: Vec::new(),
@@ -95,6 +97,7 @@ fn health_potion(world: &mut World, x: i32, y: i32) {
                 glyph: rltk::to_cp437('¡'),
                 fg: RGB::named(rltk::MAGENTA),
                 bg: RGB::named(rltk::BLACK),
+                render_order: 2,
             },
             Name {
                 name: "Health Potion".to_string(),
