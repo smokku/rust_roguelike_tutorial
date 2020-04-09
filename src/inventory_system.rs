@@ -1,6 +1,7 @@
 use super::{
-    gamelog::GameLog, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage, Map, Name,
-    Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem,
+    gamelog::GameLog, AreaOfEffect, CombatStats, Confusion, Consumable, InBackpack, InflictsDamage,
+    Map, Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem,
+    WantsToUseItem,
 };
 use legion::prelude::*;
 
@@ -40,9 +41,10 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
         .write_resource::<GameLog>()
         .read_resource::<Map>()
         .read_component::<Name>()
+        .read_component::<AreaOfEffect>()
         .read_component::<InflictsDamage>()
         .read_component::<ProvidesHealing>()
-        .read_component::<AreaOfEffect>()
+        .read_component::<Confusion>()
         .build(|command_buffer, world, (player, gamelog, map), query| {
             for (entity, use_item) in query.iter_entities(&world) {
                 let player_entity = **player;
@@ -58,7 +60,7 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
                 // Targeting
                 let mut targets = Vec::new();
                 match use_item.target {
-                    None => targets.push(player_entity),
+                    None => targets.push((player_entity, "Player".to_string())),
                     Some(target) => {
                         let area_effect = world.get_component::<AreaOfEffect>(item_entity);
                         let mut target_tiles = Vec::new();
@@ -82,7 +84,15 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
                         for tile in target_tiles.iter() {
                             let idx = map.xy_idx(tile.x, tile.y);
                             for mob in map.tile_content[idx].iter() {
-                                targets.push(*mob);
+                                let mob_entity = *mob;
+                                let mob_name = if let Some(mob_name) =
+                                    world.get_component::<Name>(mob_entity)
+                                {
+                                    mob_name.name.clone()
+                                } else {
+                                    "-Unnamed-".to_string()
+                                };
+                                targets.push((mob_entity, mob_name));
                             }
                         }
                     }
@@ -91,17 +101,17 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
                 // If it heals, apply the healing
                 if let Some(healer) = world.get_component::<ProvidesHealing>(item_entity) {
                     let heal_amount = healer.heal_amount;
-                    for target in targets.iter() {
-                        let target = *target;
+                    for (target_entity, _target_name) in targets.iter() {
+                        let target_entity = *target_entity;
                         command_buffer.exec_mut(move |world| {
-                            let stats = world.get_component_mut::<CombatStats>(target);
+                            let stats = world.get_component_mut::<CombatStats>(target_entity);
                             if let Some(mut stats) = stats {
                                 stats.hp = i32::min(stats.max_hp, stats.hp + heal_amount);
                             }
                         });
-                        if target == player_entity {
+                        if entity == player_entity {
                             gamelog.entries.push(format!(
-                                "You drink the {}, healing {} hp.",
+                                "You use the {}, healing {} hp.",
                                 item_name, heal_amount
                             ));
                         }
@@ -111,27 +121,33 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
 
                 // If it inflicts damage, apply damage to all target cell entities
                 if let Some(damages) = world.get_component::<InflictsDamage>(item_entity) {
-                    for mob in targets.iter() {
-                        let mob_entity = *mob;
+                    for (target_entity, target_name) in targets.iter() {
                         let damage = damages.damage;
-                        SufferDamage::new_damage(command_buffer, *mob, damage);
+                        SufferDamage::new_damage(command_buffer, *target_entity, damage);
 
                         if entity == player_entity {
-                            let mob_name =
-                                if let Some(mob_name) = world.get_component::<Name>(mob_entity) {
-                                    mob_name.name.clone()
-                                } else {
-                                    "-Unnamed-".to_string()
-                                };
-
                             gamelog.entries.push(format!(
                                 "You use {} on {}, inflicting {} hp.",
-                                item_name, mob_name, damage
+                                item_name, target_name, damage
                             ));
                         }
-
-                        used_item = true;
                     }
+                    used_item = true;
+                }
+
+                // Can it pass along confusion?
+                if let Some(confusion) = world.get_component::<Confusion>(item_entity) {
+                    for (target_entity, target_name) in targets.iter() {
+                        command_buffer.add_component(*target_entity, *confusion);
+
+                        if entity == player_entity {
+                            gamelog.entries.push(format!(
+                                "You use {} on {}, confusing them.",
+                                item_name, target_name
+                            ));
+                        }
+                    }
+                    used_item = true;
                 }
 
                 // If it's a consumable, we delete it on use

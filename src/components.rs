@@ -118,3 +118,8 @@ pub struct InflictsDamage {
 pub struct AreaOfEffect {
     pub radius: i32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Confusion {
+    pub turns: i32,
+}
