@@ -64,9 +64,9 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
                             item_name, healer.heal_amount
                         ));
                     }
-                    if let Some(_consumable) = world.get_tag::<Consumable>(item_entity) {
-                        command_buffer.delete(item_entity);
-                    }
+                }
+                if let Some(_consumable) = world.get_tag::<Consumable>(item_entity) {
+                    command_buffer.delete(item_entity);
                 }
                 command_buffer.remove_component::<WantsToUseItem>(entity);
             }

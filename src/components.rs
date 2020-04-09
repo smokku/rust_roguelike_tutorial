@@ -102,3 +102,13 @@ pub struct WantsToDropItem {
 pub struct ProvidesHealing {
     pub heal_amount: i32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Ranged {
+    pub range: i32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct InflictsDamage {
+    pub damage: i32,
+}
