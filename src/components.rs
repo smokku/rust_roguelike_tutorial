@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::RGB;
+use rltk::{Point, RGB};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Position {
@@ -91,6 +91,7 @@ pub struct WantsToPickupItem {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToUseItem {
     pub item: Entity,
+    pub target: Option<Point>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

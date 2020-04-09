@@ -28,6 +28,7 @@ pub enum RunState {
     WorldTurn,
     ShowInventory,
     ShowDropItem,
+    ShowTargeting { range: i32, item: Entity },
 }
 
 pub struct State {
@@ -88,36 +89,76 @@ impl GameState for State {
                 runstate = RunState::AwaitingInput;
             }
 
-            RunState::ShowInventory => match gui::show_inventory(self, ctx) {
-                gui::ItemMenuResult::Cancel => {
-                    runstate = RunState::AwaitingInput;
+            RunState::ShowInventory => {
+                let (result, item) = gui::show_inventory(self, ctx);
+                match result {
+                    gui::ItemMenuResult::Cancel => {
+                        runstate = RunState::AwaitingInput;
+                    }
+                    gui::ItemMenuResult::NoResponse => {}
+                    gui::ItemMenuResult::Selected => {
+                        let item = item.unwrap();
+
+                        let mut ranged: Option<Ranged> = None;
+                        if let Some(ranged_component) = self.world.get_component::<Ranged>(item) {
+                            ranged = Some(*ranged_component);
+                        }
+
+                        if let Some(ranged) = ranged {
+                            runstate = RunState::ShowTargeting {
+                                range: ranged.range,
+                                item,
+                            }
+                        } else {
+                            self.world
+                                .add_component(
+                                    *self.resources.get::<Entity>().unwrap(),
+                                    WantsToUseItem { item, target: None },
+                                )
+                                .expect("Unable to insert intent");
+                            runstate = RunState::PlayerTurn;
+                        }
+                    }
                 }
-                gui::ItemMenuResult::NoResponse => {}
-                gui::ItemMenuResult::Selected(item) => {
-                    self.world
-                        .add_component(
-                            *self.resources.get::<Entity>().unwrap(),
-                            WantsToUseItem { item },
-                        )
-                        .expect("Unable to insert intent");
-                    runstate = RunState::PlayerTurn
+            }
+            RunState::ShowDropItem => {
+                let (result, item) = gui::drop_item_menu(self, ctx);
+                match result {
+                    gui::ItemMenuResult::Cancel => {
+                        runstate = RunState::AwaitingInput;
+                    }
+                    gui::ItemMenuResult::NoResponse => {}
+                    gui::ItemMenuResult::Selected => {
+                        let item = item.unwrap();
+                        self.world
+                            .add_component(
+                                *self.resources.get::<Entity>().unwrap(),
+                                WantsToDropItem { item },
+                            )
+                            .expect("Unable to insert intent");
+                        runstate = RunState::PlayerTurn;
+                    }
                 }
-            },
-            RunState::ShowDropItem => match gui::drop_item_menu(self, ctx) {
-                gui::ItemMenuResult::Cancel => {
-                    runstate = RunState::AwaitingInput;
+            }
+
+            RunState::ShowTargeting { range, item } => {
+                let (result, target) = gui::ranged_target(self, ctx, range);
+                match result {
+                    gui::ItemMenuResult::Cancel => {
+                        runstate = RunState::AwaitingInput;
+                    }
+                    gui::ItemMenuResult::NoResponse => {}
+                    gui::ItemMenuResult::Selected => {
+                        self.world
+                            .add_component(
+                                *self.resources.get::<Entity>().unwrap(),
+                                WantsToUseItem { item, target },
+                            )
+                            .expect("Unable to insert intent");
+                        runstate = RunState::PlayerTurn;
+                    }
                 }
-                gui::ItemMenuResult::NoResponse => {}
-                gui::ItemMenuResult::Selected(item) => {
-                    self.world
-                        .add_component(
-                            *self.resources.get::<Entity>().unwrap(),
-                            WantsToDropItem { item },
-                        )
-                        .expect("Unable to insert intent");
-                    runstate = RunState::PlayerTurn
-                }
-            },
+            }
         }
 
         self.resources.insert(runstate);

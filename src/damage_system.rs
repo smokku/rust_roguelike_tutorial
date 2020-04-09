@@ -3,10 +3,13 @@ use legion::prelude::*;
 
 pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("damage")
-        .with_query(<(Write<CombatStats>, Write<SufferDamage>)>::query())
+        .with_query(Write::<SufferDamage>::query())
+        .write_component::<CombatStats>()
         .build(|command_buffer, world, _, query| {
-            for (entity, (mut stats, mut damage)) in query.iter_entities_mut(world) {
-                stats.hp -= damage.amount.iter().sum::<i32>();
+            for (entity, mut damage) in query.iter_entities_mut(world) {
+                if let Some(mut stats) = world.get_component_mut::<CombatStats>(entity) {
+                    stats.hp -= damage.amount.iter().sum::<i32>();
+                }
                 damage.amount.clear();
                 command_buffer.remove_component::<SufferDamage>(entity);
             }

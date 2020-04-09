@@ -1,4 +1,6 @@
-use super::{gamelog::GameLog, CombatStats, InBackpack, Map, Name, Player, Position, State};
+use super::{
+    gamelog::GameLog, CombatStats, InBackpack, Map, Name, Player, Position, State, Viewshed,
+};
 use legion::prelude::*;
 use rltk::{Console, Point, Rltk, VirtualKeyCode, RGB};
 
@@ -58,6 +60,8 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let mut tooltip = Vec::new();
     let query = <(Read<Name>, Read<Position>)>::query();
     for (name, position) in query.iter(&world) {
+        // FIXME: Should check against Player viewshed
+        // as it is possible to reveal entities by hovering over map
         if position.x == mouse_pos.0 && position.y == mouse_pos.1 {
             tooltip.push(name.name.to_string());
         }
@@ -142,10 +146,10 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
 pub enum ItemMenuResult {
     Cancel,
     NoResponse,
-    Selected(Entity),
+    Selected,
 }
 
-pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
+pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
     let player_entity = gs.resources.get::<Entity>().unwrap();
 
     let query = <(Read<InBackpack>, Read<Name>)>::query();
@@ -209,22 +213,22 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
     }
 
     match ctx.key {
-        None => ItemMenuResult::NoResponse,
+        None => (ItemMenuResult::NoResponse, None),
         Some(key) => match key {
-            VirtualKeyCode::Escape => ItemMenuResult::Cancel,
+            VirtualKeyCode::Escape => (ItemMenuResult::Cancel, None),
             _ => {
                 let selection = rltk::letter_to_option(key);
                 if selection >= 0 && selection < count as i32 {
-                    ItemMenuResult::Selected(items[selection as usize].0)
+                    (ItemMenuResult::Selected, Some(items[selection as usize].0))
                 } else {
-                    ItemMenuResult::NoResponse
+                    (ItemMenuResult::NoResponse, None)
                 }
             }
         },
     }
 }
 
-pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
+pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
     let player_entity = gs.resources.get::<Entity>().unwrap();
 
     let query = <(Read<InBackpack>, Read<Name>)>::query();
@@ -288,17 +292,75 @@ pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> ItemMenuResult {
     }
 
     match ctx.key {
-        None => ItemMenuResult::NoResponse,
+        None => (ItemMenuResult::NoResponse, None),
         Some(key) => match key {
-            VirtualKeyCode::Escape => ItemMenuResult::Cancel,
+            VirtualKeyCode::Escape => (ItemMenuResult::Cancel, None),
             _ => {
                 let selection = rltk::letter_to_option(key);
                 if selection >= 0 && selection < count as i32 {
-                    ItemMenuResult::Selected(items[selection as usize].0)
+                    (ItemMenuResult::Selected, Some(items[selection as usize].0))
                 } else {
-                    ItemMenuResult::NoResponse
+                    (ItemMenuResult::NoResponse, None)
                 }
             }
         },
     }
+}
+
+pub fn ranged_target(
+    gs: &mut State,
+    ctx: &mut Rltk,
+    range: i32,
+) -> (ItemMenuResult, Option<Point>) {
+    let player_entity = gs.resources.get::<Entity>().unwrap();
+    let player_pos = gs.resources.get::<Point>().unwrap();
+
+    ctx.print_color(
+        5,
+        0,
+        RGB::named(rltk::YELLOW),
+        RGB::named(rltk::BLACK),
+        "Select Target:",
+    );
+
+    // Highlight available target cells
+    let mut available_cells = Vec::new();
+    let visible = gs.world.get_component::<Viewshed>(*player_entity);
+    if let Some(visible) = visible {
+        // We have a viewshed
+        for idx in visible.visible_tiles.iter() {
+            let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
+            if distance <= range as f32 {
+                ctx.set_bg(idx.x, idx.y, RGB::named(rltk::BLUE));
+                available_cells.push(*idx);
+            }
+        }
+    } else {
+        return (ItemMenuResult::Cancel, None);
+    }
+
+    // Draw mouse cursor
+    let mouse_pos = ctx.mouse_pos();
+    let mut valid_target = false;
+    for idx in available_cells.iter() {
+        if idx.x == mouse_pos.0 && idx.y == mouse_pos.1 {
+            valid_target = true;
+        }
+    }
+    if valid_target {
+        ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::CYAN));
+        if ctx.left_click {
+            return (
+                ItemMenuResult::Selected,
+                Some(Point::new(mouse_pos.0, mouse_pos.1)),
+            );
+        }
+    } else {
+        ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::RED));
+        if ctx.left_click {
+            return (ItemMenuResult::Cancel, None);
+        }
+    }
+
+    (ItemMenuResult::NoResponse, None)
 }
