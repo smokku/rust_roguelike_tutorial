@@ -113,3 +113,8 @@ pub struct Ranged {
 pub struct InflictsDamage {
     pub damage: i32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AreaOfEffect {
+    pub radius: i32,
+}

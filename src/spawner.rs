@@ -1,6 +1,6 @@
 use super::{
-    map::MAP_WIDTH, BlocksTile, CombatStats, Consumable, InflictsDamage, Item, Monster, Name,
-    Player, Position, ProvidesHealing, Ranged, Rect, Renderable, Viewshed,
+    map::MAP_WIDTH, AreaOfEffect, BlocksTile, CombatStats, Consumable, InflictsDamage, Item,
+    Monster, Name, Player, Position, ProvidesHealing, Ranged, Rect, Renderable, Viewshed,
 };
 use legion::prelude::*;
 use rltk::{RandomNumberGenerator, RGB};
@@ -90,14 +90,11 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: u8, name: &str) {
 
 pub fn random_item(world: &mut World, resources: &mut Resources, x: i32, y: i32) {
     let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-    let roll = rng.roll_dice(1, 2);
+    let roll = rng.roll_dice(1, 3);
     match roll {
-        1 => {
-            health_potion(world, x, y);
-        }
-        _ => {
-            magic_missile_scroll(world, x, y);
-        }
+        1 => health_potion(world, x, y),
+        2 => fireball_scroll(world, x, y),
+        _ => magic_missile_scroll(world, x, y),
     }
 }
 fn health_potion(world: &mut World, x: i32, y: i32) {
@@ -135,6 +132,27 @@ fn magic_missile_scroll(world: &mut World, x: i32, y: i32) {
             },
             Ranged { range: 6 },
             InflictsDamage { damage: 8 },
+        )],
+    );
+}
+
+fn fireball_scroll(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item, Consumable),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437(')'),
+                fg: RGB::named(rltk::ORANGE),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Fireball Scroll".to_string(),
+            },
+            Ranged { range: 6 },
+            InflictsDamage { damage: 20 },
+            AreaOfEffect { radius: 3 },
         )],
     );
 }
