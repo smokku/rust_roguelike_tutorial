@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::{Point, RGB};
+use rltk::{FontCharType, Point, RGB};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Position {
@@ -9,7 +9,7 @@ pub struct Position {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Renderable {
-    pub glyph: u8,
+    pub glyph: FontCharType,
     pub fg: RGB,
     pub bg: RGB,
     pub render_order: i32,

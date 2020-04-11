@@ -3,7 +3,7 @@ use super::{
     Viewshed,
 };
 use legion::prelude::*;
-use rltk::{Console, Point, Rltk, VirtualKeyCode, RGB};
+use rltk::{FontCharType, Point, Rltk, VirtualKeyCode, RGB};
 
 pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     ctx.draw_box(
@@ -199,7 +199,7 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option
             y,
             RGB::named(rltk::YELLOW),
             RGB::named(rltk::BLACK),
-            rltk::to_cp437('a') + j as u8,
+            rltk::to_cp437('a') + j as FontCharType,
         );
         ctx.set(
             19,
@@ -278,7 +278,7 @@ pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option
             y,
             RGB::named(rltk::YELLOW),
             RGB::named(rltk::BLACK),
-            rltk::to_cp437('a') + j as u8,
+            rltk::to_cp437('a') + j as FontCharType,
         );
         ctx.set(
             19,

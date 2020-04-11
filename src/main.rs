@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::{Console, GameState, Point, Rltk};
+use rltk::{GameState, Point, Rltk};
 
 mod components;
 pub use components::*;
@@ -195,11 +195,12 @@ impl GameState for State {
     }
 }
 
-fn main() {
+fn main() -> rltk::BError {
     use rltk::{RandomNumberGenerator, RltkBuilder};
     let mut context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
-        .build();
+        .build()
+        .unwrap();
     context.with_post_scanlines(true);
 
     let universe = Universe::new();
@@ -252,5 +253,5 @@ fn main() {
         resources,
         schedules,
     };
-    rltk::main_loop(context, gs);
+    rltk::main_loop(context, gs)
 }

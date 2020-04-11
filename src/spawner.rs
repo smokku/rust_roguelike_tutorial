@@ -3,7 +3,7 @@ use super::{
     Item, Monster, Name, Player, Position, ProvidesHealing, Ranged, Rect, Renderable, Viewshed,
 };
 use legion::prelude::*;
-use rltk::{RandomNumberGenerator, RGB};
+use rltk::{FontCharType, RandomNumberGenerator, RGB};
 
 const MAX_MONSTERS: i32 = 4;
 const MAX_ITEMS: i32 = 2;
@@ -59,7 +59,7 @@ fn goblin(world: &mut World, x: i32, y: i32) {
     monster(world, x, y, rltk::to_cp437('g'), "Goblin");
 }
 
-fn monster(world: &mut World, x: i32, y: i32, glyph: u8, name: &str) {
+fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
     world.insert(
         (Monster, BlocksTile),
         vec![(
