@@ -28,7 +28,13 @@ pub enum RunState {
     WorldTurn,
     ShowInventory,
     ShowDropItem,
-    ShowTargeting { range: i32, item: Entity },
+    ShowTargeting {
+        range: i32,
+        item: Entity,
+    },
+    MainMenu {
+        menu_selection: gui::MainMenuSelection,
+    },
 }
 
 pub struct State {
@@ -48,25 +54,29 @@ impl State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
-        {
-            ctx.cls();
-            draw_map(self, ctx);
-
-            let map = self.resources.get::<Map>().unwrap();
-            let query = <(Read<Position>, Read<Renderable>)>::query();
-            let mut data = query.iter(&self.world).collect::<Vec<_>>();
-            data.sort_by(|a, b| b.1.render_order.cmp(&a.1.render_order));
-            for (pos, render) in data.iter() {
-                let idx = map.xy_idx(pos.x, pos.y);
-                if map.visible_tiles[idx] {
-                    ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
-                }
-            }
-
-            gui::draw_ui(&self.world, &self.resources, ctx);
-        }
-
         let mut runstate = *self.resources.get::<RunState>().unwrap();
+
+        ctx.cls();
+
+        match runstate {
+            RunState::MainMenu { .. } => {}
+            _ => {
+                draw_map(self, ctx);
+
+                let map = self.resources.get::<Map>().unwrap();
+                let query = <(Read<Position>, Read<Renderable>)>::query();
+                let mut data = query.iter(&self.world).collect::<Vec<_>>();
+                data.sort_by(|a, b| b.1.render_order.cmp(&a.1.render_order));
+                for (pos, render) in data.iter() {
+                    let idx = map.xy_idx(pos.x, pos.y);
+                    if map.visible_tiles[idx] {
+                        ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+                    }
+                }
+
+                gui::draw_ui(&self.world, &self.resources, ctx);
+            }
+        }
 
         match runstate {
             RunState::PreRun => {
@@ -159,6 +169,24 @@ impl GameState for State {
                     }
                 }
             }
+
+            RunState::MainMenu { .. } => {
+                let result = gui::main_menu(self, ctx);
+                match result {
+                    gui::MainMenuResult::NoSelection { selected } => {
+                        runstate = RunState::MainMenu {
+                            menu_selection: selected,
+                        }
+                    }
+                    gui::MainMenuResult::Selected { selected } => match selected {
+                        gui::MainMenuSelection::NewGame => runstate = RunState::PreRun,
+                        gui::MainMenuSelection::LoadGame => runstate = RunState::PreRun,
+                        gui::MainMenuSelection::Quit => {
+                            std::process::exit(0);
+                        }
+                    },
+                }
+            }
         }
 
         self.resources.insert(runstate);
@@ -180,7 +208,9 @@ fn main() {
 
     let rng = RandomNumberGenerator::new();
     resources.insert(rng);
-    resources.insert(RunState::PreRun);
+    resources.insert(RunState::MainMenu {
+        menu_selection: gui::MainMenuSelection::NewGame,
+    });
     resources.insert(gamelog::GameLog {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
