@@ -1,19 +1,20 @@
 use super::{Rect, State};
 use legion::prelude::*;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, SmallVec, RGB};
+use serde::{Deserialize, Serialize};
 use std::cmp::{max, min};
 
 pub const MAP_WIDTH: usize = 80;
 pub const MAP_HEIGHT: usize = 43;
 pub const MAP_COUNT: usize = MAP_WIDTH * MAP_HEIGHT;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
     Floor,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub rooms: Vec<Rect>,
@@ -22,6 +23,8 @@ pub struct Map {
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
+
+    #[serde(skip_serializing, skip_deserializing)]
     pub tile_content: Vec<Vec<Entity>>,
 }
 
