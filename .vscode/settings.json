@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "deser",
         "gamelog",
         "greyscale",
         "numpad",
@@ -7,8 +8,12 @@
         "rltk",
         "roguelike",
         "runstate",
+        "savegame",
+        "saveload",
         "scanlines",
         "schedulable",
+        "unserializable",
+        "uuid",
         "viewshed",
         "viewsheds"
     ]

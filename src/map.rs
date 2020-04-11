@@ -3,6 +3,7 @@ use legion::prelude::*;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, SmallVec, RGB};
 use serde::{Deserialize, Serialize};
 use std::cmp::{max, min};
+use type_uuid::TypeUuid;
 
 pub const MAP_WIDTH: usize = 80;
 pub const MAP_HEIGHT: usize = 43;
@@ -14,7 +15,8 @@ pub enum TileType {
     Floor,
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+#[uuid = "09e57cda-e925-47f0-a3f6-107c86fa76bd"]
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub rooms: Vec<Rect>,
@@ -24,7 +26,7 @@ pub struct Map {
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
 
-    #[serde(skip_serializing, skip_deserializing)]
+    #[serde(skip)]
     pub tile_content: Vec<Vec<Entity>>,
 }
 

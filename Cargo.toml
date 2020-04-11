@@ -6,7 +6,10 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-rltk = { version = "0.8.0" }
-legion = { version = "*", path = "../legion" }
+rltk = { version = "0.8.0", features = ["serde"] }
+legion = { version = "*", features = ["serialize"], path = "../legion" }
 serde = { version = "1.0.106", features = ["derive"] }
 serde_json = "1.0.51"
+type-uuid = "0.1"
+erased-serde = "0.3"
+uuid = { version = "0.8", features = ["v4"] }
