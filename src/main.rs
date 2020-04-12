@@ -185,6 +185,7 @@ impl GameState for State {
                         gui::MainMenuSelection::LoadGame => {
                             saveload_system::load_game(&mut self.world);
                             runstate = RunState::PreRun;
+                            saveload_system::delete_save();
                         }
                         gui::MainMenuSelection::Quit => {
                             std::process::exit(0);

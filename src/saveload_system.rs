@@ -455,3 +455,7 @@ pub fn load_game(mut world: &mut World) {
     let mut deserializer = serde_json::Deserializer::from_str(&data);
     legion::serialize::de::deserialize(&mut world, &de_helper, &mut deserializer).unwrap();
 }
+
+pub fn delete_save() {
+    let _ = fs::remove_file("./savegame.json");
+}
