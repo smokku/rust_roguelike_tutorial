@@ -430,6 +430,7 @@ fn get_deserializer() -> DeserializeImpl {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn save_game<'a>(world: &mut World, map: &'a Map) {
     // Add Map as an entity
     let map_entity = world.insert((), vec![(map.clone(),)])[0];
@@ -442,6 +443,9 @@ pub fn save_game<'a>(world: &mut World, map: &'a Map) {
     // Clean up
     world.delete(map_entity);
 }
+
+#[cfg(target_arch = "wasm32")]
+pub fn save_game(_world: &mut World) {}
 
 pub fn does_save_exist() -> bool {
     Path::new("./savegame.json").exists()
