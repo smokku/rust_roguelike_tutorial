@@ -229,7 +229,7 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
 
-    let map = Map::new_map_rooms_and_corridors();
+    let map = Map::new_map_rooms_and_corridors(1);
 
     let (player_x, player_y) = map.rooms[0].center();
     resources.insert(Point::new(player_x, player_y));
