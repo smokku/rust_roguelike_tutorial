@@ -36,6 +36,16 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         );
     }
 
+    let map = resources.get::<Map>().unwrap();
+    let depth = format!("Depth: {}", map.depth);
+    ctx.print_color(
+        2,
+        43,
+        RGB::named(rltk::YELLOW),
+        RGB::named(rltk::BLACK),
+        depth,
+    );
+
     let log = resources.get::<GameLog>().unwrap();
     let mut y = 44;
     for s in log.entries.iter().rev() {
