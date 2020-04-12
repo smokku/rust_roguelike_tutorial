@@ -380,6 +380,7 @@ pub enum MainMenuResult {
 }
 
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
+    let save_exists = super::saveload_system::does_save_exist();
     let runstate = gs.resources.get::<RunState>().unwrap();
 
     ctx.print_color_centered(
@@ -403,16 +404,18 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
             RGB::named(rltk::BLACK),
             "Begin New Game",
         );
-        ctx.print_color_centered(
-            25,
-            if selected == MainMenuSelection::LoadGame {
-                RGB::named(rltk::MAGENTA)
-            } else {
-                RGB::named(rltk::WHITE)
-            },
-            RGB::named(rltk::BLACK),
-            "Load Game",
-        );
+        if save_exists {
+            ctx.print_color_centered(
+                25,
+                if selected == MainMenuSelection::LoadGame {
+                    RGB::named(rltk::MAGENTA)
+                } else {
+                    RGB::named(rltk::WHITE)
+                },
+                RGB::named(rltk::BLACK),
+                "Load Game",
+            );
+        }
         ctx.print_color_centered(
             26,
             if selected == MainMenuSelection::Quit {
@@ -438,12 +441,20 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                         selected: MainMenuSelection::NewGame,
                     },
                     MainMenuSelection::Quit => MainMenuResult::NoSelection {
-                        selected: MainMenuSelection::LoadGame,
+                        selected: if save_exists {
+                            MainMenuSelection::LoadGame
+                        } else {
+                            MainMenuSelection::NewGame
+                        },
                     },
                 },
                 VirtualKeyCode::Down => match selected {
                     MainMenuSelection::NewGame => MainMenuResult::NoSelection {
-                        selected: MainMenuSelection::LoadGame,
+                        selected: if save_exists {
+                            MainMenuSelection::LoadGame
+                        } else {
+                            MainMenuSelection::Quit
+                        },
                     },
                     MainMenuSelection::LoadGame => MainMenuResult::NoSelection {
                         selected: MainMenuSelection::Quit,

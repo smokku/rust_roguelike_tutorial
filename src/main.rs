@@ -182,7 +182,10 @@ impl GameState for State {
                     }
                     gui::MainMenuResult::Selected { selected } => match selected {
                         gui::MainMenuSelection::NewGame => runstate = RunState::PreRun,
-                        gui::MainMenuSelection::LoadGame => runstate = RunState::PreRun,
+                        gui::MainMenuSelection::LoadGame => {
+                            saveload_system::load_game(&mut self.world);
+                            runstate = RunState::PreRun;
+                        }
                         gui::MainMenuSelection::Quit => {
                             std::process::exit(0);
                         }
