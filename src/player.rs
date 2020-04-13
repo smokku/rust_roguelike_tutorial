@@ -1,6 +1,6 @@
 use super::{
-    gamelog::GameLog, CombatStats, Item, Map, Player, Position, RunState, State, Viewshed,
-    WantsToMelee, WantsToPickupItem,
+    gamelog::GameLog, CombatStats, Item, Map, Player, Position, RunState, State, TileType,
+    Viewshed, WantsToMelee, WantsToPickupItem,
 };
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
@@ -56,6 +56,21 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
         gs.world
             .add_component(*entity, WantsToMelee { target: *target })
             .expect("Add target failed");
+    }
+}
+
+pub fn try_next_level(resources: &mut Resources) -> bool {
+    let player_pos = resources.get::<Point>().unwrap();
+    let map = resources.get::<Map>().unwrap();
+    let player_idx = map.xy_idx(player_pos.x, player_pos.y);
+    if map.tiles[player_idx] == TileType::DownStairs {
+        true
+    } else {
+        let mut gamelog = resources.get_mut::<GameLog>().unwrap();
+        gamelog
+            .entries
+            .push("There is no way down from here.".to_string());
+        false
     }
 }
 
@@ -116,6 +131,13 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::I => return RunState::ShowInventory,
             VirtualKeyCode::D => return RunState::ShowDropItem,
             VirtualKeyCode::Escape => return RunState::SaveGame,
+
+            // Level changes
+            VirtualKeyCode::Period => {
+                if try_next_level(&mut gs.resources) {
+                    return RunState::NextLevel;
+                }
+            }
 
             _ => return RunState::PlayerTurn,
         },

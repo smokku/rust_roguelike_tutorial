@@ -37,6 +37,7 @@ pub enum RunState {
         menu_selection: gui::MainMenuSelection,
     },
     SaveGame,
+    NextLevel,
 }
 
 pub struct State {
@@ -193,18 +194,85 @@ impl GameState for State {
                     },
                 }
             }
-
             RunState::SaveGame => {
                 saveload_system::save_game(&mut self.world, &*self.resources.get::<Map>().unwrap());
                 runstate = RunState::MainMenu {
                     menu_selection: gui::MainMenuSelection::LoadGame,
                 };
             }
+
+            RunState::NextLevel => {
+                self.goto_next_level();
+                runstate = RunState::PreRun;
+            }
         }
 
         self.resources.insert(runstate);
 
         damage_system::delete_the_dead(&mut self.world, &mut self.resources);
+    }
+}
+
+impl State {
+    fn entities_to_remove_on_level_change(&mut self) -> Vec<Entity> {
+        self.world
+            .iter_entities()
+            .filter(|entity| {
+                // Don't delete the player
+                if let Some(_player) = self.world.get_tag::<Player>(*entity) {
+                    return false;
+                }
+
+                // Don't delete the player's equipment
+                if self.world.has_component::<InBackpack>(*entity) {
+                    return false;
+                }
+
+                // To Hades with it!
+                true
+            })
+            .collect()
+    }
+
+    fn goto_next_level(&mut self) {
+        // Delete entities that aren't the player or his/her equipment
+        for target in self.entities_to_remove_on_level_change() {
+            self.world.delete(target);
+        }
+
+        // Build a new map and place the player
+        let current_map = self.resources.remove::<Map>().unwrap();
+        let map = Map::new_map_rooms_and_corridors(current_map.depth + 1);
+
+        // Spawn bad guys
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(&mut self.world, &mut self.resources, room);
+        }
+
+        // Place the player and update resources
+        let (player_x, player_y) = map.rooms[0].center();
+        self.resources.insert(Point::new(player_x, player_y));
+        self.resources.insert(map);
+
+        let player_entity = self.resources.get::<Entity>().unwrap();
+        if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
+            player_pos.x = player_x;
+            player_pos.y = player_y;
+        }
+
+        // Mark the player's visibility dirty
+        if let Some(mut viewshed) = self.world.get_component_mut::<Viewshed>(*player_entity) {
+            viewshed.dirty = true;
+        }
+
+        // Notify the player and give one some health
+        let mut gamelog = self.resources.get_mut::<gamelog::GameLog>().unwrap();
+        gamelog
+            .entries
+            .push("You descend to the next level, and take a moment to heal.".to_string());
+        if let Some(mut health) = self.world.get_component_mut::<CombatStats>(*player_entity) {
+            health.hp = i32::max(health.hp, health.max_hp / 2);
+        }
     }
 }
 
