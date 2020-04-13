@@ -13,6 +13,7 @@ pub const MAP_COUNT: usize = MAP_WIDTH * MAP_HEIGHT;
 pub enum TileType {
     Wall,
     Floor,
+    DownStairs,
 }
 
 #[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
@@ -136,6 +137,10 @@ impl Map {
             };
         }
 
+        let stairs_position = map.rooms[map.rooms.len() - 1].center();
+        let stairs_idx = map.xy_idx(stairs_position.0, stairs_position.1);
+        map.tiles[stairs_idx] = TileType::DownStairs;
+
         map
     }
 }
@@ -207,6 +212,10 @@ pub fn draw_map(gs: &mut State, ctx: &mut Rltk) {
                 TileType::Wall => {
                     glyph = rltk::to_cp437('#');
                     fg = RGB::from_f32(0.0, 1.0, 0.0);
+                }
+                TileType::DownStairs => {
+                    glyph = rltk::to_cp437('>');
+                    fg = RGB::from_f32(0.0, 1.0, 1.0);
                 }
             }
             if !map.visible_tiles[idx] {
