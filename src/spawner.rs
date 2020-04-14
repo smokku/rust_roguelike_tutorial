@@ -1,8 +1,4 @@
-use super::{
-    map::MAP_WIDTH, random_table::RandomTable, AreaOfEffect, BlocksTile, CombatStats, Confusion,
-    Consumable, InflictsDamage, Item, Monster, Name, Player, Position, ProvidesHealing, Ranged,
-    Rect, Renderable, Viewshed,
-};
+use super::{components::*, map::MAP_WIDTH, random_table::RandomTable, Rect};
 use legion::prelude::*;
 use rltk::{FontCharType, RandomNumberGenerator, RGB};
 use std::collections::HashMap;
@@ -181,6 +177,9 @@ fn dagger(world: &mut World, x: i32, y: i32) {
             Name {
                 name: "Dagger".to_string(),
             },
+            Equippable {
+                slot: EquipmentSlot::Melee,
+            },
         )],
     );
 }
@@ -198,6 +197,9 @@ fn shield(world: &mut World, x: i32, y: i32) {
             },
             Name {
                 name: "Shield".to_string(),
+            },
+            Equippable {
+                slot: EquipmentSlot::Shield,
             },
         )],
     );

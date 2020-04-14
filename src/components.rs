@@ -142,3 +142,15 @@ pub struct AreaOfEffect {
 pub struct Confusion {
     pub turns: i32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum EquipmentSlot {
+    Melee,
+    Shield,
+}
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "4239ace9-a158-4802-b797-591953c39ef3"]
+pub struct Equippable {
+    pub slot: EquipmentSlot,
+}

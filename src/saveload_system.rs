@@ -386,6 +386,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Confusion>(),
         ComponentRegistration::of::<ProvidesHealing>(),
         // ComponentRegistration::of::<InBackpack>(), // FIXME: Do not loose player backpack!
+        ComponentRegistration::of::<Equippable>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),
