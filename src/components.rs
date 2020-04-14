@@ -154,3 +154,10 @@ pub enum EquipmentSlot {
 pub struct Equippable {
     pub slot: EquipmentSlot,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq)]
+#[uuid = "9aa18630-5131-45a7-a6b8-3878c4e25973"]
+pub struct Equipped {
+    pub owner: Entity,
+    pub slot: EquipmentSlot,
+}
