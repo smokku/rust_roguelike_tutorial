@@ -47,6 +47,8 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("Fireball Scroll", 2 + map_depth)
         .add("Confusion Scroll", 2 + map_depth)
         .add("Magic Missile Scroll", 4)
+        .add("Dagger", 3)
+        .add("Shield", 3)
 }
 
 fn orc(world: &mut World, x: i32, y: i32) {
@@ -165,6 +167,42 @@ fn confusion_scroll(world: &mut World, x: i32, y: i32) {
     );
 }
 
+fn dagger(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item,),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('/'),
+                fg: RGB::named(rltk::CYAN),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Dagger".to_string(),
+            },
+        )],
+    );
+}
+
+fn shield(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item,),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('('),
+                fg: RGB::named(rltk::CYAN),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Shield".to_string(),
+            },
+        )],
+    );
+}
+
 #[allow(clippy::map_entry)]
 pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
     let spawn_table = room_table(map_depth);
@@ -204,6 +242,8 @@ pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map
             "Fireball Scroll" => fireball_scroll(world, x, y),
             "Confusion Scroll" => confusion_scroll(world, x, y),
             "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
+            "Dagger" => dagger(world, x, y),
+            "Shield" => shield(world, x, y),
             _ => {}
         }
     }
