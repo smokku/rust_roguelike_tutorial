@@ -1,5 +1,5 @@
 use super::{
-    gamelog::GameLog, CombatStats, Item, Map, Player, Position, RunState, State, TileType,
+    gamelog::GameLog, CombatStats, Item, Map, Monster, Player, Position, RunState, State, TileType,
     Viewshed, WantsToMelee, WantsToPickupItem,
 };
 use legion::prelude::*;
@@ -104,6 +104,32 @@ fn get_item(gs: &mut State) {
     }
 }
 
+fn skip_turn(gs: &mut State) -> RunState {
+    let player_entity = gs.resources.get::<Entity>().unwrap();
+    let map = gs.resources.get::<Map>().unwrap();
+
+    let mut can_heal = true;
+    {
+        let viewshed = gs.world.get_component::<Viewshed>(*player_entity).unwrap();
+        for tile in viewshed.visible_tiles.iter() {
+            let idx = map.xy_idx(tile.x, tile.y);
+            for entity in map.tile_content[idx].iter() {
+                if let Some(_monster) = gs.world.get_tag::<Monster>(*entity) {
+                    can_heal = false;
+                }
+            }
+        }
+    }
+
+    if can_heal {
+        if let Some(mut player_hp) = gs.world.get_component_mut::<CombatStats>(*player_entity) {
+            player_hp.hp = i32::min(player_hp.hp + 1, player_hp.max_hp);
+        }
+    }
+
+    RunState::PlayerTurn
+}
+
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     // Player movement
     match ctx.key {
@@ -138,6 +164,9 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                     return RunState::NextLevel;
                 }
             }
+
+            // Skip turn
+            VirtualKeyCode::Numpad5 | VirtualKeyCode::Space => return skip_turn(gs),
 
             _ => return RunState::PlayerTurn,
         },
