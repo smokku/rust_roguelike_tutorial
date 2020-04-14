@@ -1,12 +1,13 @@
 use super::{
-    map::MAP_WIDTH, AreaOfEffect, BlocksTile, CombatStats, Confusion, Consumable, InflictsDamage,
-    Item, Monster, Name, Player, Position, ProvidesHealing, Ranged, Rect, Renderable, Viewshed,
+    map::MAP_WIDTH, random_table::RandomTable, AreaOfEffect, BlocksTile, CombatStats, Confusion,
+    Consumable, InflictsDamage, Item, Monster, Name, Player, Position, ProvidesHealing, Ranged,
+    Rect, Renderable, Viewshed,
 };
 use legion::prelude::*;
 use rltk::{FontCharType, RandomNumberGenerator, RGB};
+use std::collections::HashMap;
 
 const MAX_MONSTERS: i32 = 4;
-const MAX_ITEMS: i32 = 2;
 
 // Spawns the player and returns the entity object.
 pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
@@ -38,18 +39,14 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
     )[0]
 }
 
-// Spawns a random monster at a given location.
-pub fn random_monster(world: &mut World, resources: &mut Resources, x: i32, y: i32) {
-    let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-    let roll = rng.roll_dice(1, 2);
-    match roll {
-        1 => {
-            orc(world, x, y);
-        }
-        _ => {
-            goblin(world, x, y);
-        }
-    }
+fn room_table() -> RandomTable {
+    RandomTable::new()
+        .add("Goblin", 10)
+        .add("Orc", 1)
+        .add("Health Potion", 7)
+        .add("Fireball Scroll", 2)
+        .add("Confusion Scroll", 2)
+        .add("Magic Missile Scroll", 4)
 }
 
 fn orc(world: &mut World, x: i32, y: i32) {
@@ -88,16 +85,6 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
     );
 }
 
-pub fn random_item(world: &mut World, resources: &mut Resources, x: i32, y: i32) {
-    let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-    let roll = rng.roll_dice(1, 4);
-    match roll {
-        1 => health_potion(world, x, y),
-        2 => fireball_scroll(world, x, y),
-        3 => confusion_scroll(world, x, y),
-        _ => magic_missile_scroll(world, x, y),
-    }
-}
 fn health_potion(world: &mut World, x: i32, y: i32) {
     world.insert(
         (Item, Consumable),
@@ -178,54 +165,46 @@ fn confusion_scroll(world: &mut World, x: i32, y: i32) {
     );
 }
 
+#[allow(clippy::map_entry)]
 pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect) {
-    let mut monster_spawn_points = Vec::new();
-    let mut item_spawn_points = Vec::new();
+    let spawn_table = room_table();
+    let mut spawn_points = HashMap::new();
 
     // Scope to keep the borrow checker happy
     {
         let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-        let num_monsters = rng.roll_dice(1, MAX_MONSTERS + 2) - 3;
-        let num_items = rng.roll_dice(1, MAX_ITEMS + 2) - 3;
+        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) - 3;
 
-        for _i in 0..num_monsters {
+        for _i in 0..num_spawns {
             let mut added = false;
-            while !added {
+            let mut tries = 0;
+            while !added && tries < 20 {
                 let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
                 let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
                 let idx = (y * MAP_WIDTH) + x;
-                if !monster_spawn_points.contains(&idx) {
-                    monster_spawn_points.push(idx);
+                if !spawn_points.contains_key(&idx) {
+                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
                     added = true;
-                }
-            }
-        }
-
-        for _i in 0..num_items {
-            let mut added = false;
-            while !added {
-                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
-                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
-                let idx = (y * MAP_WIDTH) + x;
-                if !item_spawn_points.contains(&idx) {
-                    item_spawn_points.push(idx);
-                    added = true;
+                } else {
+                    tries += 1;
                 }
             }
         }
     }
 
     // Actually spawn the monsters
-    for idx in monster_spawn_points.iter() {
-        let x = *idx % MAP_WIDTH;
-        let y = *idx / MAP_WIDTH;
-        random_monster(world, resources, x as i32, y as i32);
-    }
+    for (idx, spawn) in spawn_points.iter() {
+        let x = (*idx % MAP_WIDTH) as i32;
+        let y = (*idx / MAP_WIDTH) as i32;
 
-    // Actually spawn the potions
-    for idx in item_spawn_points.iter() {
-        let x = *idx % MAP_WIDTH;
-        let y = *idx / MAP_WIDTH;
-        random_item(world, resources, x as i32, y as i32);
+        match spawn.as_ref() {
+            "Goblin" => goblin(world, x, y),
+            "Orc" => orc(world, x, y),
+            "Health Potion" => health_potion(world, x, y),
+            "Fireball Scroll" => fireball_scroll(world, x, y),
+            "Confusion Scroll" => confusion_scroll(world, x, y),
+            "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
+            _ => {}
+        }
     }
 }

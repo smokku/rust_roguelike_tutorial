@@ -16,6 +16,7 @@ mod inventory_system;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
+mod random_table;
 mod saveload_system;
 mod spawner;
 mod visibility_system;
