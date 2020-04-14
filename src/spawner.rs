@@ -45,6 +45,8 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("Magic Missile Scroll", 4)
         .add("Dagger", 3)
         .add("Shield", 3)
+        .add("Longsword", map_depth - 1)
+        .add("TowerShield", map_depth - 1)
 }
 
 fn orc(world: &mut World, x: i32, y: i32) {
@@ -207,6 +209,50 @@ fn shield(world: &mut World, x: i32, y: i32) {
     );
 }
 
+fn longsword(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item,),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('/'),
+                fg: RGB::named(rltk::YELLOW),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Longsword".to_string(),
+            },
+            Equippable {
+                slot: EquipmentSlot::Melee,
+            },
+            MeleePowerBonus { power: 4 },
+        )],
+    );
+}
+
+fn tower_shield(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item,),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('('),
+                fg: RGB::named(rltk::YELLOW),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Tower Shield".to_string(),
+            },
+            Equippable {
+                slot: EquipmentSlot::Shield,
+            },
+            DefenseBonus { defense: 3 },
+        )],
+    );
+}
+
 #[allow(clippy::map_entry)]
 pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
     let spawn_table = room_table(map_depth);
@@ -248,6 +294,8 @@ pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map
             "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
             "Dagger" => dagger(world, x, y),
             "Shield" => shield(world, x, y),
+            "Longsword" => longsword(world, x, y),
+            "Tower Shield" => tower_shield(world, x, y),
             _ => {}
         }
     }
