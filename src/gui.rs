@@ -133,7 +133,7 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
                 let padding = (width - s.len() as i32) - 1;
                 for i in 0..padding {
                     ctx.print_color(
-                        arrow_pos.x + 1 + i,
+                        arrow_pos.x + width + 1 - i,
                         y,
                         RGB::named(rltk::WHITE),
                         RGB::named(rltk::GREY),
