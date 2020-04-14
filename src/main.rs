@@ -30,6 +30,7 @@ pub enum RunState {
     WorldTurn,
     ShowInventory,
     ShowDropItem,
+    ShowRemoveItem,
     ShowTargeting {
         range: i32,
         item: Entity,
@@ -148,6 +149,25 @@ impl GameState for State {
                             .add_component(
                                 *self.resources.get::<Entity>().unwrap(),
                                 WantsToDropItem { item },
+                            )
+                            .expect("Unable to insert intent");
+                        runstate = RunState::PlayerTurn;
+                    }
+                }
+            }
+            RunState::ShowRemoveItem => {
+                let (result, item) = gui::remove_item_menu(self, ctx);
+                match result {
+                    gui::ItemMenuResult::Cancel => {
+                        runstate = RunState::AwaitingInput;
+                    }
+                    gui::ItemMenuResult::NoResponse => {}
+                    gui::ItemMenuResult::Selected => {
+                        let item = item.unwrap();
+                        self.world
+                            .add_component(
+                                *self.resources.get::<Entity>().unwrap(),
+                                WantsToRemoveItem { item },
                             )
                             .expect("Unable to insert intent");
                         runstate = RunState::PlayerTurn;
@@ -325,6 +345,7 @@ fn main() -> rltk::BError {
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
             .add_system(inventory_system::build()) // Turns WantsToPickupItem into InBackpack
             .add_system(inventory_system::item_drop()) // Turns WantsToDropItem into Position
+            .add_system(inventory_system::item_remove()) // Turns WantsToRemoveItem into InBackpack
             .add_system(inventory_system::item_use()) // Process WantsToUseItem
             .build(),
         Schedule::builder()

@@ -1,7 +1,4 @@
-use super::{
-    gamelog::GameLog, CombatStats, InBackpack, Map, Name, Player, Position, RunState, State,
-    Viewshed,
-};
+use super::{components::*, gamelog::GameLog, Map, RunState, State};
 use legion::prelude::*;
 use rltk::{FontCharType, Point, Rltk, VirtualKeyCode, RGB};
 
@@ -266,6 +263,85 @@ pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option
         RGB::named(rltk::YELLOW),
         RGB::named(rltk::BLACK),
         "Drop Which Item?",
+    );
+    ctx.print_color(
+        18,
+        y + count as i32 + 1,
+        RGB::named(rltk::YELLOW),
+        RGB::named(rltk::BLACK),
+        "ESC to cancel",
+    );
+
+    for (j, (_entity, name)) in items.iter().enumerate() {
+        ctx.set(
+            17,
+            y,
+            RGB::named(rltk::WHITE),
+            RGB::named(rltk::BLACK),
+            rltk::to_cp437('('),
+        );
+        ctx.set(
+            18,
+            y,
+            RGB::named(rltk::YELLOW),
+            RGB::named(rltk::BLACK),
+            rltk::to_cp437('a') + j as FontCharType,
+        );
+        ctx.set(
+            19,
+            y,
+            RGB::named(rltk::WHITE),
+            RGB::named(rltk::BLACK),
+            rltk::to_cp437(')'),
+        );
+
+        ctx.print(21, y, &name);
+        y += 1;
+    }
+
+    match ctx.key {
+        None => (ItemMenuResult::NoResponse, None),
+        Some(key) => match key {
+            VirtualKeyCode::Escape => (ItemMenuResult::Cancel, None),
+            _ => {
+                let selection = rltk::letter_to_option(key);
+                if selection >= 0 && selection < count as i32 {
+                    (ItemMenuResult::Selected, Some(items[selection as usize].0))
+                } else {
+                    (ItemMenuResult::NoResponse, None)
+                }
+            }
+        },
+    }
+}
+
+pub fn remove_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
+    let player_entity = gs.resources.get::<Entity>().unwrap();
+
+    let query = <(Read<Equipped>, Read<Name>)>::query();
+    let items: Vec<(Entity, String)> = query
+        .iter_entities(&gs.world)
+        .filter(|(_entity, (item, _name))| item.owner == *player_entity)
+        .map(|(entity, (_item, name))| (entity, name.name.clone()))
+        .collect();
+
+    let count = items.len();
+
+    let mut y = (25 - (count / 2)) as i32;
+    ctx.draw_box(
+        15,
+        y - 2,
+        31,
+        (count + 3) as i32,
+        RGB::named(rltk::WHITE),
+        RGB::named(rltk::BLACK),
+    );
+    ctx.print_color(
+        18,
+        y - 2,
+        RGB::named(rltk::YELLOW),
+        RGB::named(rltk::BLACK),
+        "Remove Which Item?",
     );
     ctx.print_color(
         18,

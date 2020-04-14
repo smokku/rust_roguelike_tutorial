@@ -133,7 +133,9 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
                         command_buffer.remove_component::<InBackpack>(item_entity);
                         if target == player_entity {
                             let name = world.get_component::<Name>(item_entity).unwrap();
-                            gamelog.entries.push(format!("You equip {}.", name.name));
+                            gamelog
+                                .entries
+                                .push(format!("You equip the {}.", name.name));
                         }
                     }
 
@@ -222,6 +224,33 @@ pub fn item_drop() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)
                     gamelog.entries.push(format!("You drop the {}.", item_name));
                 }
                 command_buffer.remove_component::<WantsToDropItem>(entity);
+            }
+        })
+}
+
+pub fn item_remove() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+    SystemBuilder::new("item_remove")
+        .with_query(Read::<WantsToRemoveItem>::query())
+        .read_resource::<Entity>()
+        .write_resource::<GameLog>()
+        .read_component::<Name>()
+        .build(|command_buffer, world, (player, gamelog), query| {
+            for (entity, to_remove) in query.iter_entities(&world) {
+                let item_entity = to_remove.item;
+                command_buffer.remove_component::<Equipped>(item_entity);
+                command_buffer.add_component(item_entity, InBackpack { owner: entity });
+
+                let item_name = if let Some(item_name) = world.get_component::<Name>(item_entity) {
+                    item_name.name.clone()
+                } else {
+                    "-Unknown-".to_string()
+                };
+                if entity == **player {
+                    gamelog
+                        .entries
+                        .push(format!("You remove the {}.", item_name));
+                }
+                command_buffer.remove_component::<WantsToRemoveItem>(entity);
             }
         })
 }

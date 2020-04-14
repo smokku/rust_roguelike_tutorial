@@ -113,6 +113,11 @@ pub struct WantsToDropItem {
     pub item: Entity,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToRemoveItem {
+    pub item: Entity,
+}
+
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "fde630bf-14fc-46e6-8cd9-36a2cbb0734a"]
 pub struct ProvidesHealing {
