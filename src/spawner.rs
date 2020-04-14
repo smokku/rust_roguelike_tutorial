@@ -166,14 +166,14 @@ fn confusion_scroll(world: &mut World, x: i32, y: i32) {
 }
 
 #[allow(clippy::map_entry)]
-pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect) {
+pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
     let spawn_table = room_table();
     let mut spawn_points = HashMap::new();
 
     // Scope to keep the borrow checker happy
     {
         let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) - 3;
+        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3;
 
         for _i in 0..num_spawns {
             let mut added = false;

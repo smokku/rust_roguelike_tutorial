@@ -247,7 +247,7 @@ impl State {
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.world, &mut self.resources, room);
+            spawner::spawn_room(&mut self.world, &mut self.resources, room, map.depth);
         }
 
         // Place the player and update resources
@@ -307,7 +307,7 @@ fn main() -> rltk::BError {
     resources.insert(player);
 
     for room in map.rooms.iter().skip(1) {
-        spawner::spawn_room(&mut world, &mut resources, room);
+        spawner::spawn_room(&mut world, &mut resources, room, map.depth);
     }
 
     resources.insert(map);
