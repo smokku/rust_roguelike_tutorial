@@ -40,6 +40,7 @@ pub enum RunState {
     },
     SaveGame,
     NextLevel,
+    GameOver,
 }
 
 pub struct State {
@@ -64,7 +65,7 @@ impl GameState for State {
         ctx.cls();
 
         match runstate {
-            RunState::MainMenu { .. } => {}
+            RunState::MainMenu { .. } | RunState::GameOver => {}
             _ => {
                 draw_map(self, ctx);
 
@@ -226,6 +227,19 @@ impl GameState for State {
                 self.goto_next_level();
                 runstate = RunState::PreRun;
             }
+
+            RunState::GameOver => {
+                let result = gui::game_over(ctx);
+                match result {
+                    gui::GameOverResult::NoSelection => {}
+                    gui::GameOverResult::QuitToMenu => {
+                        self.game_over_cleanup();
+                        runstate = RunState::MainMenu {
+                            menu_selection: gui::MainMenuSelection::NewGame,
+                        };
+                    }
+                }
+            }
         }
 
         self.resources.insert(runstate);
@@ -264,7 +278,7 @@ impl State {
             self.world.delete(target);
         }
 
-        // Build a new map and place the player
+        // Build a new map
         let current_map = self.resources.remove::<Map>().unwrap();
         let map = Map::new_map_rooms_and_corridors(current_map.depth + 1);
 
@@ -296,6 +310,43 @@ impl State {
             .push("You descend to the next level, and take a moment to heal.".to_string());
         if let Some(mut health) = self.world.get_component_mut::<CombatStats>(*player_entity) {
             health.hp = i32::max(health.hp, health.max_hp / 2);
+        }
+    }
+
+    fn game_over_cleanup(&mut self) {
+        // Delete everything
+        self.world.delete_all();
+
+        // Clear gamelog
+        {
+            let mut log = self.resources.get_mut::<gamelog::GameLog>().unwrap();
+            log.entries.clear();
+        }
+
+        // Build a new map
+        let map = Map::new_map_rooms_and_corridors(1);
+
+        // Spawn bad guys
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(&mut self.world, &mut self.resources, room, map.depth);
+        }
+        // Place the player and update resources
+        let (player_x, player_y) = map.rooms[0].center();
+        self.resources.insert(map);
+
+        self.resources.insert(Point::new(player_x, player_y));
+        let player = spawner::player(&mut self.world, player_x, player_y);
+        self.resources.insert(player);
+
+        let player_entity = self.resources.get::<Entity>().unwrap();
+        if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
+            player_pos.x = player_x;
+            player_pos.y = player_y;
+        }
+
+        // Mark the player's visibility dirty
+        if let Some(mut viewshed) = self.world.get_component_mut::<Viewshed>(*player_entity) {
+            viewshed.dirty = true;
         }
     }
 }

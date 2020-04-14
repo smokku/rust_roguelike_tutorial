@@ -1,4 +1,4 @@
-use super::{gamelog::GameLog, CombatStats, Name, SufferDamage};
+use super::{gamelog::GameLog, CombatStats, Name, Player, RunState, SufferDamage};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
@@ -18,18 +18,18 @@ pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
 
 pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
     let mut dead = Vec::new();
-    let mut log = resources.get_mut::<GameLog>().unwrap();
     let query = Read::<CombatStats>::query();
-    for (entity, stats) in query.iter_entities(world) {
+    for (victim, stats) in query.iter_entities(world) {
         if stats.hp < 1 {
-            let player = resources.get::<Entity>().expect("Cannot get Player entity");
-            if entity == *player {
-                log.entries.push("You are dead".to_string());
+            if let Some(_player) = world.get_tag::<Player>(victim) {
+                resources.insert(RunState::GameOver);
             } else {
-                dead.push(entity);
+                dead.push(victim);
             }
         }
     }
+
+    let mut log = resources.get_mut::<GameLog>().unwrap();
     for victim in dead {
         let name = if let Some(name) = world.get_component::<Name>(victim) {
             name.name.clone()
