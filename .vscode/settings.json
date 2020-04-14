@@ -13,6 +13,7 @@
         "saveload",
         "scanlines",
         "schedulable",
+        "unequip",
         "unserializable",
         "uuid",
         "viewshed",

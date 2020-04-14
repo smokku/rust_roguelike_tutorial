@@ -228,6 +228,9 @@ impl State {
                 if self.world.has_component::<InBackpack>(*entity) {
                     return false;
                 }
+                if self.world.has_component::<Equipped>(*entity) {
+                    return false;
+                }
 
                 // To Hades with it!
                 true
