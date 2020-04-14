@@ -180,6 +180,7 @@ fn dagger(world: &mut World, x: i32, y: i32) {
             Equippable {
                 slot: EquipmentSlot::Melee,
             },
+            MeleePowerBonus { power: 2 },
         )],
     );
 }
@@ -201,6 +202,7 @@ fn shield(world: &mut World, x: i32, y: i32) {
             Equippable {
                 slot: EquipmentSlot::Shield,
             },
+            DefenseBonus { defense: 1 },
         )],
     );
 }

@@ -161,3 +161,15 @@ pub struct Equipped {
     pub owner: Entity,
     pub slot: EquipmentSlot,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "bfa76812-9216-4360-829c-9b8816cb8d1b"]
+pub struct MeleePowerBonus {
+    pub power: i32,
+}
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "9c0725df-a532-488c-a890-84a7dc186686"]
+pub struct DefenseBonus {
+    pub defense: i32,
+}
