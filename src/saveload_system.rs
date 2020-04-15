@@ -12,8 +12,8 @@ use serde::{
     Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::{
-    any::TypeId, cell::RefCell, collections::HashMap, fs, fs::File, iter::FromIterator,
-    marker::PhantomData, path::Path, ptr::NonNull,
+    any::TypeId, cell::RefCell, collections::HashMap, fs, iter::FromIterator, marker::PhantomData,
+    path::Path, ptr::NonNull,
 };
 use type_uuid::TypeUuid;
 
@@ -435,12 +435,12 @@ fn get_deserializer() -> DeserializeImpl {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn save_game<'a>(world: &mut World, map: &'a Map) {
+pub fn save_game(world: &mut World, map: &Map) {
     // Add Map as an entity
     let map_entity = world.insert((), vec![(map.clone(),)])[0];
 
     let ser_helper = get_serializer();
-    let writer = File::create("./savegame.json").unwrap();
+    let writer = std::fs::File::create("./savegame.json").unwrap();
     let serializable = legion::serialize::ser::serializable_world(&world, &ser_helper);
     serde_json::to_writer_pretty(writer, &serializable).expect("Unable to save game");
 
@@ -449,7 +449,7 @@ pub fn save_game<'a>(world: &mut World, map: &'a Map) {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub fn save_game(_world: &mut World) {}
+pub fn save_game(_world: &mut World, _map: &Map) {}
 
 pub fn does_save_exist() -> bool {
     Path::new("./savegame.json").exists()
