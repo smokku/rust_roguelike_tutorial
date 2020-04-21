@@ -178,3 +178,9 @@ pub struct MeleePowerBonus {
 pub struct DefenseBonus {
     pub defense: i32,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "667de082-404a-438d-8d8b-2c4f217a1017"]
+pub struct ParticleLifetime {
+    pub lifetime_ms: f32,
+}

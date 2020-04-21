@@ -16,6 +16,7 @@ mod inventory_system;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
+mod particle_system;
 mod random_table;
 mod saveload_system;
 mod spawner;
@@ -63,6 +64,7 @@ impl GameState for State {
         let mut runstate = *self.resources.get::<RunState>().unwrap();
 
         ctx.cls();
+        particle_system::cull_dead_particles(&mut self.world, ctx);
 
         match runstate {
             RunState::MainMenu { .. } | RunState::GameOver => {}
