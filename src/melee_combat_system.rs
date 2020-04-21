@@ -5,7 +5,7 @@ use super::{
 use legion::prelude::*;
 use rltk::console;
 
-pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("melee_combat")
         .with_query(<(Read<WantsToMelee>, Read<Name>, Read<CombatStats>)>::query())
         .read_component::<CombatStats>()

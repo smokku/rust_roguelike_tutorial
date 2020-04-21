@@ -387,6 +387,7 @@ fn main() -> rltk::BError {
     }
 
     resources.insert(map);
+    resources.insert(particle_system::ParticleBuilder::new());
 
     let schedules = vec![
         Schedule::builder()
@@ -403,6 +404,7 @@ fn main() -> rltk::BError {
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())
+            .add_system(particle_system::particle_spawn()) // Turns ParticleRequests into particle Entities
             .build(),
     ];
 

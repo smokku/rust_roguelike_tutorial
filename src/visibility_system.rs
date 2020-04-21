@@ -2,7 +2,7 @@ use super::{Map, Player, Position, Viewshed};
 use legion::prelude::*;
 use rltk::{field_of_view, Point};
 
-pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("visibility_system")
         .write_resource::<Map>()
         .with_query(<(Write<Viewshed>, Read<Position>)>::query())

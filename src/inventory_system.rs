@@ -1,7 +1,7 @@
 use super::{components::*, gamelog::GameLog, Map};
 use legion::prelude::*;
 
-pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("item_collection")
         .with_query(Read::<WantsToPickupItem>::query())
         .read_resource::<Entity>()
@@ -30,7 +30,7 @@ pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
         })
 }
 
-pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("item_use")
         .with_query(Read::<WantsToUseItem>::query())
         .read_resource::<Entity>()
@@ -203,7 +203,7 @@ pub fn item_use() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)>
         )
 }
 
-pub fn item_drop() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn item_drop() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("item_drop")
         .with_query(<(Read<WantsToDropItem>, Read<Position>)>::query())
         .read_resource::<Entity>()
@@ -228,7 +228,7 @@ pub fn item_drop() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)
         })
 }
 
-pub fn item_remove() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn item_remove() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("item_remove")
         .with_query(Read::<WantsToRemoveItem>::query())
         .read_resource::<Entity>()

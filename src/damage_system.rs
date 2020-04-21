@@ -1,7 +1,7 @@
 use super::{gamelog::GameLog, CombatStats, Map, Name, Player, Position, RunState, SufferDamage};
 use legion::prelude::*;
 
-pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
+pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("damage")
         .with_query(Write::<SufferDamage>::query())
         .write_component::<CombatStats>()
