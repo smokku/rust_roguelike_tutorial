@@ -1,6 +1,6 @@
 use super::{
-    gamelog::GameLog, CombatStats, DefenseBonus, Equipped, MeleePowerBonus, Name, SufferDamage,
-    WantsToMelee,
+    gamelog::GameLog, particle_system::ParticleBuilder, CombatStats, DefenseBonus, Equipped,
+    MeleePowerBonus, Name, Position, SufferDamage, WantsToMelee,
 };
 use legion::prelude::*;
 use rltk::console;
@@ -10,11 +10,16 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .with_query(<(Read<WantsToMelee>, Read<Name>, Read<CombatStats>)>::query())
         .read_component::<CombatStats>()
         .read_component::<Name>()
+        .read_component::<Position>()
         .with_query(<(Read<MeleePowerBonus>, Read<Equipped>)>::query())
         .with_query(<(Read<DefenseBonus>, Read<Equipped>)>::query())
         .write_resource::<GameLog>()
+        .write_resource::<ParticleBuilder>()
         .build(
-            |command_buffer, mut world, log, (query, query_melee, query_defense)| {
+            |command_buffer,
+             mut world,
+             (log, particle_builder),
+             (query, query_melee, query_defense)| {
                 for (entity, (wants_melee, name, stats)) in query.iter_entities_mut(&mut world) {
                     let target = wants_melee.target;
                     if stats.hp > 0 {
@@ -29,6 +34,17 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                 Some(name) => name.name.clone(),
                                 None => "-Unnamed-".to_string(),
                             };
+
+                            if let Some(pos) = world.get_component::<Position>(target) {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    rltk::RGB::named(rltk::ORANGE),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('‼'),
+                                    200.0,
+                                );
+                            }
 
                             let mut defensive_bonus = 0;
                             for (defense_bonus, equipped_by) in query_defense.iter(&world) {

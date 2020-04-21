@@ -74,7 +74,7 @@ pub fn particle_spawn() -> Box<(dyn Schedulable + 'static)> {
                             fg: new_particle.fg,
                             bg: new_particle.bg,
                             glyph: new_particle.glyph,
-                            render_order: 0,
+                            render_order: -1,
                         },
                         ParticleLifetime {
                             lifetime_ms: new_particle.lifetime,
