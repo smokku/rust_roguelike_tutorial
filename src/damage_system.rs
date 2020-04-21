@@ -1,15 +1,23 @@
-use super::{gamelog::GameLog, CombatStats, Name, Player, RunState, SufferDamage};
+use super::{gamelog::GameLog, CombatStats, Map, Name, Player, Position, RunState, SufferDamage};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn legion::systems::schedule::Schedulable + 'static)> {
     SystemBuilder::new("damage")
         .with_query(Write::<SufferDamage>::query())
         .write_component::<CombatStats>()
-        .build(|command_buffer, world, _, query| {
+        .read_component::<Position>()
+        .write_resource::<Map>()
+        .build(|command_buffer, world, map, query| {
             for (entity, mut damage) in query.iter_entities_mut(world) {
                 if let Some(mut stats) = world.get_component_mut::<CombatStats>(entity) {
                     stats.hp -= damage.amount.iter().sum::<i32>();
                 }
+
+                if let Some(pos) = world.get_component::<Position>(entity) {
+                    let idx = map.xy_idx(pos.x, pos.y);
+                    map.bloodstains.insert(idx);
+                }
+
                 damage.amount.clear();
                 command_buffer.remove_component::<SufferDamage>(entity);
             }
