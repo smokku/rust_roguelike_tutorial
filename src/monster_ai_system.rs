@@ -1,4 +1,7 @@
-use super::{Confusion, Map, Monster, Position, RunState, Viewshed, WantsToMelee};
+use super::{
+    particle_system::ParticleBuilder, Confusion, Map, Monster, Position, RunState, Viewshed,
+    WantsToMelee,
+};
 use legion::prelude::*;
 use rltk::Point;
 
@@ -10,12 +13,16 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_resource::<RunState>()
         .with_query(<(Write<Viewshed>, Write<Position>)>::query().filter(tag::<Monster>()))
         .write_component::<Confusion>()
+        .write_resource::<ParticleBuilder>()
         .build(
-            |command_buffer, mut world, (map, player_pos, player_entity, runstate), query| {
+            |command_buffer,
+             world,
+             (map, player_pos, player_entity, runstate, particle_builder),
+             query| {
                 if **runstate != RunState::MonsterTurn {
                     return;
                 }
-                for (entity, (mut viewshed, mut pos)) in query.iter_entities_mut(&mut world) {
+                for (entity, (mut viewshed, mut pos)) in query.iter_entities_mut(world) {
                     let mut can_act = true;
 
                     if let Some(mut confused) = world.get_component_mut::<Confusion>(entity) {
@@ -24,6 +31,14 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             command_buffer.remove_component::<Confusion>(entity);
                         }
                         can_act = false;
+                        particle_builder.request(
+                            pos.x,
+                            pos.y,
+                            rltk::RGB::named(rltk::MAGENTA),
+                            rltk::RGB::named(rltk::BLACK),
+                            rltk::to_cp437('?'),
+                            200.0,
+                        );
                     }
 
                     if can_act {
