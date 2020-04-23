@@ -1,4 +1,4 @@
-use super::{components::*, gamelog::GameLog, Map};
+use super::{components::*, gamelog::GameLog, particle_system::ParticleBuilder, Map};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -36,15 +36,21 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
         .read_resource::<Entity>()
         .write_resource::<GameLog>()
         .read_resource::<Map>()
+        .write_resource::<ParticleBuilder>()
         .read_component::<Name>()
         .read_component::<AreaOfEffect>()
         .read_component::<InflictsDamage>()
         .read_component::<ProvidesHealing>()
         .read_component::<Confusion>()
         .read_component::<Equippable>()
+        .read_component::<Position>()
         .with_query(<(Read<Equipped>, Read<Name>)>::query())
         .build(
-            |command_buffer, world, (player, gamelog, map), (query, query_equipped)| {
+            #[allow(clippy::cognitive_complexity)]
+            |command_buffer,
+             world,
+             (player, gamelog, map, particle_builder),
+             (query, query_equipped)| {
                 for (entity, use_item) in query.iter_entities(&world) {
                     let player_entity = **player;
                     let item_entity = use_item.item;
@@ -94,6 +100,14 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                                     };
                                     targets.push((mob_entity, mob_name));
                                 }
+                                particle_builder.request(
+                                    tile.x,
+                                    tile.y,
+                                    rltk::RGB::named(rltk::ORANGE),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('░'),
+                                    200.0,
+                                );
                             }
                         }
                     }
@@ -145,11 +159,23 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                         for (target_entity, _target_name) in targets.iter() {
                             let target_entity = *target_entity;
                             command_buffer.exec_mut(move |world| {
-                                let stats = world.get_component_mut::<CombatStats>(target_entity);
-                                if let Some(mut stats) = stats {
+                                if let Some(mut stats) =
+                                    world.get_component_mut::<CombatStats>(target_entity)
+                                {
                                     stats.hp = i32::min(stats.max_hp, stats.hp + heal_amount);
                                 }
                             });
+                            if let Some(pos) = world.get_component::<Position>(target_entity) {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    rltk::RGB::named(rltk::GREEN),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('♥'),
+                                    200.0,
+                                );
+                            }
+
                             if entity == player_entity {
                                 gamelog.entries.push(format!(
                                     "You use the {}, healing {} hp.",
@@ -163,8 +189,19 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                     // If it inflicts damage, apply damage to all target cell entities
                     if let Some(damages) = world.get_component::<InflictsDamage>(item_entity) {
                         for (target_entity, target_name) in targets.iter() {
+                            let target_entity = *target_entity;
                             let damage = damages.damage;
-                            SufferDamage::new_damage(command_buffer, *target_entity, damage);
+                            SufferDamage::new_damage(command_buffer, target_entity, damage);
+                            if let Some(pos) = world.get_component::<Position>(target_entity) {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    rltk::RGB::named(rltk::RED),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('‼'),
+                                    200.0,
+                                );
+                            }
 
                             if entity == player_entity {
                                 gamelog.entries.push(format!(
@@ -179,7 +216,18 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                     // Can it pass along confusion?
                     if let Some(confusion) = world.get_component::<Confusion>(item_entity) {
                         for (target_entity, target_name) in targets.iter() {
-                            command_buffer.add_component(*target_entity, *confusion);
+                            let target_entity = *target_entity;
+                            command_buffer.add_component(target_entity, *confusion);
+                            if let Some(pos) = world.get_component::<Position>(target_entity) {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    rltk::RGB::named(rltk::MAGENTA),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('?'),
+                                    200.0,
+                                );
+                            }
 
                             if entity == player_entity {
                                 gamelog.entries.push(format!(
