@@ -15,13 +15,13 @@ uuid = { version = "0.8", features = ["v4"] }
 
 [dependencies.legion]
 version = "*"
-path = "../legion"
+path = "external/legion"
 default-features = false
 features = ["serialize"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.legion]
 version = "*"
-path = "../legion"
+path = "external/legion"
 default-features = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

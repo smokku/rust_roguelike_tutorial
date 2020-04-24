@@ -6,7 +6,10 @@ Still work in progress - as I progress through the tutorial.
 
 ## Running
 
-Unfortunately, it requires `master` branch of Legion, so you will need to checkout [legion](https://github.com/TomGillen/legion) beside this repo.
+Unfortunately, it requires `master` branch of Legion, so you will need to checkout [legion](https://github.com/TomGillen/legion) as submodule.
+
+    git submodule init
+    git submodule update
 
 ## Building for Web
 
