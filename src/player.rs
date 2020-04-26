@@ -1,6 +1,6 @@
 use super::{
-    gamelog::GameLog, CombatStats, Item, Map, Monster, Player, Position, RunState, State, TileType,
-    Viewshed, WantsToMelee, WantsToPickupItem,
+    gamelog::GameLog, CombatStats, HungerClock, HungerState, Item, Map, Monster, Player, Position,
+    RunState, State, TileType, Viewshed, WantsToMelee, WantsToPickupItem,
 };
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
@@ -118,6 +118,13 @@ fn skip_turn(gs: &mut State) -> RunState {
                     can_heal = false;
                 }
             }
+        }
+    }
+
+    if let Some(hc) = gs.world.get_component::<HungerClock>(*player_entity) {
+        match hc.state {
+            HungerState::Hungry | HungerState::Starving => can_heal = false,
+            _ => {}
         }
     }
 
