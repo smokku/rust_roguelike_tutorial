@@ -189,7 +189,7 @@ pub struct ParticleLifetime {
 pub enum HungerState {
     WellFed,
     Normal,
-    Hungryy,
+    Hungry,
     Starving,
 }
 

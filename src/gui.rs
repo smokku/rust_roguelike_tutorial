@@ -12,25 +12,51 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         RGB::named(rltk::BLACK),
     );
 
-    let query = Read::<CombatStats>::query().filter(tag::<Player>());
-    for stats in query.iter(&world) {
-        let health = format!(" HP: {} / {}", stats.hp, stats.max_hp);
-        ctx.print_color(
-            12,
-            43,
-            RGB::named(rltk::YELLOW),
+    let player = resources.get::<Entity>().unwrap();
+
+    let stats = world.get_component::<CombatStats>(*player).unwrap();
+    let health = format!(" HP: {} / {}", stats.hp, stats.max_hp);
+    ctx.print_color(
+        12,
+        43,
+        RGB::named(rltk::YELLOW),
+        RGB::named(rltk::BLACK),
+        &health,
+    );
+    ctx.draw_bar_horizontal(
+        28,
+        43,
+        51,
+        stats.hp,
+        stats.max_hp,
+        RGB::named(rltk::RED),
+        RGB::named(rltk::BLACK),
+    );
+
+    let hunger = world.get_component::<HungerClock>(*player).unwrap();
+    match hunger.state {
+        HungerState::WellFed => ctx.print_color(
+            71,
+            42,
+            RGB::named(rltk::GREEN),
             RGB::named(rltk::BLACK),
-            &health,
-        );
-        ctx.draw_bar_horizontal(
-            28,
-            43,
-            51,
-            stats.hp,
-            stats.max_hp,
+            "Well Fed",
+        ),
+        HungerState::Normal => {}
+        HungerState::Hungry => ctx.print_color(
+            71,
+            42,
+            RGB::named(rltk::ORANGE),
+            RGB::named(rltk::BLACK),
+            "Hungry",
+        ),
+        HungerState::Starving => ctx.print_color(
+            71,
+            42,
             RGB::named(rltk::RED),
             RGB::named(rltk::BLACK),
-        );
+            "Starving",
+        ),
     }
 
     let map = resources.get::<Map>().unwrap();

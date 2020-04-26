@@ -12,6 +12,7 @@ pub use rect::*;
 mod damage_system;
 mod gamelog;
 mod gui;
+mod hunger_system;
 mod inventory_system;
 mod map_indexing_system;
 mod melee_combat_system;
@@ -404,6 +405,7 @@ fn main() -> rltk::BError {
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())
+            .add_system(hunger_system::build()) // Process HungerClock
             .add_thread_local_fn(particle_system::particle_spawn()) // Turns ParticleRequests into particle Entities
             .build(),
     ];
