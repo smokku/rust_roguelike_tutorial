@@ -31,6 +31,10 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
                 defense: 2,
                 power: 5,
             },
+            HungerClock {
+                state: HungerState::WellFed,
+                duration: 20,
+            },
         )],
     )[0]
 }

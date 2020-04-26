@@ -184,3 +184,18 @@ pub struct DefenseBonus {
 pub struct ParticleLifetime {
     pub lifetime_ms: f32,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum HungerState {
+    WellFed,
+    Normal,
+    Hungryy,
+    Starving,
+}
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "7242e30f-b971-4ad0-bcae-cc8ad67a5852"]
+pub struct HungerClock {
+    pub state: HungerState,
+    pub duration: i32,
+}

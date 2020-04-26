@@ -391,6 +391,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<MeleePowerBonus>(),
         ComponentRegistration::of::<DefenseBonus>(),
         ComponentRegistration::of::<ParticleLifetime>(),
+        ComponentRegistration::of::<HungerClock>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),
