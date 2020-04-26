@@ -57,32 +57,31 @@ impl ParticleBuilder {
     }
 }
 
-pub fn particle_spawn() -> Box<(dyn Schedulable + 'static)> {
-    SystemBuilder::new("particle_spawn")
-        .write_resource::<ParticleBuilder>()
-        .build(|command_buffer, _, particle_builder, _| {
-            let particles: Vec<(Position, Renderable, ParticleLifetime)> = particle_builder
-                .requests
-                .iter()
-                .map(|new_particle| {
-                    (
-                        Position {
-                            x: new_particle.x,
-                            y: new_particle.y,
-                        },
-                        Renderable {
-                            fg: new_particle.fg,
-                            bg: new_particle.bg,
-                            glyph: new_particle.glyph,
-                            render_order: -1,
-                        },
-                        ParticleLifetime {
-                            lifetime_ms: new_particle.lifetime,
-                        },
-                    )
-                })
-                .collect();
-            particle_builder.requests.clear();
-            command_buffer.insert((), particles);
-        })
+pub fn particle_spawn() -> Box<dyn Fn(&mut World, &mut Resources) -> ()> {
+    Box::new(|world: &mut World, resources: &mut Resources| {
+        let mut particle_builder = resources.get_mut::<ParticleBuilder>().unwrap();
+        let particles: Vec<(Position, Renderable, ParticleLifetime)> = particle_builder
+            .requests
+            .iter()
+            .map(|new_particle| {
+                (
+                    Position {
+                        x: new_particle.x,
+                        y: new_particle.y,
+                    },
+                    Renderable {
+                        fg: new_particle.fg,
+                        bg: new_particle.bg,
+                        glyph: new_particle.glyph,
+                        render_order: -1,
+                    },
+                    ParticleLifetime {
+                        lifetime_ms: new_particle.lifetime,
+                    },
+                )
+            })
+            .collect();
+        particle_builder.requests.clear();
+        world.insert((), particles);
+    })
 }

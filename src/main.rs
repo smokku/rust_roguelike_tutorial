@@ -404,7 +404,7 @@ fn main() -> rltk::BError {
             .build(),
         Schedule::builder()
             .add_system(map_indexing_system::build())
-            .add_system(particle_system::particle_spawn()) // Turns ParticleRequests into particle Entities
+            .add_thread_local_fn(particle_system::particle_spawn()) // Turns ParticleRequests into particle Entities
             .build(),
     ];
 
