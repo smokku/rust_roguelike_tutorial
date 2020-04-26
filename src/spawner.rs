@@ -51,6 +51,56 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("Shield", 3)
         .add("Longsword", map_depth - 1)
         .add("TowerShield", map_depth - 1)
+        .add("Rations", 10)
+}
+
+#[allow(clippy::map_entry)]
+pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
+    let spawn_table = room_table(map_depth);
+    let mut spawn_points = HashMap::new();
+
+    // Scope to keep the borrow checker happy
+    {
+        let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
+        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3;
+
+        for _i in 0..num_spawns {
+            let mut added = false;
+            let mut tries = 0;
+            while !added && tries < 20 {
+                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
+                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
+                let idx = (y * MAP_WIDTH) + x;
+                if !spawn_points.contains_key(&idx) {
+                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
+                    added = true;
+                } else {
+                    tries += 1;
+                }
+            }
+        }
+    }
+
+    // Actually spawn the monsters
+    for (idx, spawn) in spawn_points.iter() {
+        let x = (*idx % MAP_WIDTH) as i32;
+        let y = (*idx / MAP_WIDTH) as i32;
+
+        match spawn.as_ref() {
+            "Goblin" => goblin(world, x, y),
+            "Orc" => orc(world, x, y),
+            "Health Potion" => health_potion(world, x, y),
+            "Fireball Scroll" => fireball_scroll(world, x, y),
+            "Confusion Scroll" => confusion_scroll(world, x, y),
+            "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
+            "Dagger" => dagger(world, x, y),
+            "Shield" => shield(world, x, y),
+            "Longsword" => longsword(world, x, y),
+            "Tower Shield" => tower_shield(world, x, y),
+            "Rations" => rations(world, x, y),
+            _ => {}
+        }
+    }
 }
 
 fn orc(world: &mut World, x: i32, y: i32) {
@@ -257,50 +307,20 @@ fn tower_shield(world: &mut World, x: i32, y: i32) {
     );
 }
 
-#[allow(clippy::map_entry)]
-pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
-    let spawn_table = room_table(map_depth);
-    let mut spawn_points = HashMap::new();
-
-    // Scope to keep the borrow checker happy
-    {
-        let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3;
-
-        for _i in 0..num_spawns {
-            let mut added = false;
-            let mut tries = 0;
-            while !added && tries < 20 {
-                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
-                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
-                let idx = (y * MAP_WIDTH) + x;
-                if !spawn_points.contains_key(&idx) {
-                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
-                    added = true;
-                } else {
-                    tries += 1;
-                }
-            }
-        }
-    }
-
-    // Actually spawn the monsters
-    for (idx, spawn) in spawn_points.iter() {
-        let x = (*idx % MAP_WIDTH) as i32;
-        let y = (*idx / MAP_WIDTH) as i32;
-
-        match spawn.as_ref() {
-            "Goblin" => goblin(world, x, y),
-            "Orc" => orc(world, x, y),
-            "Health Potion" => health_potion(world, x, y),
-            "Fireball Scroll" => fireball_scroll(world, x, y),
-            "Confusion Scroll" => confusion_scroll(world, x, y),
-            "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
-            "Dagger" => dagger(world, x, y),
-            "Shield" => shield(world, x, y),
-            "Longsword" => longsword(world, x, y),
-            "Tower Shield" => tower_shield(world, x, y),
-            _ => {}
-        }
-    }
+fn rations(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Item, ProvidesFood, Consumable),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('%'),
+                fg: RGB::named(rltk::GREEN),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Rations".to_string(),
+            },
+        )],
+    );
 }

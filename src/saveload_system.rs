@@ -399,6 +399,7 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<BlocksTile>(),
         TagRegistration::of::<Item>(),
         TagRegistration::of::<Consumable>(),
+        TagRegistration::of::<ProvidesFood>(),
     ];
 
     SerializeImpl {

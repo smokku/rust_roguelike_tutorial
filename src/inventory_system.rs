@@ -153,6 +153,22 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                         }
                     }
 
+                    // It it is edible, eat it!
+                    if let Some(_food) = world.get_tag::<ProvidesFood>(item_entity) {
+                        let target = targets[0].0;
+                        command_buffer.exec_mut(move |world| {
+                            if let Some(mut hc) = world.get_component_mut::<HungerClock>(target) {
+                                hc.state = HungerState::WellFed;
+                                hc.duration = 20;
+                            }
+                        });
+                        if target == player_entity {
+                            let name = world.get_component::<Name>(item_entity).unwrap();
+                            gamelog.entries.push(format!("You eat the {}.", name.name));
+                        }
+                        used_item = true;
+                    }
+
                     // If it heals, apply the healing
                     if let Some(healer) = world.get_component::<ProvidesHealing>(item_entity) {
                         let heal_amount = healer.heal_amount;

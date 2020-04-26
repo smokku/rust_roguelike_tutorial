@@ -199,3 +199,7 @@ pub struct HungerClock {
     pub state: HungerState,
     pub duration: i32,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "0457c4c2-e26a-4d05-a4cb-d4322a41e876"]
+pub struct ProvidesFood;
