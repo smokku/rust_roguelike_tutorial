@@ -1,6 +1,6 @@
 use super::{
     gamelog::GameLog, particle_system::ParticleBuilder, CombatStats, DefenseBonus, Equipped,
-    MeleePowerBonus, Name, Position, SufferDamage, WantsToMelee,
+    HungerClock, HungerState, MeleePowerBonus, Name, Position, SufferDamage, WantsToMelee,
 };
 use legion::prelude::*;
 use rltk::console;
@@ -11,6 +11,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<CombatStats>()
         .read_component::<Name>()
         .read_component::<Position>()
+        .read_component::<HungerClock>()
         .with_query(<(Read<MeleePowerBonus>, Read<Equipped>)>::query())
         .with_query(<(Read<DefenseBonus>, Read<Equipped>)>::query())
         .write_resource::<GameLog>()
@@ -29,6 +30,12 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                 offensive_bonus += power_bonus.power;
                             }
                         }
+                        if let Some(hc) = world.get_component::<HungerClock>(entity) {
+                            if hc.state == HungerState::WellFed {
+                                offensive_bonus += 1;
+                            }
+                        }
+
                         if let Some(target_stats) = world.get_component::<CombatStats>(target) {
                             let target_name = match world.get_component::<Name>(target) {
                                 Some(name) => name.name.clone(),
