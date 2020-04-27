@@ -94,9 +94,8 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let mut tooltip = Vec::new();
     let query = <(Read<Name>, Read<Position>)>::query();
     for (name, position) in query.iter(&world) {
-        // FIXME: Should check against Player viewshed
-        // as it is possible to reveal entities by hovering over map
-        if position.x == mouse_pos.0 && position.y == mouse_pos.1 {
+        let idx = map.xy_idx(position.x, position.y);
+        if position.x == mouse_pos.0 && position.y == mouse_pos.1 && map.visible_tiles[idx] {
             tooltip.push(name.name.to_string());
         }
     }
