@@ -1,4 +1,4 @@
-use super::{components::*, gamelog::GameLog, particle_system::ParticleBuilder, Map};
+use super::{components::*, gamelog::GameLog, particle_system::ParticleBuilder, Map, RunState};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -45,11 +45,12 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<Equippable>()
         .read_component::<Position>()
         .with_query(<(Read<Equipped>, Read<Name>)>::query())
+        .write_resource::<RunState>()
         .build(
             #[allow(clippy::cognitive_complexity)]
             |command_buffer,
              world,
-             (player, gamelog, map, particle_builder),
+             (player, gamelog, map, particle_builder, runstate),
              (query, query_equipped)| {
                 for (entity, use_item) in query.iter_entities(&world) {
                     let player_entity = **player;
@@ -166,6 +167,15 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                             let name = world.get_component::<Name>(item_entity).unwrap();
                             gamelog.entries.push(format!("You eat the {}.", name.name));
                         }
+                        used_item = true;
+                    }
+
+                    // It it's a magic mapper...
+                    if let Some(_mm) = world.get_tag::<MagicMapper>(item_entity) {
+                        gamelog
+                            .entries
+                            .push("The map is revealed to you!".to_string());
+                        **runstate = RunState::MagicMapReveal { row: 0 };
                         used_item = true;
                     }
 

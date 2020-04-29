@@ -43,6 +43,9 @@ pub enum RunState {
     SaveGame,
     NextLevel,
     GameOver,
+    MagicMapReveal {
+        row: i32,
+    },
 }
 
 pub struct State {
@@ -97,7 +100,10 @@ impl GameState for State {
             }
             RunState::PlayerTurn => {
                 self.run_systems();
-                runstate = RunState::MonsterTurn;
+                runstate = *self.resources.get::<RunState>().unwrap();
+                if runstate == RunState::PlayerTurn {
+                    runstate = RunState::MonsterTurn;
+                }
             }
             RunState::MonsterTurn => {
                 self.run_systems();
@@ -219,6 +225,20 @@ impl GameState for State {
                     },
                 }
             }
+
+            RunState::GameOver => {
+                let result = gui::game_over(ctx);
+                match result {
+                    gui::GameOverResult::NoSelection => {}
+                    gui::GameOverResult::QuitToMenu => {
+                        self.game_over_cleanup();
+                        runstate = RunState::MainMenu {
+                            menu_selection: gui::MainMenuSelection::NewGame,
+                        };
+                    }
+                }
+            }
+
             RunState::SaveGame => {
                 saveload_system::save_game(&mut self.world, &*self.resources.get::<Map>().unwrap());
                 runstate = RunState::MainMenu {
@@ -231,16 +251,16 @@ impl GameState for State {
                 runstate = RunState::PreRun;
             }
 
-            RunState::GameOver => {
-                let result = gui::game_over(ctx);
-                match result {
-                    gui::GameOverResult::NoSelection => {}
-                    gui::GameOverResult::QuitToMenu => {
-                        self.game_over_cleanup();
-                        runstate = RunState::MainMenu {
-                            menu_selection: gui::MainMenuSelection::NewGame,
-                        };
-                    }
+            RunState::MagicMapReveal { row } => {
+                let mut map = self.resources.get_mut::<Map>().unwrap();
+                for x in 0..map.width {
+                    let idx = map.xy_idx(x as i32, row);
+                    map.revealed_tiles[idx] = true;
+                }
+                if row >= map.height - 1 {
+                    runstate = RunState::MonsterTurn;
+                } else {
+                    runstate = RunState::MagicMapReveal { row: row + 1 };
                 }
             }
         }
