@@ -215,3 +215,7 @@ pub struct Hidden;
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "1f0408cb-f7f2-45aa-b2d6-0aac7bae3a7d"]
 pub struct EntryTrigger;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "bfd72dfa-446e-49bc-99ab-259eb6e0cbf3"]
+pub struct SingleActivation;

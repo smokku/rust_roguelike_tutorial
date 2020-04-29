@@ -403,6 +403,7 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<MagicMapper>(),
         TagRegistration::of::<Hidden>(),
         TagRegistration::of::<EntryTrigger>(),
+        TagRegistration::of::<SingleActivation>(),
     ];
 
     SerializeImpl {

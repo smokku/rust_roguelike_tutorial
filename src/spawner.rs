@@ -349,7 +349,7 @@ fn magic_mapping_scroll(world: &mut World, x: i32, y: i32) {
 
 fn bear_trap(world: &mut World, x: i32, y: i32) {
     world.insert(
-        (Hidden, EntryTrigger),
+        (Hidden, EntryTrigger, SingleActivation),
         vec![(
             Position { x, y },
             Renderable {
@@ -361,6 +361,7 @@ fn bear_trap(world: &mut World, x: i32, y: i32) {
             Name {
                 name: "Bear Trap".to_string(),
             },
+            InflictsDamage { damage: 6 },
         )],
     );
 }
