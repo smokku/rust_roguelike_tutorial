@@ -19,6 +19,7 @@ mod melee_combat_system;
 mod monster_ai_system;
 mod particle_system;
 mod random_table;
+mod rex_assets;
 mod saveload_system;
 mod spawner;
 mod visibility_system;
@@ -409,6 +410,7 @@ fn main() -> rltk::BError {
 
     resources.insert(map);
     resources.insert(particle_system::ParticleBuilder::new());
+    resources.insert(rex_assets::RexAssets::new());
 
     let schedules = vec![
         Schedule::builder()

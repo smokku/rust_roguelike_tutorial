@@ -1,4 +1,4 @@
-use super::{components::*, gamelog::GameLog, Map, RunState, State};
+use super::{components::*, gamelog::GameLog, rex_assets::RexAssets, Map, RunState, State};
 use legion::prelude::*;
 use rltk::{FontCharType, Point, Rltk, VirtualKeyCode, RGB};
 
@@ -493,20 +493,44 @@ pub enum MainMenuResult {
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let save_exists = super::saveload_system::does_save_exist();
     let runstate = gs.resources.get::<RunState>().unwrap();
+    let assets = gs.resources.get::<RexAssets>().unwrap();
 
+    ctx.render_xp_sprite(&assets.menu, 0, 0);
+
+    ctx.draw_box_double(
+        24,
+        18,
+        31,
+        10,
+        RGB::named(rltk::WHEAT),
+        RGB::named(rltk::BLACK),
+    );
     ctx.print_color_centered(
-        15,
+        20,
         RGB::named(rltk::YELLOW),
         RGB::named(rltk::BLACK),
         "Rust Roguelike Tutorial",
     );
+    ctx.print_color_centered(
+        21,
+        RGB::named(rltk::CYAN),
+        RGB::named(rltk::BLACK),
+        "by Herbert Wolverson",
+    );
+    ctx.print_color_centered(
+        22,
+        RGB::named(rltk::GRAY),
+        RGB::named(rltk::BLACK),
+        "Use Up/Down Arrows and Enter",
+    );
 
+    let mut y = 24;
     if let RunState::MainMenu {
         menu_selection: selected,
     } = *runstate
     {
         ctx.print_color_centered(
-            24,
+            y,
             if selected == MainMenuSelection::NewGame {
                 RGB::named(rltk::MAGENTA)
             } else {
@@ -515,9 +539,11 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
             RGB::named(rltk::BLACK),
             "Begin New Game",
         );
+        y += 1;
+
         if save_exists {
             ctx.print_color_centered(
-                25,
+                y,
                 if selected == MainMenuSelection::LoadGame {
                     RGB::named(rltk::MAGENTA)
                 } else {
@@ -526,9 +552,11 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 RGB::named(rltk::BLACK),
                 "Load Game",
             );
+            y += 1;
         }
+
         ctx.print_color_centered(
-            26,
+            y,
             if selected == MainMenuSelection::Quit {
                 RGB::named(rltk::MAGENTA)
             } else {
