@@ -7,9 +7,9 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .write_component::<CombatStats>()
         .read_component::<Position>()
         .write_resource::<Map>()
-        .build(|command_buffer, world, map, query| {
-            for (entity, mut damage) in query.iter_entities_mut(world) {
-                if let Some(mut stats) = world.get_component_mut::<CombatStats>(entity) {
+        .build(|command_buffer, world, map, query| unsafe {
+            for (entity, mut damage) in query.iter_entities_unchecked(world) {
+                if let Some(mut stats) = world.get_component_mut_unchecked::<CombatStats>(entity) {
                     stats.hp -= damage.amount.iter().sum::<i32>();
                 }
 

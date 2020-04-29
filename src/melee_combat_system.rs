@@ -18,14 +18,14 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .write_resource::<ParticleBuilder>()
         .build(
             |command_buffer,
-             mut world,
+             world,
              (log, particle_builder),
              (query, query_melee, query_defense)| {
-                for (entity, (wants_melee, name, stats)) in query.iter_entities_mut(&mut world) {
+                for (entity, (wants_melee, name, stats)) in query.iter_entities(world) {
                     let target = wants_melee.target;
                     if stats.hp > 0 {
                         let mut offensive_bonus = 0;
-                        for (power_bonus, equipped_by) in query_melee.iter(&world) {
+                        for (power_bonus, equipped_by) in query_melee.iter(world) {
                             if equipped_by.owner == entity {
                                 offensive_bonus += power_bonus.power;
                             }

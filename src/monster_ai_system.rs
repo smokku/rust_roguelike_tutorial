@@ -18,14 +18,16 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
             |command_buffer,
              world,
              (map, player_pos, player_entity, runstate, particle_builder),
-             query| {
+             query| unsafe {
                 if **runstate != RunState::MonsterTurn {
                     return;
                 }
-                for (entity, (mut viewshed, mut pos)) in query.iter_entities_mut(world) {
+                for (entity, (mut viewshed, mut pos)) in query.iter_entities_unchecked(world) {
                     let mut can_act = true;
 
-                    if let Some(mut confused) = world.get_component_mut::<Confusion>(entity) {
+                    if let Some(mut confused) =
+                        world.get_component_mut_unchecked::<Confusion>(entity)
+                    {
                         confused.turns -= 1;
                         if confused.turns < 1 {
                             command_buffer.remove_component::<Confusion>(entity);
