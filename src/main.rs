@@ -22,6 +22,7 @@ mod random_table;
 mod rex_assets;
 mod saveload_system;
 mod spawner;
+mod trigger_system;
 mod visibility_system;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -427,6 +428,7 @@ fn main() -> rltk::BError {
             .add_system(inventory_system::item_use()) // Process WantsToUseItem
             .build(),
         Schedule::builder()
+            .add_system(trigger_system::build())
             .add_system(map_indexing_system::build())
             .add_system(hunger_system::build()) // Process HungerClock
             .add_thread_local_fn(particle_system::particle_spawn()) // Turns ParticleRequests into particle Entities

@@ -211,3 +211,7 @@ pub struct MagicMapper;
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "8e5c82a0-f62a-46f8-95ea-b2531da310b1"]
 pub struct Hidden;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "1f0408cb-f7f2-45aa-b2d6-0aac7bae3a7d"]
+pub struct EntryTrigger;

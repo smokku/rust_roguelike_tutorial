@@ -349,7 +349,7 @@ fn magic_mapping_scroll(world: &mut World, x: i32, y: i32) {
 
 fn bear_trap(world: &mut World, x: i32, y: i32) {
     world.insert(
-        (Hidden,),
+        (Hidden, EntryTrigger),
         vec![(
             Position { x, y },
             Renderable {
