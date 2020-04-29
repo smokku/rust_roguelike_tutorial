@@ -53,7 +53,7 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("TowerShield", map_depth - 1)
         .add("Rations", 10)
         .add("Magic Mapping Scroll", 2)
-        .add("Bear Trap", 200)
+        .add("Bear Trap", 2)
 }
 
 #[allow(clippy::map_entry)]

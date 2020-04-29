@@ -1,14 +1,19 @@
-use super::{Map, Player, Position, Viewshed};
+use super::{gamelog::GameLog, Hidden, Map, Name, Player, Position, Viewshed};
 use legion::prelude::*;
 use rltk::{field_of_view, Point};
+use std::collections::HashSet;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("visibility_system")
         .write_resource::<Map>()
+        .write_resource::<rltk::RandomNumberGenerator>()
+        .write_resource::<GameLog>()
         .with_query(<(Write<Viewshed>, Read<Position>)>::query())
         .read_component::<Player>()
-        .build(|_, mut world, map, query| {
-            for chunk in query.iter_chunks_mut(&mut world) {
+        .read_component::<Name>()
+        .build(|command_buffer, world, (map, rng, log), query| {
+            let mut seen_tiles: HashSet<usize> = HashSet::new();
+            for chunk in query.iter_chunks_mut(world) {
                 // Is this the players chunk?
                 let p = chunk.tag::<Player>();
                 let player_chunk = if let Some(_p) = p {
@@ -42,6 +47,21 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             let idx = map.xy_idx(vis.x, vis.y);
                             map.revealed_tiles[idx] = true;
                             map.visible_tiles[idx] = true;
+                            seen_tiles.insert(idx);
+                        }
+                    }
+                }
+            }
+
+            for idx in seen_tiles.iter() {
+                // Chance to reveal hidden things
+                for e in map.tile_content[*idx].iter() {
+                    if let Some(_hidden) = world.get_tag::<Hidden>(*e) {
+                        if rng.roll_dice(1, 24) == 1 {
+                            if let Some(name) = world.get_component::<Name>(*e) {
+                                log.entries.push(format!("You spotted a {}.", &name.name));
+                            }
+                            command_buffer.remove_tag::<Hidden>(*e);
                         }
                     }
                 }
