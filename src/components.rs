@@ -207,3 +207,7 @@ pub struct ProvidesFood;
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "74ea7770-fd58-43ce-a0b5-8ef6f8610d48"]
 pub struct MagicMapper;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "8e5c82a0-f62a-46f8-95ea-b2531da310b1"]
+pub struct Hidden;

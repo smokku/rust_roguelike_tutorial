@@ -76,8 +76,9 @@ impl GameState for State {
             _ => {
                 draw_map(self, ctx);
 
+                // Draw Renderable entities
                 let map = self.resources.get::<Map>().unwrap();
-                let query = <(Read<Position>, Read<Renderable>)>::query();
+                let query = <(Read<Position>, Read<Renderable>)>::query().filter(!tag::<Hidden>());
                 let mut data = query.iter(&self.world).collect::<Vec<_>>();
                 data.sort_by(|a, b| b.1.render_order.cmp(&a.1.render_order));
                 for (pos, render) in data.iter() {

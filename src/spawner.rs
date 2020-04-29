@@ -53,6 +53,7 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("TowerShield", map_depth - 1)
         .add("Rations", 10)
         .add("Magic Mapping Scroll", 2)
+        .add("Bear Trap", 200)
 }
 
 #[allow(clippy::map_entry)]
@@ -100,6 +101,7 @@ pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map
             "Tower Shield" => tower_shield(world, x, y),
             "Rations" => rations(world, x, y),
             "Magic Mapping Scroll" => magic_mapping_scroll(world, x, y),
+            "Bear Trap" => bear_trap(world, x, y),
             _ => {}
         }
     }
@@ -340,6 +342,24 @@ fn magic_mapping_scroll(world: &mut World, x: i32, y: i32) {
             },
             Name {
                 name: "Scroll of Magic Mapping".to_string(),
+            },
+        )],
+    );
+}
+
+fn bear_trap(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (Hidden,),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('^'),
+                fg: RGB::named(rltk::RED),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Bear Trap".to_string(),
             },
         )],
     );
