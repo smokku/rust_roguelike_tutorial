@@ -400,6 +400,7 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<Item>(),
         TagRegistration::of::<Consumable>(),
         TagRegistration::of::<ProvidesFood>(),
+        TagRegistration::of::<MagicMapper>(),
     ];
 
     SerializeImpl {

@@ -203,3 +203,7 @@ pub struct HungerClock {
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "0457c4c2-e26a-4d05-a4cb-d4322a41e876"]
 pub struct ProvidesFood;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "74ea7770-fd58-43ce-a0b5-8ef6f8610d48"]
+pub struct MagicMapper;
