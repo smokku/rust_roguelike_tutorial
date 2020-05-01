@@ -1,4 +1,4 @@
-use super::{Rect, State};
+use super::State;
 use legion::prelude::*;
 use rltk::{Algorithm2D, BaseMap, Point, Rltk, SmallVec, RGB};
 use serde::{Deserialize, Serialize};
@@ -20,7 +20,6 @@ pub enum TileType {
 #[uuid = "09e57cda-e925-47f0-a3f6-107c86fa76bd"]
 pub struct Map {
     pub tiles: Vec<TileType>,
-    pub rooms: Vec<Rect>,
     pub width: i32,
     pub height: i32,
     pub revealed_tiles: Vec<bool>,
@@ -62,7 +61,6 @@ impl Map {
     pub fn new(depth: i32) -> Self {
         Map {
             tiles: vec![TileType::Wall; MAP_COUNT],
-            rooms: Vec::new(),
             width: MAP_WIDTH as i32,
             height: MAP_HEIGHT as i32,
             revealed_tiles: vec![false; MAP_COUNT],
