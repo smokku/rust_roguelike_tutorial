@@ -307,12 +307,10 @@ impl State {
 
         // Build a new map
         let current_map = self.resources.remove::<Map>().unwrap();
-        let (map, player_start) = map_builders::build_random_map(current_map.depth + 1);
+        let (mut map, player_start) = map_builders::build_random_map(current_map.depth + 1);
 
         // Spawn bad guys
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.world, &mut self.resources, room, map.depth);
-        }
+        map_builders::spawn(&mut map, &mut self.world, &mut self.resources);
 
         // Place the player and update resources
         self.resources
@@ -351,12 +349,10 @@ impl State {
         }
 
         // Build a new map
-        let (map, player_start) = map_builders::build_random_map(1);
+        let (mut map, player_start) = map_builders::build_random_map(1);
 
         // Spawn bad guys
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.world, &mut self.resources, room, map.depth);
-        }
+        map_builders::spawn(&mut map, &mut self.world, &mut self.resources);
         // Place the player and update resources
         self.resources.insert(map);
 
@@ -399,16 +395,14 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
 
-    let (map, player_start) = map_builders::build_random_map(1);
+    let (mut map, player_start) = map_builders::build_random_map(1);
 
     resources.insert(Point::new(player_start.x, player_start.y));
 
     let player = spawner::player(&mut world, player_start.x, player_start.y);
     resources.insert(player);
 
-    for room in map.rooms.iter().skip(1) {
-        spawner::spawn_room(&mut world, &mut resources, room, map.depth);
-    }
+    map_builders::spawn(&mut map, &mut world, &mut resources);
 
     resources.insert(map);
     resources.insert(particle_system::ParticleBuilder::new());

@@ -1,7 +1,8 @@
 use super::{
-    apply_horizontal_tunnel, apply_room_to_map, apply_vertical_tunnel, Map, MapBuilder, Position,
-    Rect, TileType,
+    apply_horizontal_tunnel, apply_room_to_map, apply_vertical_tunnel, spawner, Map, MapBuilder,
+    Position, Rect, TileType,
 };
+use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
 pub struct SimpleMapBuilder;
@@ -11,6 +12,13 @@ impl MapBuilder for SimpleMapBuilder {
         let mut map = Map::new(depth);
         let player_pos = SimpleMapBuilder::rooms_and_corridors(&mut map);
         (map, player_pos)
+    }
+
+    fn spawn(map: &mut Map, world: &mut World, resources: &mut Resources) {
+        // Spawn bad guys and items
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(world, resources, room, map.depth);
+        }
     }
 }
 
