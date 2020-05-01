@@ -305,33 +305,12 @@ impl State {
             self.world.delete(target);
         }
 
-        // Build a new map
+        // Build a new map and Place the player and update resources
         let current_map = self.resources.remove::<Map>().unwrap();
-        let mut builder = map_builders::random_builder(current_map.depth + 1);
-        builder.build_map();
-        let map = builder.get_map();
-        let player_start = builder.get_starting_position();
-
-        // Spawn bad guys
-        builder.spawn_entities(&mut self.world, &mut self.resources);
-
-        // Place the player and update resources
-        self.resources
-            .insert(Point::new(player_start.x, player_start.y));
-        self.resources.insert(map);
-
-        let player_entity = self.resources.get::<Entity>().unwrap();
-        if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
-            player_pos.x = player_start.x;
-            player_pos.y = player_start.y;
-        }
-
-        // Mark the player's visibility dirty
-        if let Some(mut viewshed) = self.world.get_component_mut::<Viewshed>(*player_entity) {
-            viewshed.dirty = true;
-        }
+        self.generate_world_map(current_map.depth + 1);
 
         // Notify the player and give one some health
+        let player_entity = self.resources.get::<Entity>().unwrap();
         let mut gamelog = self.resources.get_mut::<gamelog::GameLog>().unwrap();
         gamelog
             .entries
@@ -351,21 +330,28 @@ impl State {
             log.entries.clear();
         }
 
+        // Spawn a new player
+        self.resources
+            .insert(spawner::player(&mut self.world, 0, 0));
+
+        // Build a new map and place the player
+        self.generate_world_map(1);
+    }
+
+    fn generate_world_map(&mut self, depth: i32) {
         // Build a new map
-        let mut builder = map_builders::random_builder(1);
+        let mut builder = map_builders::random_builder(depth);
         builder.build_map();
         let map = builder.get_map();
-        let player_start = builder.get_starting_position();
+        self.resources.insert(map);
 
         // Spawn bad guys
         builder.spawn_entities(&mut self.world, &mut self.resources);
-        // Place the player and update resources
-        self.resources.insert(map);
 
+        // Place the player and update resources
+        let player_start = builder.get_starting_position();
         self.resources
             .insert(Point::new(player_start.x, player_start.y));
-        let player = spawner::player(&mut self.world, player_start.x, player_start.y);
-        self.resources.insert(player);
 
         let player_entity = self.resources.get::<Entity>().unwrap();
         if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
@@ -392,8 +378,10 @@ fn main() -> rltk::BError {
     let mut world = universe.create_world();
     let mut resources = Resources::default();
 
-    let rng = RandomNumberGenerator::new();
-    resources.insert(rng);
+    resources.insert(RandomNumberGenerator::new());
+    resources.insert(particle_system::ParticleBuilder::new());
+    resources.insert(rex_assets::RexAssets::new());
+
     resources.insert(RunState::MainMenu {
         menu_selection: gui::MainMenuSelection::NewGame,
     });
@@ -401,21 +389,10 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
 
-    let mut builder = map_builders::random_builder(1);
-    builder.build_map();
-    let map = builder.get_map();
-    let player_start = builder.get_starting_position();
-
-    resources.insert(Point::new(player_start.x, player_start.y));
-
-    let player = spawner::player(&mut world, player_start.x, player_start.y);
-    resources.insert(player);
-
-    builder.spawn_entities(&mut world, &mut resources);
-
-    resources.insert(map);
-    resources.insert(particle_system::ParticleBuilder::new());
-    resources.insert(rex_assets::RexAssets::new());
+    // Insert placeholder values for "Start Game" map generator
+    resources.insert(Point::new(0, 0));
+    resources.insert(spawner::player(&mut world, 0, 0));
+    resources.insert(Map::new(1));
 
     let schedules = vec![
         Schedule::builder()
@@ -438,11 +415,14 @@ fn main() -> rltk::BError {
             .build(),
     ];
 
-    let gs = State {
+    let mut gs = State {
         universe,
         world,
         resources,
         schedules,
     };
+
+    gs.generate_world_map(1);
+
     rltk::main_loop(context, gs)
 }
