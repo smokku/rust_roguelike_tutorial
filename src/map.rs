@@ -167,9 +167,7 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
     }
 }
 
-pub fn draw_map(gs: &mut State, ctx: &mut Rltk) {
-    let map = gs.resources.get::<Map>().unwrap();
-
+pub fn draw_map(map: &Map, ctx: &mut Rltk) {
     let mut x = 0;
     let mut y = 0;
     for (idx, tile) in map.tiles.iter().enumerate() {

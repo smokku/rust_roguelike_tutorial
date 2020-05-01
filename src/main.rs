@@ -26,6 +26,8 @@ mod spawner;
 mod trigger_system;
 mod visibility_system;
 
+const SHOW_MAPGEN_VISUALIZER: bool = true;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RunState {
     AwaitingInput,
@@ -49,6 +51,7 @@ pub enum RunState {
     MagicMapReveal {
         row: i32,
     },
+    MapGeneration,
 }
 
 pub struct State {
@@ -56,6 +59,11 @@ pub struct State {
     pub world: World,
     pub resources: Resources,
     pub schedules: Vec<Schedule>,
+
+    mapgen_next_state: Option<RunState>,
+    mapgen_history: Vec<Map>,
+    mapgen_index: usize,
+    mapgen_timer: f32,
 }
 
 impl State {
@@ -76,7 +84,7 @@ impl GameState for State {
         match runstate {
             RunState::MainMenu { .. } | RunState::GameOver => {}
             _ => {
-                draw_map(self, ctx);
+                draw_map(&*self.resources.get::<Map>().unwrap(), ctx);
 
                 // Draw Renderable entities
                 let map = self.resources.get::<Map>().unwrap();
@@ -95,6 +103,23 @@ impl GameState for State {
         }
 
         match runstate {
+            RunState::MapGeneration => {
+                if !SHOW_MAPGEN_VISUALIZER {
+                    runstate = self.mapgen_next_state.unwrap();
+                } else {
+                    ctx.cls();
+                    draw_map(&self.mapgen_history[self.mapgen_index], ctx);
+
+                    self.mapgen_timer += ctx.frame_time_ms;
+                    if self.mapgen_timer > 300.0 {
+                        self.mapgen_timer = 0.0;
+                        self.mapgen_index += 1;
+                        if self.mapgen_index >= self.mapgen_history.len() {
+                            runstate = self.mapgen_next_state.unwrap();
+                        }
+                    }
+                }
+            }
             RunState::PreRun => {
                 self.run_systems();
                 runstate = RunState::AwaitingInput;
@@ -339,9 +364,14 @@ impl State {
     }
 
     fn generate_world_map(&mut self, depth: i32) {
+        self.mapgen_index = 0;
+        self.mapgen_timer = 0.0;
+        self.mapgen_history.clear();
+
         // Build a new map
         let mut builder = map_builders::random_builder(depth);
         builder.build_map();
+        self.mapgen_history = builder.get_snapshot_history();
         let map = builder.get_map();
         self.resources.insert(map);
 
@@ -382,9 +412,7 @@ fn main() -> rltk::BError {
     resources.insert(particle_system::ParticleBuilder::new());
     resources.insert(rex_assets::RexAssets::new());
 
-    resources.insert(RunState::MainMenu {
-        menu_selection: gui::MainMenuSelection::NewGame,
-    });
+    resources.insert(RunState::MapGeneration {});
     resources.insert(gamelog::GameLog {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
@@ -420,6 +448,13 @@ fn main() -> rltk::BError {
         world,
         resources,
         schedules,
+
+        mapgen_next_state: Some(RunState::MainMenu {
+            menu_selection: gui::MainMenuSelection::NewGame,
+        }),
+        mapgen_index: 0,
+        mapgen_history: Vec::new(),
+        mapgen_timer: 0.0,
     };
 
     gs.generate_world_map(1);

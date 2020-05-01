@@ -6,6 +6,7 @@
         "gamelog",
         "greyscale",
         "longsword",
+        "mapgen",
         "numpad",
         "renderable",
         "rltk",

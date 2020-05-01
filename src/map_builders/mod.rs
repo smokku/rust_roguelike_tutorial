@@ -1,4 +1,4 @@
-use super::{spawner, Map, Position, Rect, TileType};
+use super::{spawner, Map, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER};
 use legion::prelude::*;
 
 mod common;
@@ -12,6 +12,9 @@ pub trait MapBuilder {
     fn spawn_entities(&mut self, world: &mut World, resources: &mut Resources);
     fn get_map(&mut self) -> Map;
     fn get_starting_position(&mut self) -> Position;
+
+    fn get_snapshot_history(&self) -> Vec<Map>;
+    fn take_snapshot(&mut self);
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
