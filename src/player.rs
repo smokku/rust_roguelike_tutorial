@@ -5,49 +5,40 @@ use super::{
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
-use std::collections::HashMap;
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
     let map = gs.resources.get::<Map>().unwrap();
 
-    // Pull all CombatStats for reference later
-    // FIXME: This is required as you cannot access random parts
-    // of ECS during query iteration - world is already borrowed.
-    // This is a sub-optimal pattern and should be implemented some other way.
-    // ECS is designed to work in carefully crafted chunks of data, withouts
-    // accessing data all over the place.
-    let mut combat_stats = HashMap::new();
-    let query = Read::<CombatStats>::query();
-    for (entity, cs) in query.iter_entities(&gs.world) {
-        combat_stats.insert(entity, *cs);
-    }
-
     let mut wants_to_melee = Vec::new();
-    let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
-    for (entity, (mut pos, mut viewshed)) in query.iter_entities_mut(&mut gs.world) {
-        let destination_x = pos.x + delta_x;
-        let destination_y = pos.y + delta_y;
-        let destination_idx = map.xy_idx(destination_x, destination_y);
-
-        for potential_target in map.tile_content[destination_idx].iter() {
-            let cs = combat_stats.get(&*potential_target);
-            if let Some(_cs) = cs {
-                // Store attack target
-                wants_to_melee.push((entity, *potential_target));
-                continue; // So we don't move after attacking
+    unsafe {
+        let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
+        for (entity, (mut pos, mut viewshed)) in query.iter_entities_unchecked(&gs.world) {
+            let dest_x = pos.x + delta_x;
+            let dest_y = pos.y + delta_y;
+            if dest_x < 0 || dest_x > map.width - 1 || dest_y < 0 || dest_y > map.height - 1 {
+                return;
             }
-        }
+            let dest_idx = map.xy_idx(dest_x, dest_y);
 
-        if !map.blocked[destination_idx] {
-            pos.x = min(79, max(0, destination_x));
-            pos.y = min(49, max(0, destination_y));
+            for potential_target in map.tile_content[dest_idx].iter() {
+                if let Some(_target) = gs.world.get_component::<CombatStats>(*potential_target) {
+                    // Store attack target
+                    wants_to_melee.push((entity, *potential_target));
+                    continue; // So we don't move after attacking
+                }
+            }
 
-            viewshed.dirty = true;
+            if !map.blocked[dest_idx] {
+                pos.x = min(79, max(0, dest_x));
+                pos.y = min(49, max(0, dest_y));
 
-            // Update Player position resource
-            let mut p_pos = gs.resources.get_mut::<Point>().unwrap();
-            p_pos.x = pos.x;
-            p_pos.y = pos.y;
+                viewshed.dirty = true;
+
+                // Update Player position resource
+                let mut p_pos = gs.resources.get_mut::<Point>().unwrap();
+                p_pos.x = pos.x;
+                p_pos.y = pos.y;
+            }
         }
     }
 
