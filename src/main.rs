@@ -106,6 +106,8 @@ impl GameState for State {
             RunState::MapGeneration => {
                 if !SHOW_MAPGEN_VISUALIZER {
                     runstate = self.mapgen_next_state.unwrap();
+                } else if self.mapgen_index >= self.mapgen_history.len() {
+                    runstate = self.mapgen_next_state.unwrap();
                 } else {
                     ctx.cls();
                     draw_map(&self.mapgen_history[self.mapgen_index], ctx);
@@ -114,9 +116,6 @@ impl GameState for State {
                     if self.mapgen_timer > 300.0 {
                         self.mapgen_timer = 0.0;
                         self.mapgen_index += 1;
-                        if self.mapgen_index >= self.mapgen_history.len() {
-                            runstate = self.mapgen_next_state.unwrap();
-                        }
                     }
                 }
             }

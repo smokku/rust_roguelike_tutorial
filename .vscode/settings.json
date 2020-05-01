@@ -8,6 +8,7 @@
         "longsword",
         "mapgen",
         "numpad",
+        "rects",
         "renderable",
         "rltk",
         "roguelike",
