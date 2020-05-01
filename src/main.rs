@@ -307,7 +307,7 @@ impl State {
 
         // Build a new map
         let current_map = self.resources.remove::<Map>().unwrap();
-        let map = map_builders::build_random_map(current_map.depth + 1);
+        let (map, player_start) = map_builders::build_random_map(current_map.depth + 1);
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
@@ -315,14 +315,14 @@ impl State {
         }
 
         // Place the player and update resources
-        let (player_x, player_y) = map.rooms[0].center();
-        self.resources.insert(Point::new(player_x, player_y));
+        self.resources
+            .insert(Point::new(player_start.x, player_start.y));
         self.resources.insert(map);
 
         let player_entity = self.resources.get::<Entity>().unwrap();
         if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
-            player_pos.x = player_x;
-            player_pos.y = player_y;
+            player_pos.x = player_start.x;
+            player_pos.y = player_start.y;
         }
 
         // Mark the player's visibility dirty
@@ -351,24 +351,24 @@ impl State {
         }
 
         // Build a new map
-        let map = map_builders::build_random_map(1);
+        let (map, player_start) = map_builders::build_random_map(1);
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
             spawner::spawn_room(&mut self.world, &mut self.resources, room, map.depth);
         }
         // Place the player and update resources
-        let (player_x, player_y) = map.rooms[0].center();
         self.resources.insert(map);
 
-        self.resources.insert(Point::new(player_x, player_y));
-        let player = spawner::player(&mut self.world, player_x, player_y);
+        self.resources
+            .insert(Point::new(player_start.x, player_start.y));
+        let player = spawner::player(&mut self.world, player_start.x, player_start.y);
         self.resources.insert(player);
 
         let player_entity = self.resources.get::<Entity>().unwrap();
         if let Some(mut player_pos) = self.world.get_component_mut::<Position>(*player_entity) {
-            player_pos.x = player_x;
-            player_pos.y = player_y;
+            player_pos.x = player_start.x;
+            player_pos.y = player_start.y;
         }
 
         // Mark the player's visibility dirty
@@ -399,12 +399,11 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
 
-    let map = map_builders::build_random_map(1);
+    let (map, player_start) = map_builders::build_random_map(1);
 
-    let (player_x, player_y) = map.rooms[0].center();
-    resources.insert(Point::new(player_x, player_y));
+    resources.insert(Point::new(player_start.x, player_start.y));
 
-    let player = spawner::player(&mut world, player_x, player_y);
+    let player = spawner::player(&mut world, player_start.x, player_start.y);
     resources.insert(player);
 
     for room in map.rooms.iter().skip(1) {

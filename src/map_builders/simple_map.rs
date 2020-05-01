@@ -1,23 +1,23 @@
 use super::{
-    apply_horizontal_tunnel, apply_room_to_map, apply_vertical_tunnel, Map, MapBuilder, Rect,
-    TileType,
+    apply_horizontal_tunnel, apply_room_to_map, apply_vertical_tunnel, Map, MapBuilder, Position,
+    Rect, TileType,
 };
 use rltk::RandomNumberGenerator;
 
 pub struct SimpleMapBuilder;
 
 impl MapBuilder for SimpleMapBuilder {
-    fn build(depth: i32) -> Map {
+    fn build(depth: i32) -> (Map, Position) {
         let mut map = Map::new(depth);
-        SimpleMapBuilder::rooms_and_corridors(&mut map);
-        map
+        let player_pos = SimpleMapBuilder::rooms_and_corridors(&mut map);
+        (map, player_pos)
     }
 }
 
 impl SimpleMapBuilder {
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
-    fn rooms_and_corridors(map: &mut Map) {
+    fn rooms_and_corridors(map: &mut Map) -> Position {
         const MAX_ROOMS: i32 = 30;
         const MIN_SIZE: i32 = 6;
         const MAX_SIZE: i32 = 10;
@@ -59,5 +59,11 @@ impl SimpleMapBuilder {
         let stairs_position = map.rooms[map.rooms.len() - 1].center();
         let stairs_idx = map.xy_idx(stairs_position.0, stairs_position.1);
         map.tiles[stairs_idx] = TileType::DownStairs;
+
+        let start_pos = map.rooms[0].center();
+        Position {
+            x: start_pos.0,
+            y: start_pos.1,
+        }
     }
 }
