@@ -8,13 +8,13 @@ use rltk::RandomNumberGenerator;
 pub struct SimpleMapBuilder;
 
 impl MapBuilder for SimpleMapBuilder {
-    fn build(depth: i32) -> (Map, Position) {
+    fn build_map(&mut self, depth: i32) -> (Map, Position) {
         let mut map = Map::new(depth);
         let player_pos = SimpleMapBuilder::rooms_and_corridors(&mut map);
         (map, player_pos)
     }
 
-    fn spawn(map: &mut Map, world: &mut World, resources: &mut Resources) {
+    fn spawn_entities(&mut self, map: &mut Map, world: &mut World, resources: &mut Resources) {
         // Spawn bad guys and items
         for room in map.rooms.iter().skip(1) {
             spawner::spawn_room(world, resources, room, map.depth);
@@ -23,6 +23,10 @@ impl MapBuilder for SimpleMapBuilder {
 }
 
 impl SimpleMapBuilder {
+    pub fn new() -> Self {
+        SimpleMapBuilder {}
+    }
+
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
     fn rooms_and_corridors(map: &mut Map) -> Position {
