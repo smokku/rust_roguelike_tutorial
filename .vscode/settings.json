@@ -20,5 +20,8 @@
         "uuid",
         "viewshed",
         "viewsheds"
-    ]
+    ],
+    "search.exclude": {
+        "external/**": true
+    }
 }

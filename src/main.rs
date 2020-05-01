@@ -14,6 +14,7 @@ mod gamelog;
 mod gui;
 mod hunger_system;
 mod inventory_system;
+mod map_builders;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
@@ -306,7 +307,7 @@ impl State {
 
         // Build a new map
         let current_map = self.resources.remove::<Map>().unwrap();
-        let map = Map::new_map_rooms_and_corridors(current_map.depth + 1);
+        let map = map_builders::build_random_map(current_map.depth + 1);
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
@@ -350,7 +351,7 @@ impl State {
         }
 
         // Build a new map
-        let map = Map::new_map_rooms_and_corridors(1);
+        let map = map_builders::build_random_map(1);
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
@@ -398,7 +399,7 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
 
-    let map = Map::new_map_rooms_and_corridors(1);
+    let map = map_builders::build_random_map(1);
 
     let (player_x, player_y) = map.rooms[0].center();
     resources.insert(Point::new(player_x, player_y));
