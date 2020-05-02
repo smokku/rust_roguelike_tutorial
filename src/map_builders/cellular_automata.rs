@@ -121,13 +121,45 @@ impl CellularAutomataBuilder {
             x: self.map.width / 2,
             y: self.map.height / 2,
         };
+        let mut start_idx;
         while {
-            let start_idx = self
+            start_idx = self
                 .map
                 .xy_idx(self.starting_position.x, self.starting_position.y);
             self.map.tiles[start_idx] != TileType::Floor
         } {
             self.starting_position.x -= 1;
         }
+
+        // Find all the tiles we can reach from the starting point
+        let map_starts: Vec<usize> = vec![start_idx];
+        let dijkstra_map = rltk::DijkstraMap::new(
+            self.map.width,
+            self.map.height,
+            &map_starts,
+            &self.map,
+            200.0,
+        );
+        let mut exit_tile = 0;
+        let mut exit_tile_distance = 0.0f32;
+        for (i, tile) in self.map.tiles.iter_mut().enumerate() {
+            if *tile == TileType::Floor {
+                let distance_to_start = dijkstra_map.map[i];
+                if distance_to_start == std::f32::MAX {
+                    // We can't get to this tile, so we'll make it a wall
+                    *tile = TileType::Wall;
+                } else {
+                    // if it is further away than our current exit candidate, move the exit
+                    if distance_to_start > exit_tile_distance {
+                        exit_tile = i;
+                        exit_tile_distance = distance_to_start;
+                    }
+                }
+            }
+        }
+        self.take_snapshot();
+
+        self.map.tiles[exit_tile] = TileType::DownStairs;
+        self.take_snapshot();
     }
 }
