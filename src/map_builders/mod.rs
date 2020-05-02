@@ -21,11 +21,11 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    // let mut rng = rltk::RandomNumberGenerator::new();
-    // let builder = rng.roll_dice(1, 2);
-    // match builder {
-    //     1 => Box::new(BspDungeonBuilder::new(depth)),
-    //     _ => Box::new(SimpleMapBuilder::new(depth)),
-    // }
-    Box::new(BspInteriorBuilder::new(depth))
+    let mut rng = rltk::RandomNumberGenerator::new();
+    let builder = rng.roll_dice(1, 3);
+    match builder {
+        1 => Box::new(BspDungeonBuilder::new(depth)),
+        2 => Box::new(BspInteriorBuilder::new(depth)),
+        _ => Box::new(SimpleMapBuilder::new(depth)),
+    }
 }

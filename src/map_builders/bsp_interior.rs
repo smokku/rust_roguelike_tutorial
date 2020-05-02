@@ -64,7 +64,7 @@ impl BspInteriorBuilder {
 
         self.rects.clear();
         self.rects
-            .push(Rect::new(1, 1, self.map.width - 1, self.map.height - 1)); // Start with a single map-sized rectangle
+            .push(Rect::new(1, 1, self.map.width - 2, self.map.height - 2)); // Start with a single map-sized rectangle
         self.partition_rects(&mut rng);
 
         for r in self.rects.clone().iter() {
