@@ -26,7 +26,7 @@ impl MapBuilder for CellularAutomataBuilder {
     }
 
     fn build_map(&mut self) {
-        //self.build(); - we should write this
+        self.build();
     }
 
     fn spawn_entities(&mut self, world: &mut World, resources: &mut Resources) {
@@ -50,6 +50,39 @@ impl CellularAutomataBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
+        }
+    }
+
+    fn build(&mut self) {
+        let mut rng = RandomNumberGenerator::new();
+
+        // First we completely randomize the map, setting 55% of it tto be floor.
+        for y in 1..self.map.height - 1 {
+            for x in 1..self.map.width - 1 {
+                let roll = rng.roll_dice(1, 100);
+                let idx = self.map.xy_idx(x, y);
+                self.map.tiles[idx] = if roll > 55 {
+                    TileType::Floor
+                } else {
+                    TileType::Wall
+                };
+            }
+        }
+        self.take_snapshot();
+
+        // Find a starting point;
+        // start at the middle and walk left until we find an open tile
+        self.starting_position = Position {
+            x: self.map.width / 2,
+            y: self.map.height / 2,
+        };
+        while {
+            let start_idx = self
+                .map
+                .xy_idx(self.starting_position.x, self.starting_position.y);
+            self.map.tiles[start_idx] != TileType::Floor
+        } {
+            self.starting_position.x -= 1;
         }
     }
 }
