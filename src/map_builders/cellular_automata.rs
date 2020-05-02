@@ -70,6 +70,51 @@ impl CellularAutomataBuilder {
         }
         self.take_snapshot();
 
+        // Now we iteratively apply cellular automata rules
+        for _i in 0..15 {
+            let mut new_tiles = vec![TileType::Wall; self.map.tiles.len()];
+
+            for y in 1..self.map.height - 1 {
+                for x in 1..self.map.width - 1 {
+                    let idx = self.map.xy_idx(x, y);
+                    let mut neighbors = 0;
+                    if self.map.tiles[idx - 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx + 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx - self.map.width as usize] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx + self.map.width as usize] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx - self.map.width as usize - 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx - self.map.width as usize + 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx + self.map.width as usize - 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+                    if self.map.tiles[idx + self.map.width as usize + 1] == TileType::Wall {
+                        neighbors += 1;
+                    }
+
+                    new_tiles[idx] = if neighbors > 4 || neighbors == 0 {
+                        TileType::Wall
+                    } else {
+                        TileType::Floor
+                    }
+                }
+            }
+
+            self.map.tiles = new_tiles;
+            self.take_snapshot();
+        }
+
         // Find a starting point;
         // start at the middle and walk left until we find an open tile
         self.starting_position = Position {
