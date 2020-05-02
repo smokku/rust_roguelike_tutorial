@@ -102,6 +102,7 @@ impl BspDungeonBuilder {
         let stairs_pos = self.rooms[self.rooms.len() - 1].center();
         let stairs_idx = self.map.xy_idx(stairs_pos.0, stairs_pos.1);
         self.map.tiles[stairs_idx] = TileType::DownStairs;
+        self.take_snapshot();
 
         // Set player start
         let start = self.rooms[0].center();
