@@ -90,15 +90,18 @@ impl BspDungeonBuilder {
         for i in 0..self.rooms.len() - 1 {
             let room = self.rooms[i];
             let next_room = self.rooms[i + 1];
-            let start_x = room.x1 + (rng.roll_dice(1, i32::abs(room.x1 - room.x2)) - 1);
-            let start_y = room.y1 + (rng.roll_dice(1, i32::abs(room.y1 - room.y2)) - 1);
-            let end_x =
-                next_room.x1 + (rng.roll_dice(1, i32::abs(next_room.x1 - next_room.x2)) - 1);
-            let end_y =
-                next_room.y1 + (rng.roll_dice(1, i32::abs(next_room.y1 - next_room.y2)) - 1);
+            let start_x = room.x1 + (rng.roll_dice(1, i32::abs(room.x1 - room.x2)));
+            let start_y = room.y1 + (rng.roll_dice(1, i32::abs(room.y1 - room.y2)));
+            let end_x = next_room.x1 + (rng.roll_dice(1, i32::abs(next_room.x1 - next_room.x2)));
+            let end_y = next_room.y1 + (rng.roll_dice(1, i32::abs(next_room.y1 - next_room.y2)));
             self.draw_corridor(start_x, start_y, end_x, end_y);
             self.take_snapshot();
         }
+
+        // And stairs
+        let stairs_pos = self.rooms[self.rooms.len() - 1].center();
+        let stairs_idx = self.map.xy_idx(stairs_pos.0, stairs_pos.1);
+        self.map.tiles[stairs_idx] = TileType::DownStairs;
 
         // Set player start
         let start = self.rooms[0].center();
