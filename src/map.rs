@@ -1,4 +1,3 @@
-use super::State;
 use legion::prelude::*;
 use rltk::{Algorithm2D, BaseMap, Point, Rltk, SmallVec, RGB};
 use serde::{Deserialize, Serialize};

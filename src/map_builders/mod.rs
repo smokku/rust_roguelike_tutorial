@@ -21,6 +21,10 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    // Note that until we have a second map type, this isn't even slightly random
-    Box::new(BspDungeonBuilder::new(depth))
+    let mut rng = rltk::RandomNumberGenerator::new();
+    let builder = rng.roll_dice(1, 2);
+    match builder {
+        1 => Box::new(BspDungeonBuilder::new(depth)),
+        _ => Box::new(SimpleMapBuilder::new(depth)),
+    }
 }
