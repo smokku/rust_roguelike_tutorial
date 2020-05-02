@@ -9,6 +9,8 @@ mod bsp_dungeon;
 use bsp_dungeon::BspDungeonBuilder;
 mod bsp_interior;
 use bsp_interior::BspInteriorBuilder;
+mod cellular_automata;
+use cellular_automata::CellularAutomataBuilder;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -21,11 +23,12 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = rltk::RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 3);
-    match builder {
-        1 => Box::new(BspDungeonBuilder::new(depth)),
-        2 => Box::new(BspInteriorBuilder::new(depth)),
-        _ => Box::new(SimpleMapBuilder::new(depth)),
-    }
+    // let mut rng = rltk::RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 3);
+    // match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(depth)),
+    //     _ => Box::new(SimpleMapBuilder::new(depth)),
+    // }
+    Box::new(CellularAutomataBuilder::new(depth))
 }
