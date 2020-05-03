@@ -13,6 +13,8 @@ mod cellular_automata;
 use cellular_automata::CellularAutomataBuilder;
 mod drunkard;
 use drunkard::DrunkardsWalkBuilder;
+mod maze;
+use maze::MazeBuilder;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -25,15 +27,16 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = rltk::RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 7);
-    match builder {
-        1 => Box::new(BspDungeonBuilder::new(depth)),
-        2 => Box::new(BspInteriorBuilder::new(depth)),
-        3 => Box::new(CellularAutomataBuilder::new(depth)),
-        4 => Box::new(DrunkardsWalkBuilder::open_area(depth)),
-        5 => Box::new(DrunkardsWalkBuilder::open_halls(depth)),
-        6 => Box::new(DrunkardsWalkBuilder::winding_passage(depth)),
-        _ => Box::new(SimpleMapBuilder::new(depth)),
-    }
+    // let mut rng = rltk::RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 7);
+    // match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(depth)),
+    //     3 => Box::new(CellularAutomataBuilder::new(depth)),
+    //     4 => Box::new(DrunkardsWalkBuilder::open_area(depth)),
+    //     5 => Box::new(DrunkardsWalkBuilder::open_halls(depth)),
+    //     6 => Box::new(DrunkardsWalkBuilder::winding_passage(depth)),
+    //     _ => Box::new(SimpleMapBuilder::new(depth)),
+    // }
+    Box::new(MazeBuilder::new(depth))
 }
