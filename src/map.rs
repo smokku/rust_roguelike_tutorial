@@ -32,6 +32,7 @@ pub struct Map {
 }
 
 impl Map {
+    #[inline]
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
         (y as usize * self.width as usize) + x as usize
     }
