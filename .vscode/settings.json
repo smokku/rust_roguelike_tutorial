@@ -21,7 +21,8 @@
         "unserializable",
         "uuid",
         "viewshed",
-        "viewsheds"
+        "viewsheds",
+        "voronoi"
     ],
     "search.exclude": {
         "external/**": true
