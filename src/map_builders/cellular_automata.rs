@@ -1,11 +1,7 @@
-use super::{
-    apply_room_to_map, spawner, Map, MapBuilder, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER,
-};
+use super::{spawner, Map, MapBuilder, Position, TileType, SHOW_MAPGEN_VISUALIZER};
 use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashMap;
-
-const MIN_ROOM_SIZE: i32 = 8;
 
 pub struct CellularAutomataBuilder {
     map: Map,
