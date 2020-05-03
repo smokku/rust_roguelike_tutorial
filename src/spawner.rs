@@ -1,4 +1,4 @@
-use super::{components::*, map::MAP_WIDTH, random_table::RandomTable, Rect};
+use super::{components::*, map::MAP_WIDTH, random_table::RandomTable, Map, Rect, TileType};
 use legion::prelude::*;
 use rltk::{FontCharType, RandomNumberGenerator, RGB};
 use std::collections::HashMap;
@@ -56,54 +56,76 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("Bear Trap", 2)
 }
 
-#[allow(clippy::map_entry)]
 pub fn spawn_room(world: &mut World, resources: &mut Resources, room: &Rect, map_depth: i32) {
-    let spawn_table = room_table(map_depth);
-    let mut spawn_points = HashMap::new();
+    let mut possible_targets = Vec::new();
 
-    // Scope to keep the borrow checker happy
+    // Borrow scope - to keep access to the map isolated
     {
-        let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
-        let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3;
+        let map = resources.get_mut::<Map>().unwrap();
 
-        for _i in 0..num_spawns {
-            let mut added = false;
-            let mut tries = 0;
-            while !added && tries < 20 {
-                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
-                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
-                let idx = (y * MAP_WIDTH) + x;
-                if !spawn_points.contains_key(&idx) {
-                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
-                    added = true;
-                } else {
-                    tries += 1;
+        for y in room.y1 + 1..room.y2 {
+            for x in room.x1 + 1..room.x2 {
+                let idx = map.xy_idx(x, y);
+                if map.tiles[idx] == TileType::Floor {
+                    possible_targets.push(idx);
                 }
             }
         }
     }
 
-    // Actually spawn the monsters
-    for (idx, spawn) in spawn_points.iter() {
-        let x = (*idx % MAP_WIDTH) as i32;
-        let y = (*idx / MAP_WIDTH) as i32;
+    spawn_region(world, resources, &possible_targets, map_depth);
+}
 
-        match spawn.as_ref() {
-            "Goblin" => goblin(world, x, y),
-            "Orc" => orc(world, x, y),
-            "Health Potion" => health_potion(world, x, y),
-            "Fireball Scroll" => fireball_scroll(world, x, y),
-            "Confusion Scroll" => confusion_scroll(world, x, y),
-            "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
-            "Dagger" => dagger(world, x, y),
-            "Shield" => shield(world, x, y),
-            "Longsword" => longsword(world, x, y),
-            "Tower Shield" => tower_shield(world, x, y),
-            "Rations" => rations(world, x, y),
-            "Magic Mapping Scroll" => magic_mapping_scroll(world, x, y),
-            "Bear Trap" => bear_trap(world, x, y),
-            _ => {}
-        }
+pub fn spawn_region(world: &mut World, resources: &mut Resources, area: &[usize], map_depth: i32) {
+    let spawn_table = room_table(map_depth);
+    let mut spawn_points = HashMap::new();
+    let mut areas = Vec::from(area);
+    let mut rng = resources.get_mut::<RandomNumberGenerator>().unwrap();
+
+    let num_spawns = i32::min(
+        areas.len() as i32,
+        rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3,
+    );
+    if num_spawns == 0 {
+        return;
+    }
+
+    for _i in 0..num_spawns {
+        let array_index = if area.len() == 1 {
+            0
+        } else {
+            (rng.roll_dice(1, areas.len() as i32) - 1) as usize
+        };
+        let map_idx = areas[array_index];
+        spawn_points.insert(map_idx, spawn_table.roll(&mut rng));
+        areas.remove(array_index);
+    }
+
+    for (idx, spawn) in spawn_points.iter() {
+        spawn_entity(world, idx, spawn);
+    }
+}
+
+// Spawn a named entity at the location
+pub fn spawn_entity(world: &mut World, idx: &usize, name: &str) {
+    let x = (*idx % MAP_WIDTH) as i32;
+    let y = (*idx / MAP_WIDTH) as i32;
+
+    match name.as_ref() {
+        "Goblin" => goblin(world, x, y),
+        "Orc" => orc(world, x, y),
+        "Health Potion" => health_potion(world, x, y),
+        "Fireball Scroll" => fireball_scroll(world, x, y),
+        "Confusion Scroll" => confusion_scroll(world, x, y),
+        "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
+        "Dagger" => dagger(world, x, y),
+        "Shield" => shield(world, x, y),
+        "Longsword" => longsword(world, x, y),
+        "Tower Shield" => tower_shield(world, x, y),
+        "Rations" => rations(world, x, y),
+        "Magic Mapping Scroll" => magic_mapping_scroll(world, x, y),
+        "Bear Trap" => bear_trap(world, x, y),
+        _ => {}
     }
 }
 
