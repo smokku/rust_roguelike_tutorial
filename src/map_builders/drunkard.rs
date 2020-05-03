@@ -61,14 +61,47 @@ impl MapBuilder for DrunkardsWalkBuilder {
 }
 
 impl DrunkardsWalkBuilder {
-    pub fn new(new_depth: i32, settings: DrunkardSettings) -> Self {
+    pub fn new(depth: i32, settings: DrunkardSettings) -> Self {
         DrunkardsWalkBuilder {
-            map: Map::new(new_depth),
+            map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
             settings,
         }
+    }
+
+    pub fn open_area(depth: i32) -> Self {
+        Self::new(
+            depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::StartingPoint,
+                drunken_lifetime: 400,
+                floor_percent: 0.5,
+            },
+        )
+    }
+
+    pub fn open_halls(depth: i32) -> Self {
+        Self::new(
+            depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::Random,
+                drunken_lifetime: 400,
+                floor_percent: 0.5,
+            },
+        )
+    }
+
+    pub fn winding_passage(depth: i32) -> Self {
+        Self::new(
+            depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::Random,
+                drunken_lifetime: 100,
+                floor_percent: 0.4,
+            },
+        )
     }
 
     fn build(&mut self) {

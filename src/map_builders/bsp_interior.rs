@@ -47,9 +47,9 @@ impl MapBuilder for BspInteriorBuilder {
 }
 
 impl BspInteriorBuilder {
-    pub fn new(new_depth: i32) -> Self {
+    pub fn new(depth: i32) -> Self {
         BspInteriorBuilder {
-            map: Map::new(new_depth),
+            map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             rooms: Vec::new(),
             history: Vec::new(),

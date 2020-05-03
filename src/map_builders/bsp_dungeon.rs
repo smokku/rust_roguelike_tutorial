@@ -47,7 +47,7 @@ impl MapBuilder for BspDungeonBuilder {
 }
 
 impl BspDungeonBuilder {
-    pub fn new(depth: i32) -> BspDungeonBuilder {
+    pub fn new(depth: i32) -> Self {
         BspDungeonBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
