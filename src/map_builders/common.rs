@@ -36,7 +36,7 @@ pub fn remove_unreachable_areas_returning_most_distant(map: &mut Map, start_idx:
 
     // Find all the tiles we can reach from the starting point
     let map_starts: Vec<usize> = vec![start_idx];
-    let dijkstra_map = rltk::DijkstraMap::new(map.width, map.height, &map_starts, map, 200.0);
+    let dijkstra_map = rltk::DijkstraMap::new(map.width, map.height, &map_starts, map, 1000.0);
     let mut farthest_tile = 0;
     let mut farthest_tile_distance = 0.0f32;
     for (i, tile) in map.tiles.iter_mut().enumerate() {

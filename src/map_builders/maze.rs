@@ -1,7 +1,6 @@
 use super::{
-    generate_voronoi_spawn_regions, get_central_starting_position,
-    remove_unreachable_areas_returning_most_distant, spawner, Map, MapBuilder, Position, TileType,
-    SHOW_MAPGEN_VISUALIZER,
+    generate_voronoi_spawn_regions, remove_unreachable_areas_returning_most_distant, spawner, Map,
+    MapBuilder, Position, TileType, SHOW_MAPGEN_VISUALIZER,
 };
 use legion::prelude::*;
 use rltk::RandomNumberGenerator;
@@ -209,7 +208,6 @@ impl<'a> Grid<'a> {
 
             match next {
                 Some(next) => {
-                    // self.cells[next].visited = true;
                     self.backtrace.push(self.current);
                     let (lower_part, higher_part) =
                         self.cells.split_at_mut(std::cmp::max(self.current, next));
