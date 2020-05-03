@@ -49,7 +49,7 @@ impl MapBuilder for CellularAutomataBuilder {
 }
 
 impl CellularAutomataBuilder {
-    pub fn new(new_depth: i32) -> CellularAutomataBuilder {
+    pub fn new(new_depth: i32) -> Self {
         CellularAutomataBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },

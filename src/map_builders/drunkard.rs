@@ -6,11 +6,22 @@ use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashMap;
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum DrunkSpawnMode {
+    StartingPoint,
+    Random,
+}
+
+pub struct DrunkardSettings {
+    pub spawn_mode: DrunkSpawnMode,
+}
+
 pub struct DrunkardsWalkBuilder {
     map: Map,
     starting_position: Position,
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
+    settings: DrunkardSettings,
 }
 
 impl MapBuilder for DrunkardsWalkBuilder {
@@ -48,12 +59,13 @@ impl MapBuilder for DrunkardsWalkBuilder {
 }
 
 impl DrunkardsWalkBuilder {
-    pub fn new(new_depth: i32) -> DrunkardsWalkBuilder {
+    pub fn new(new_depth: i32, settings: DrunkardSettings) -> Self {
         DrunkardsWalkBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
+            settings,
         }
     }
 
@@ -85,8 +97,23 @@ impl DrunkardsWalkBuilder {
             floor_tile_count < desired_floor_tiles
         } {
             let mut did_something = false;
-            let mut drunk_x = self.starting_position.x;
-            let mut drunk_y = self.starting_position.y;
+            let mut drunk_x;
+            let mut drunk_y;
+            match self.settings.spawn_mode {
+                DrunkSpawnMode::StartingPoint => {
+                    drunk_x = self.starting_position.x;
+                    drunk_y = self.starting_position.y;
+                }
+                DrunkSpawnMode::Random => {
+                    if digger_count == 0 {
+                        drunk_x = self.starting_position.x;
+                        drunk_y = self.starting_position.y;
+                    } else {
+                        drunk_x = rng.roll_dice(1, self.map.width - 3) + 1;
+                        drunk_y = rng.roll_dice(1, self.map.height - 3) + 1;
+                    }
+                }
+            }
             let mut drunk_life = 400;
 
             while drunk_life > 0 {
