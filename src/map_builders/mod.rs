@@ -11,6 +11,8 @@ mod bsp_interior;
 use bsp_interior::BspInteriorBuilder;
 mod cellular_automata;
 use cellular_automata::CellularAutomataBuilder;
+mod drunkard;
+use drunkard::DrunkardsWalkBuilder;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -23,12 +25,13 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = rltk::RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 4);
-    match builder {
-        1 => Box::new(BspDungeonBuilder::new(depth)),
-        2 => Box::new(BspInteriorBuilder::new(depth)),
-        3 => Box::new(CellularAutomataBuilder::new(depth)),
-        _ => Box::new(SimpleMapBuilder::new(depth)),
-    }
+    // let mut rng = rltk::RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 4);
+    // match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(depth)),
+    //     3 => Box::new(CellularAutomataBuilder::new(depth)),
+    //     _ => Box::new(SimpleMapBuilder::new(depth)),
+    // }
+    Box::new(DrunkardsWalkBuilder::new(depth))
 }
