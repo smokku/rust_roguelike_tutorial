@@ -69,8 +69,8 @@ impl MazeBuilder {
         );
         maze.generate_maze(self);
 
-        // Find a starting point
-        self.starting_position = get_central_starting_position(&self.map);
+        // Set starting point
+        self.starting_position = Position { x: 2, y: 2 };
 
         // Find all tiles we can reach from the starting point
         let start_idx = self
@@ -202,6 +202,7 @@ impl<'a> Grid<'a> {
     }
 
     fn generate_maze(&mut self, generator: &mut MazeBuilder) {
+        let mut i = 0;
         loop {
             self.cells[self.current].visited = true;
             let next = self.find_next_cell();
@@ -226,8 +227,11 @@ impl<'a> Grid<'a> {
                 }
             }
 
-            self.copy_to_map(&mut generator.map);
-            generator.take_snapshot();
+            if i % 50 == 0 {
+                self.copy_to_map(&mut generator.map);
+                generator.take_snapshot();
+            }
+            i += 1;
         }
     }
 
