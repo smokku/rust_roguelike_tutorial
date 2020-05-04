@@ -112,9 +112,17 @@ impl GameState for State {
                     ctx.cls();
                     draw_map(&self.mapgen_history[self.mapgen_index], ctx);
 
+                    const MAX_VISUALIZATION_TIME: i32 = 15000; // Let the visualization be around 15 seconds
+                    let frame_timer: f32 = f32::max(
+                        10.0, // not shorter than 10ms
+                        f32::min(
+                            300.0, // not longer than 300ms
+                            MAX_VISUALIZATION_TIME as f32 / self.mapgen_history.len() as f32,
+                        ),
+                    );
                     self.mapgen_timer += ctx.frame_time_ms;
-                    if self.mapgen_timer > 300.0 {
-                        self.mapgen_timer = 0.0;
+                    if self.mapgen_timer > frame_timer {
+                        self.mapgen_timer -= frame_timer;
                         self.mapgen_index += 1;
                     }
                 }
