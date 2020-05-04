@@ -73,7 +73,7 @@ impl DLABuilder {
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
-            algorithm: DLAAlgorithm::WalkInwards,
+            algorithm: DLAAlgorithm::WalkOutwards,
             brush_size: 1,
             symmetry: DLASymmetry::None,
             floor_percent: 0.25,
@@ -148,6 +148,39 @@ impl DLABuilder {
                         }
                     }
                     self.paint(prev_x, prev_y);
+                }
+                DLAAlgorithm::WalkOutwards => {
+                    let mut digger_x = self.starting_position.x;
+                    let mut digger_y = self.starting_position.y;
+                    while {
+                        let digger_idx = self.map.xy_idx(digger_x, digger_y);
+                        self.map.tiles[digger_idx] == TileType::Floor
+                    } {
+                        let stagger_direction = rng.roll_dice(1, 4);
+                        match stagger_direction {
+                            1 => {
+                                if digger_x > 2 {
+                                    digger_x -= 1;
+                                }
+                            }
+                            2 => {
+                                if digger_x < self.map.width - 2 {
+                                    digger_x += 1;
+                                }
+                            }
+                            3 => {
+                                if digger_y > 2 {
+                                    digger_y -= 1;
+                                }
+                            }
+                            _ => {
+                                if digger_y < self.map.height - 2 {
+                                    digger_y += 1;
+                                }
+                            }
+                        }
+                    }
+                    self.paint(digger_x, digger_y);
                 }
                 _ => {}
             }
