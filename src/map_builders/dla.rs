@@ -83,7 +83,76 @@ impl DLABuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
-        let start_idx = 0;
+        // Carve a starting seed
+        self.starting_position = Position {
+            x: self.map.width / 2,
+            y: self.map.height / 2,
+        };
+        let start_idx = self
+            .map
+            .xy_idx(self.starting_position.x, self.starting_position.y);
+        self.map.tiles[start_idx] = TileType::Floor;
+        self.map.tiles[start_idx - 1] = TileType::Floor;
+        self.map.tiles[start_idx + 1] = TileType::Floor;
+        self.map.tiles[start_idx - self.map.width as usize] = TileType::Floor;
+        self.map.tiles[start_idx + self.map.width as usize] = TileType::Floor;
+        self.take_snapshot();
+
+        // Random walker
+        let total_tiles = self.map.width * self.map.height;
+        let desired_floor_tiles = (self.floor_percent * total_tiles as f32) as usize;
+
+        while {
+            let floor_tile_count = self
+                .map
+                .tiles
+                .iter()
+                .filter(|tile| **tile == TileType::Floor)
+                .count();
+            floor_tile_count < desired_floor_tiles
+        } {
+            match self.algorithm {
+                DLAAlgorithm::WalkInwards => {
+                    let mut digger_x = rng.roll_dice(1, self.map.width - 3) + 1;
+                    let mut digger_y = rng.roll_dice(1, self.map.height - 3) + 1;
+                    let mut prev_x = digger_x;
+                    let mut prev_y = digger_y;
+                    while {
+                        let digger_idx = self.map.xy_idx(digger_x, digger_y);
+                        self.map.tiles[digger_idx] == TileType::Wall
+                    } {
+                        prev_x = digger_x;
+                        prev_y = digger_y;
+                        let stagger_direction = rng.roll_dice(1, 4);
+                        match stagger_direction {
+                            1 => {
+                                if digger_x > 2 {
+                                    digger_x -= 1;
+                                }
+                            }
+                            2 => {
+                                if digger_x < self.map.width - 2 {
+                                    digger_x += 1;
+                                }
+                            }
+                            3 => {
+                                if digger_y > 2 {
+                                    digger_y -= 1;
+                                }
+                            }
+                            _ => {
+                                if digger_y < self.map.height - 2 {
+                                    digger_y += 1;
+                                }
+                            }
+                        }
+                    }
+                    self.paint(prev_x, prev_y);
+                }
+                _ => {}
+            }
+        }
+
         // Find all tiles we can reach from the starting point
         let exit_tile = remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx);
         self.take_snapshot();
@@ -94,5 +163,11 @@ impl DLABuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+    }
+
+    fn paint(&mut self, x: i32, y: i32) {
+        let digger_idx = self.map.xy_idx(x, y);
+        self.map.tiles[digger_idx] = TileType::Floor;
+        self.take_snapshot();
     }
 }
