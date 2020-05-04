@@ -13,6 +13,7 @@ pub enum DLAAlgorithm {
     CentralAttractor,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum DLASymmetry {
     None,
@@ -67,6 +68,7 @@ impl MapBuilder for DLABuilder {
 }
 
 impl DLABuilder {
+    #[allow(dead_code)]
     pub fn new(depth: i32) -> Self {
         DLABuilder {
             map: Map::new(depth),
@@ -76,6 +78,57 @@ impl DLABuilder {
             algorithm: DLAAlgorithm::CentralAttractor,
             brush_size: 3,
             symmetry: DLASymmetry::Both,
+            floor_percent: 0.25,
+        }
+    }
+    pub fn walk_inwards(new_depth: i32) -> Self {
+        DLABuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            algorithm: DLAAlgorithm::WalkInwards,
+            brush_size: 1,
+            symmetry: DLASymmetry::None,
+            floor_percent: 0.25,
+        }
+    }
+
+    pub fn walk_outwards(new_depth: i32) -> Self {
+        DLABuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            algorithm: DLAAlgorithm::WalkOutwards,
+            brush_size: 2,
+            symmetry: DLASymmetry::None,
+            floor_percent: 0.25,
+        }
+    }
+
+    pub fn central_attractor(new_depth: i32) -> Self {
+        DLABuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            algorithm: DLAAlgorithm::CentralAttractor,
+            brush_size: 2,
+            symmetry: DLASymmetry::None,
+            floor_percent: 0.25,
+        }
+    }
+
+    pub fn insectoid(new_depth: i32) -> Self {
+        DLABuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            algorithm: DLAAlgorithm::CentralAttractor,
+            brush_size: 2,
+            symmetry: DLASymmetry::Horizontal,
             floor_percent: 0.25,
         }
     }
