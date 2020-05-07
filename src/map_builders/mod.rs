@@ -17,6 +17,8 @@ mod maze;
 use maze::MazeBuilder;
 mod dla;
 use dla::DLABuilder;
+mod voronoi;
+use voronoi::VoronoiBuilder;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -29,22 +31,23 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = rltk::RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 14);
-    match builder {
-        1 => Box::new(BspDungeonBuilder::new(depth)),
-        2 => Box::new(BspInteriorBuilder::new(depth)),
-        3 => Box::new(CellularAutomataBuilder::new(depth)),
-        4 => Box::new(DrunkardsWalkBuilder::open_area(depth)),
-        5 => Box::new(DrunkardsWalkBuilder::open_halls(depth)),
-        6 => Box::new(DrunkardsWalkBuilder::winding_passage(depth)),
-        7 => Box::new(DrunkardsWalkBuilder::fat_passage(depth)),
-        8 => Box::new(DrunkardsWalkBuilder::fearful_symmetry(depth)),
-        9 => Box::new(MazeBuilder::new(depth)),
-        10 => Box::new(DLABuilder::walk_inwards(depth)),
-        11 => Box::new(DLABuilder::walk_outwards(depth)),
-        12 => Box::new(DLABuilder::central_attractor(depth)),
-        13 => Box::new(DLABuilder::insectoid(depth)),
-        _ => Box::new(SimpleMapBuilder::new(depth)),
-    }
+    // let mut rng = rltk::RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 14);
+    // match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(depth)),
+    //     3 => Box::new(CellularAutomataBuilder::new(depth)),
+    //     4 => Box::new(DrunkardsWalkBuilder::open_area(depth)),
+    //     5 => Box::new(DrunkardsWalkBuilder::open_halls(depth)),
+    //     6 => Box::new(DrunkardsWalkBuilder::winding_passage(depth)),
+    //     7 => Box::new(DrunkardsWalkBuilder::fat_passage(depth)),
+    //     8 => Box::new(DrunkardsWalkBuilder::fearful_symmetry(depth)),
+    //     9 => Box::new(MazeBuilder::new(depth)),
+    //     10 => Box::new(DLABuilder::walk_inwards(depth)),
+    //     11 => Box::new(DLABuilder::walk_outwards(depth)),
+    //     12 => Box::new(DLABuilder::central_attractor(depth)),
+    //     13 => Box::new(DLABuilder::insectoid(depth)),
+    //     _ => Box::new(SimpleMapBuilder::new(depth)),
+    // }
+    Box::new(VoronoiBuilder::new(depth))
 }
