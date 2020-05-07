@@ -61,6 +61,62 @@ impl VoronoiBuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
+        // Make a Voronoi diagram. We'll do this the hard way to learn about the technique!
+        let n_seeds = 64;
+        let mut voronoi_seeds: Vec<(usize, rltk::Point)> = Vec::new();
+
+        while voronoi_seeds.len() < n_seeds {
+            let vx = rng.roll_dice(1, self.map.width - 1);
+            let vy = rng.roll_dice(1, self.map.height - 1);
+            let vidx = self.map.xy_idx(vx, vy);
+            let candidate = (vidx, rltk::Point::new(vx, vy));
+            if !voronoi_seeds.contains(&candidate) {
+                voronoi_seeds.push(candidate);
+            }
+        }
+
+        let mut voronoi_distance = vec![(0, 0.0); voronoi_seeds.len()];
+        let mut voronoi_membership = vec![0; self.map.width as usize * self.map.height as usize];
+        for (i, vid) in voronoi_membership.iter_mut().enumerate() {
+            let x = i as i32 % self.map.width;
+            let y = i as i32 / self.map.width;
+
+            for (seed, (_, pos)) in voronoi_seeds.iter().enumerate() {
+                let distance =
+                    rltk::DistanceAlg::PythagorasSquared.distance2d(rltk::Point::new(x, y), *pos);
+                voronoi_distance[seed] = (seed, distance);
+            }
+
+            voronoi_distance.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
+            *vid = voronoi_distance[0].0 as i32;
+        }
+
+        for y in 1..self.map.height - 1 {
+            for x in 1..self.map.width - 1 {
+                let mut neighbors = 0;
+                let my_idx = self.map.xy_idx(x, y);
+                let my_seed = voronoi_membership[my_idx];
+                if voronoi_membership[self.map.xy_idx(x - 1, y)] != my_seed {
+                    neighbors += 1;
+                }
+                if voronoi_membership[self.map.xy_idx(x + 1, y)] != my_seed {
+                    neighbors += 1;
+                }
+                if voronoi_membership[self.map.xy_idx(x, y - 1)] != my_seed {
+                    neighbors += 1;
+                }
+                if voronoi_membership[self.map.xy_idx(x, y + 1)] != my_seed {
+                    neighbors += 1;
+                }
+
+                if neighbors < 2 {
+                    self.map.tiles[my_idx] = TileType::Floor;
+                }
+            }
+            self.take_snapshot();
+        }
+
         // Set a central starting point
         self.starting_position = get_central_starting_position(&self.map);
 
