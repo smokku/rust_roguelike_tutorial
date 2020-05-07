@@ -125,6 +125,19 @@ impl DrunkardsWalkBuilder {
         )
     }
 
+    pub fn fearful_symmetry(depth: i32) -> Self {
+        Self::new(
+            depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::Random,
+                drunken_lifetime: 100,
+                floor_percent: 0.4,
+                brush_size: 1,
+                symmetry: Symmetry::Both,
+            },
+        )
+    }
+
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
