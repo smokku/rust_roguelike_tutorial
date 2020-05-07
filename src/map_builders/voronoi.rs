@@ -14,7 +14,7 @@ pub enum DistanceAlgorithm {
     Chebyshev,
 }
 
-pub struct VoronoiBuilder {
+pub struct VoronoiCellBuilder {
     map: Map,
     starting_position: Position,
     history: Vec<Map>,
@@ -23,7 +23,7 @@ pub struct VoronoiBuilder {
     distance_algorithm: DistanceAlgorithm,
 }
 
-impl MapBuilder for VoronoiBuilder {
+impl MapBuilder for VoronoiCellBuilder {
     fn get_map(&self) -> Map {
         self.map.clone()
     }
@@ -57,15 +57,37 @@ impl MapBuilder for VoronoiBuilder {
     }
 }
 
-impl VoronoiBuilder {
+impl VoronoiCellBuilder {
     pub fn new(depth: i32) -> Self {
-        VoronoiBuilder {
+        VoronoiCellBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
             n_seeds: 64,
             distance_algorithm: DistanceAlgorithm::Pythagoras,
+        }
+    }
+
+    pub fn manhattan(new_depth: i32) -> Self {
+        VoronoiCellBuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            n_seeds: 64,
+            distance_algorithm: DistanceAlgorithm::Manhattan,
+        }
+    }
+
+    pub fn chebyshev(new_depth: i32) -> Self {
+        VoronoiCellBuilder {
+            map: Map::new(new_depth),
+            starting_position: Position { x: 0, y: 0 },
+            history: Vec::new(),
+            noise_areas: HashMap::new(),
+            n_seeds: 64,
+            distance_algorithm: DistanceAlgorithm::Chebyshev,
         }
     }
 
