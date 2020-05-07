@@ -7,6 +7,9 @@ use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashMap;
 
+mod image_loader;
+use image_loader::*;
+
 pub struct WaveformCollapseBuilder {
     map: Map,
     starting_position: Position,
@@ -60,6 +63,12 @@ impl WaveformCollapseBuilder {
 
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
+
+        self.map = load_rex_map(
+            self.map.depth,
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+        );
+        self.take_snapshot();
 
         // Set a central starting point
         self.starting_position = get_central_starting_position(&self.map);
