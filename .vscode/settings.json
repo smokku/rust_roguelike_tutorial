@@ -3,6 +3,7 @@
         "backtrace",
         "bindgen",
         "bresenham",
+        "chebyshev",
         "deser",
         "equippable",
         "gamelog",
