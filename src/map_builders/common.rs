@@ -115,6 +115,7 @@ pub enum Symmetry {
     None,
     Horizontal,
     Vertical,
+    SemiBoth,
     Both,
 }
 
@@ -137,6 +138,22 @@ pub fn paint(map: &mut Map, mode: Symmetry, brush_size: i32, x: i32, y: i32) {
             if dist_y == 0 {
                 apply_paint(map, brush_size, x, y);
             } else {
+                apply_paint(map, brush_size, x, center_y + dist_y);
+                apply_paint(map, brush_size, x, center_y - dist_y);
+            }
+        }
+        Symmetry::SemiBoth => {
+            let center_x = map.width / 2;
+            let center_y = map.height / 2;
+            let dist_x = i32::abs(center_x - x);
+            let dist_y = i32::abs(center_y - y);
+            if dist_x == 0 && dist_y == 0 {
+                apply_paint(map, brush_size, x, y);
+            } else {
+                // This gives only 3 symmetric points, as 2 of the points
+                // will get the same and painted twice
+                apply_paint(map, brush_size, center_x + dist_x, y);
+                apply_paint(map, brush_size, center_x - dist_x, y);
                 apply_paint(map, brush_size, x, center_y + dist_y);
                 apply_paint(map, brush_size, x, center_y - dist_y);
             }
