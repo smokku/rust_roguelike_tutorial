@@ -9,6 +9,8 @@ use std::collections::HashMap;
 
 mod image_loader;
 use image_loader::*;
+mod constraints;
+use constraints::*;
 
 pub struct WaveformCollapseBuilder {
     map: Map,
@@ -64,14 +66,19 @@ impl WaveformCollapseBuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
+        const CHUNK_SIZE: i32 = 7;
+
         self.map = load_rex_map(
             self.map.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
         );
         self.take_snapshot();
 
+        let patterns = build_pattern(&self.map, CHUNK_SIZE, true, true);
+        self.render_tile_gallery(&patterns, CHUNK_SIZE);
+
         // Set a central starting point
-        self.starting_position = get_central_starting_position(&self.map);
+        // self.starting_position = get_central_starting_position(&self.map);
 
         // Find all tiles we can reach from the starting point
         let start_idx = self
@@ -86,5 +93,33 @@ impl WaveformCollapseBuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+    }
+
+    fn render_tile_gallery(&mut self, patterns: &Vec<Vec<TileType>>, chunk_size: i32) {
+        self.map = Map::new(0);
+        let mut counter = 0;
+        let mut x = 1;
+        let mut y = 1;
+        while counter < patterns.len() {
+            render_pattern_to_map(&mut self.map, &patterns[counter], chunk_size, x, y);
+
+            x += chunk_size + 1;
+            if x + chunk_size > self.map.width {
+                // Move to the next row
+                x = 1;
+                y += chunk_size + 1;
+
+                if y + chunk_size > self.map.height {
+                    // Move to the next page
+                    self.take_snapshot();
+                    self.map = Map::new(0);
+                    x = 1;
+                    y = 1;
+                }
+            }
+
+            counter += 1;
+        }
+        self.take_snapshot();
     }
 }

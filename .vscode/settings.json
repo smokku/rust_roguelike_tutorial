@@ -4,6 +4,7 @@
         "bindgen",
         "bresenham",
         "chebyshev",
+        "dedupe",
         "deser",
         "equippable",
         "gamelog",
