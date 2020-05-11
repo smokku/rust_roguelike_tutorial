@@ -70,15 +70,29 @@ impl WaveformCollapseBuilder {
 
         self.map = load_rex_map(
             self.map.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
         );
         self.take_snapshot();
 
         let patterns = build_pattern(&self.map, CHUNK_SIZE, true, true);
-        self.render_tile_gallery(&patterns, CHUNK_SIZE);
+        let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
+        self.render_tile_gallery(&constraints, CHUNK_SIZE);
 
         // Set a central starting point
         // self.starting_position = get_central_starting_position(&self.map);
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
+        self.take_snapshot();
 
         // Find all tiles we can reach from the starting point
         let start_idx = self
@@ -95,13 +109,13 @@ impl WaveformCollapseBuilder {
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
     }
 
-    fn render_tile_gallery(&mut self, patterns: &Vec<Vec<TileType>>, chunk_size: i32) {
+    fn render_tile_gallery(&mut self, constraints: &Vec<MapChunk>, chunk_size: i32) {
         self.map = Map::new(0);
         let mut counter = 0;
         let mut x = 1;
         let mut y = 1;
-        while counter < patterns.len() {
-            render_pattern_to_map(&mut self.map, &patterns[counter], chunk_size, x, y);
+        while counter < constraints.len() {
+            render_pattern_to_map(&mut self.map, &constraints[counter], chunk_size, x, y);
 
             x += chunk_size + 1;
             if x + chunk_size > self.map.width {
