@@ -11,6 +11,8 @@ mod image_loader;
 use image_loader::*;
 mod constraints;
 use constraints::*;
+mod solver;
+use solver::*;
 
 pub struct WaveformCollapseBuilder {
     map: Map,
@@ -78,21 +80,22 @@ impl WaveformCollapseBuilder {
         let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
         self.render_tile_gallery(&constraints, CHUNK_SIZE);
 
+        self.map = Map::new(self.map.depth);
+        loop {
+            let mut solver = Solver::new(constraints.clone(), CHUNK_SIZE, &self.map);
+            while !solver.iteration(&mut self.map, &mut rng) {
+                self.take_snapshot();
+            }
+            self.take_snapshot();
+
+            // If it has hit an impossible condition, try again
+            if solver.possible {
+                break;
+            }
+        }
+
         // Set a central starting point
-        // self.starting_position = get_central_starting_position(&self.map);
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
-        self.take_snapshot();
+        self.starting_position = get_central_starting_position(&self.map);
 
         // Find all tiles we can reach from the starting point
         let start_idx = self
@@ -110,7 +113,7 @@ impl WaveformCollapseBuilder {
     }
 
     fn render_tile_gallery(&mut self, constraints: &Vec<MapChunk>, chunk_size: i32) {
-        self.map = Map::new(0);
+        self.map = Map::new(self.map.depth);
         let mut counter = 0;
         let mut x = 1;
         let mut y = 1;
