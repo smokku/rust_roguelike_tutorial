@@ -68,12 +68,16 @@ impl WaveformCollapseBuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
-        const CHUNK_SIZE: i32 = 7;
+        const CHUNK_SIZE: i32 = 8;
 
-        self.map = load_rex_map(
-            self.map.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
-        );
+        let mut ca = super::CellularAutomataBuilder::new(0);
+        ca.build_map();
+        self.map = ca.get_map();
+        for t in self.map.tiles.iter_mut() {
+            if *t == TileType::DownStairs {
+                *t = TileType::Floor;
+            }
+        }
         self.take_snapshot();
 
         let patterns = build_pattern(&self.map, CHUNK_SIZE, true, true);
