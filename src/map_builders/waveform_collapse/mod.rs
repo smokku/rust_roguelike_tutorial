@@ -9,6 +9,8 @@ use std::collections::HashMap;
 
 mod image_loader;
 use image_loader::*;
+mod common;
+use common::*;
 mod constraints;
 use constraints::*;
 mod solver;
@@ -68,24 +70,22 @@ impl WaveformCollapseBuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
-        const CHUNK_SIZE: i32 = 8;
+        const CHUNK_SIZE: i32 = 7;
 
-        let mut ca = super::CellularAutomataBuilder::new(0);
-        ca.build_map();
-        self.map = ca.get_map();
-        for t in self.map.tiles.iter_mut() {
-            if *t == TileType::DownStairs {
-                *t = TileType::Floor;
-            }
-        }
+        self.map = load_rex_map(
+            self.map.depth,
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
+        );
         self.take_snapshot();
 
-        let patterns = build_pattern(&self.map, CHUNK_SIZE, true, true);
+        let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
         let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
         self.render_tile_gallery(&constraints, CHUNK_SIZE);
+        self.take_snapshot();
 
-        self.map = Map::new(self.map.depth);
+        let mut tries = 1;
         loop {
+            self.map = Map::new(self.map.depth);
             let mut solver = Solver::new(constraints.clone(), CHUNK_SIZE, &self.map);
             while !solver.iteration(&mut self.map, &mut rng) {
                 self.take_snapshot();
@@ -96,7 +96,10 @@ impl WaveformCollapseBuilder {
             if solver.possible {
                 break;
             }
+
+            tries += 1;
         }
+        rltk::console::log(format!("Took {} tries to solve", tries));
 
         // Set a central starting point
         self.starting_position = get_central_starting_position(&self.map);
@@ -133,7 +136,7 @@ impl WaveformCollapseBuilder {
                 if y + chunk_size > self.map.height {
                     // Move to the next page
                     self.take_snapshot();
-                    self.map = Map::new(0);
+                    self.map = Map::new(self.map.depth);
                     x = 1;
                     y = 1;
                 }

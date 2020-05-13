@@ -1,7 +1,7 @@
-use super::{Map, TileType};
+use super::{tile_idx_in_chunk, Map, MapChunk, TileType};
 use std::collections::HashSet;
 
-pub fn build_pattern(
+pub fn build_patterns(
     map: &Map,
     chunk_size: i32,
     include_flipping: bool,
@@ -113,18 +113,6 @@ pub fn render_pattern_to_map(map: &mut Map, chunk: &MapChunk, chunk_size: i32, x
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct MapChunk {
-    pub pattern: Vec<TileType>,
-    pub exits: [Vec<bool>; 4],
-    pub has_exits: bool,
-    pub compatible_with: [Vec<usize>; 4],
-}
-
-pub fn tile_idx_in_chunk(chunk_size: i32, x: i32, y: i32) -> usize {
-    (y * chunk_size + x) as usize
-}
-
 pub fn patterns_to_constraints(patterns: Vec<Vec<TileType>>, chunk_size: i32) -> Vec<MapChunk> {
     // Move into new constraints object
     let mut constraints = Vec::new();
@@ -179,41 +167,47 @@ pub fn patterns_to_constraints(patterns: Vec<Vec<TileType>>, chunk_size: i32) ->
 
     // Build compatibility matrix
     let ch = constraints.clone();
-    for c in constraints.iter_mut() {
+    for (i, c) in constraints.iter_mut().enumerate() {
         for (j, potential) in ch.iter().enumerate() {
-            // if there are no exits at all, it's compatible
-            if !c.has_exits || !potential.has_exits {
-                for compatible in c.compatible_with.iter_mut() {
-                    compatible.push(j);
-                }
-            } else {
-                // Evaluate compatibility by direction
-                for (direction, exit_list) in c.exits.iter_mut().enumerate() {
-                    let opposite = match direction {
-                        0 => 1, // Our North, Their South
-                        1 => 0, // Our South, Their North
-                        2 => 3, // Our West, Their East
-                        _ => 2, // Our East, Their West
-                    };
+            // Evaluate compatibility by direction
+            for (direction, exit_list) in c.exits.iter_mut().enumerate() {
+                let opposite = match direction {
+                    0 => 1, // Our North, Their South
+                    1 => 0, // Our South, Their North
+                    2 => 3, // Our West, Their East
+                    _ => 2, // Our East, Their West
+                };
 
-                    let mut it_fits = false;
-                    let mut has_any = false;
-                    for (slot, can_enter) in exit_list.iter().enumerate() {
-                        if *can_enter {
-                            has_any = true;
-                            if potential.exits[opposite][slot] {
-                                it_fits = true;
-                            }
+                let mut it_fits = false;
+                let mut has_any = false;
+                for (slot, can_enter) in exit_list.iter().enumerate() {
+                    if *can_enter {
+                        has_any = true;
+                        if potential.exits[opposite][slot] {
+                            it_fits = true;
                         }
                     }
-                    if it_fits {
-                        c.compatible_with[direction].push(j);
-                    }
-                    if !has_any {
-                        // There's no exits on this side, we don't care what goes there
+                }
+                if it_fits {
+                    c.compatible_with[direction].push(j);
+                } else if !has_any {
+                    // There's no exits on this side, let's match if
+                    // the other edge also has no exits
+                    let exit_count = potential.exits[opposite].iter().filter(|a| **a).count();
+                    if exit_count == 0 {
                         c.compatible_with[direction].push(j);
                     }
                 }
+            }
+        }
+        for (direction, compatible) in c.compatible_with.iter_mut().enumerate() {
+            if compatible.len() == 0 {
+                rltk::console::log(format!(
+                    "Eek! No compatibles for chunk {} in direction {}",
+                    i, direction
+                ));
+                // insert self
+                compatible.push(i);
             }
         }
     }
