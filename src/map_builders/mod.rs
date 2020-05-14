@@ -21,6 +21,8 @@ mod voronoi;
 use voronoi::VoronoiCellBuilder;
 mod waveform_collapse;
 use waveform_collapse::WaveformCollapseBuilder;
+mod prefab_builder;
+use prefab_builder::PrefabBuilder;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
