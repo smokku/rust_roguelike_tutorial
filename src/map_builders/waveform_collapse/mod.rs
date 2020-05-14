@@ -16,11 +16,19 @@ use constraints::*;
 mod solver;
 use solver::*;
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum WaveformMode {
+    TestMap,
+    Derived,
+}
+
 pub struct WaveformCollapseBuilder {
     map: Map,
     starting_position: Position,
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
+    mode: WaveformMode,
+    derive_from: Option<Box<dyn MapBuilder>>,
 }
 
 impl MapBuilder for WaveformCollapseBuilder {
@@ -58,24 +66,47 @@ impl MapBuilder for WaveformCollapseBuilder {
 }
 
 impl WaveformCollapseBuilder {
-    pub fn new(depth: i32) -> Self {
+    pub fn new(depth: i32, mode: WaveformMode, derive_from: Option<Box<dyn MapBuilder>>) -> Self {
         WaveformCollapseBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
+            mode,
+            derive_from,
         }
     }
 
+    pub fn test_map(depth: i32) -> WaveformCollapseBuilder {
+        WaveformCollapseBuilder::new(depth, WaveformMode::TestMap, None)
+    }
+
+    pub fn derived_map(depth: i32, builder: Box<dyn MapBuilder>) -> WaveformCollapseBuilder {
+        WaveformCollapseBuilder::new(depth, WaveformMode::Derived, Some(builder))
+    }
+
     fn build(&mut self) {
+        if self.mode == WaveformMode::TestMap {
+            self.map = load_rex_map(
+                self.map.depth,
+                &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+            );
+            self.take_snapshot();
+            return;
+        }
+
         let mut rng = RandomNumberGenerator::new();
 
         const CHUNK_SIZE: i32 = 7;
 
-        self.map = load_rex_map(
-            self.map.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
-        );
+        let pre_builder = &mut self.derive_from.as_mut().unwrap();
+        pre_builder.build_map();
+        self.map = pre_builder.get_map();
+        for t in self.map.tiles.iter_mut() {
+            if *t == TileType::DownStairs {
+                *t = TileType::Floor;
+            }
+        }
         self.take_snapshot();
 
         let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
