@@ -5,9 +5,12 @@ use super::{
 use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
-#[derive(Clone, Debug, PartialEq)]
+mod prefab_levels;
+
+#[derive(Clone, PartialEq)]
 pub enum PrefabMode {
     RexLevel { template: &'static str },
+    Constant { level: prefab_levels::PrefabLevel },
 }
 
 pub struct PrefabBuilder {
@@ -58,8 +61,8 @@ impl PrefabBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
-            mode: PrefabMode::RexLevel {
-                template: "../resources/wfc-populated.xp",
+            mode: PrefabMode::Constant {
+                level: prefab_levels::WFC_POPULATED,
             },
             spawns: Vec::new(),
         }
@@ -68,6 +71,7 @@ impl PrefabBuilder {
     fn build(&mut self) {
         match self.mode {
             PrefabMode::RexLevel { template } => self.load_rex_map(template),
+            PrefabMode::Constant { level } => self.load_ascii_map(&level),
         }
         self.take_snapshot();
 
@@ -89,6 +93,49 @@ impl PrefabBuilder {
         }
     }
 
+    fn char_to_map(&mut self, ch: char, idx: usize) {
+        match ch {
+            ' ' => self.map.tiles[idx] = TileType::Floor,
+            '#' => self.map.tiles[idx] = TileType::Wall,
+            '>' => self.map.tiles[idx] = TileType::DownStairs,
+
+            '@' => {
+                let x = idx as i32 % self.map.width;
+                let y = idx as i32 / self.map.width;
+                self.map.tiles[idx] = TileType::Floor;
+                self.starting_position = Position {
+                    x: x as i32,
+                    y: y as i32,
+                };
+            }
+
+            'g' => {
+                self.map.tiles[idx] = TileType::Floor;
+                self.spawns.push((idx, "Goblin".to_string()));
+            }
+            'o' => {
+                self.map.tiles[idx] = TileType::Floor;
+                self.spawns.push((idx, "Orc".to_string()));
+            }
+            '^' => {
+                self.map.tiles[idx] = TileType::Floor;
+                self.spawns.push((idx, "Bear Trap".to_string()));
+            }
+            '%' => {
+                self.map.tiles[idx] = TileType::Floor;
+                self.spawns.push((idx, "Rations".to_string()));
+            }
+            '!' => {
+                self.map.tiles[idx] = TileType::Floor;
+                self.spawns.push((idx, "Health Potion".to_string()));
+            }
+
+            c => {
+                rltk::console::log(format!("Unknown glyph loading map: {}", c));
+            }
+        }
+    }
+
     fn load_rex_map(&mut self, path: &str) {
         let xp_file = rltk::rex::XpFile::from_resource(path).unwrap();
 
@@ -98,46 +145,34 @@ impl PrefabBuilder {
                     let cell = layer.get(x, y).unwrap();
                     if x < self.map.width as usize && y < self.map.height as usize {
                         let idx = self.map.xy_idx(x as i32, y as i32);
-                        match (cell.ch as u8) as char {
-                            ' ' => self.map.tiles[idx] = TileType::Floor,
-                            '#' => self.map.tiles[idx] = TileType::Wall,
-                            '>' => self.map.tiles[idx] = TileType::DownStairs,
-
-                            '@' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.starting_position = Position {
-                                    x: x as i32,
-                                    y: y as i32,
-                                };
-                            }
-
-                            'g' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.spawns.push((idx, "Goblin".to_string()));
-                            }
-                            'o' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.spawns.push((idx, "Orc".to_string()));
-                            }
-                            '^' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.spawns.push((idx, "Bear Trap".to_string()));
-                            }
-                            '%' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.spawns.push((idx, "Rations".to_string()));
-                            }
-                            '!' => {
-                                self.map.tiles[idx] = TileType::Floor;
-                                self.spawns.push((idx, "Health Potion".to_string()));
-                            }
-
-                            c => {
-                                rltk::console::log(format!("Unknown glyph loading map: {}", c));
-                            }
-                        }
+                        // We're doing some nasty casting to make it easier to type things like '#' in the match
+                        self.char_to_map(cell.ch as u8 as char, idx);
                     }
                 }
+            }
+        }
+    }
+
+    fn load_ascii_map(&mut self, level: &prefab_levels::PrefabLevel) {
+        // Start by converting to a vector, with new lines removed
+        let string_vec: Vec<char> = level
+            .template
+            .chars()
+            .filter(|c| *c != '\r' && *c != '\n')
+            .map(|c| match c as u8 {
+                160 => ' ',
+                _ => c,
+            })
+            .collect();
+
+        let mut i = 0;
+        for ty in 0..level.height {
+            for tx in 0..level.width {
+                if tx < self.map.width as usize && ty < self.map.height as usize {
+                    let idx = self.map.xy_idx(tx as i32, ty as i32);
+                    self.char_to_map(string_vec[i], idx);
+                }
+                i += 1;
             }
         }
     }
