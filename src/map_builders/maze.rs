@@ -11,6 +11,7 @@ pub struct MazeBuilder {
     starting_position: Position,
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
+    spawn_list: Vec<(usize, String)>,
 }
 
 impl MapBuilder for MazeBuilder {
@@ -30,12 +31,9 @@ impl MapBuilder for MazeBuilder {
         self.build();
     }
 
-    fn spawn_entities(&mut self, world: &mut World, resources: &mut Resources) {
-        for (_id, area) in self.noise_areas.iter() {
-            spawner::spawn_region(world, resources, area, self.map.depth);
-        }
+    fn get_spawn_list(&self) -> &Vec<(usize, String)> {
+        &self.spawn_list
     }
-
     fn take_snapshot(&mut self) {
         if SHOW_MAPGEN_VISUALIZER {
             let mut snapshot = self.map.clone();
@@ -54,6 +52,7 @@ impl MazeBuilder {
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
             noise_areas: HashMap::new(),
+            spawn_list: Vec::new(),
         }
     }
 
@@ -84,6 +83,17 @@ impl MazeBuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+
+        // Spawn the entities
+        for (_id, area) in self.noise_areas.iter() {
+            spawner::spawn_region(
+                &self.map,
+                &mut rng,
+                area,
+                self.map.depth,
+                &mut self.spawn_list,
+            );
+        }
     }
 }
 
