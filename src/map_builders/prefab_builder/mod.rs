@@ -6,11 +6,19 @@ use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
 mod prefab_levels;
+mod prefab_sections;
 
 #[derive(Clone, PartialEq)]
 pub enum PrefabMode {
-    RexLevel { template: &'static str },
-    Constant { level: prefab_levels::PrefabLevel },
+    RexLevel {
+        template: &'static str,
+    },
+    Constant {
+        level: prefab_levels::PrefabLevel,
+    },
+    Sectional {
+        section: prefab_sections::PrefabSection,
+    },
 }
 
 pub struct PrefabBuilder {
@@ -19,6 +27,7 @@ pub struct PrefabBuilder {
     history: Vec<Map>,
     mode: PrefabMode,
     spawns: Vec<(usize, String)>,
+    previous_builder: Option<Box<dyn MapBuilder>>,
 }
 
 impl MapBuilder for PrefabBuilder {
@@ -56,15 +65,16 @@ impl MapBuilder for PrefabBuilder {
 }
 
 impl PrefabBuilder {
-    pub fn new(depth: i32) -> Self {
+    pub fn new(depth: i32, previous_builder: Option<Box<dyn MapBuilder>>) -> Self {
         PrefabBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
-            mode: PrefabMode::Constant {
-                level: prefab_levels::WFC_POPULATED,
+            mode: PrefabMode::Sectional {
+                section: prefab_sections::UNDERGROUND_FORT,
             },
             spawns: Vec::new(),
+            previous_builder,
         }
     }
 
@@ -72,6 +82,7 @@ impl PrefabBuilder {
         match self.mode {
             PrefabMode::RexLevel { template } => self.load_rex_map(template),
             PrefabMode::Constant { level } => self.load_ascii_map(&level),
+            PrefabMode::Sectional { section } => self.apply_sectional(&section),
         }
         self.take_snapshot();
 
@@ -153,23 +164,60 @@ impl PrefabBuilder {
         }
     }
 
-    fn load_ascii_map(&mut self, level: &prefab_levels::PrefabLevel) {
-        // Start by converting to a vector, with new lines removed
-        let string_vec: Vec<char> = level
-            .template
+    fn read_ascii_to_vec(template: &str, width: usize) -> Vec<char> {
+        template
+            .lines()
+            .map(|line| format!("{: <width$}", line, width = width))
+            .collect::<Vec<_>>()
+            .concat()
             .chars()
-            .filter(|c| *c != '\r' && *c != '\n')
-            .map(|c| match c as u8 {
-                160 => ' ',
-                _ => c,
-            })
-            .collect();
+            .collect()
+    }
+
+    fn load_ascii_map(&mut self, level: &prefab_levels::PrefabLevel) {
+        let string_vec = PrefabBuilder::read_ascii_to_vec(level.template, level.width);
 
         let mut i = 0;
         for ty in 0..level.height {
             for tx in 0..level.width {
                 if tx < self.map.width as usize && ty < self.map.height as usize {
                     let idx = self.map.xy_idx(tx as i32, ty as i32);
+                    self.char_to_map(string_vec[i], idx);
+                }
+                i += 1;
+            }
+        }
+    }
+
+    fn apply_sectional(&mut self, section: &prefab_sections::PrefabSection) {
+        // Build the map
+        let prev_builder = self.previous_builder.as_mut().unwrap();
+        prev_builder.build_map();
+        self.starting_position = prev_builder.get_starting_position();
+        self.map = prev_builder.get_map().clone();
+        self.take_snapshot();
+
+        use prefab_sections::*;
+
+        let string_vec = PrefabBuilder::read_ascii_to_vec(section.template, section.width);
+
+        // Place the new section
+        let chunk_x = match section.placement.0 {
+            HorizontalPlacement::Left => 0,
+            HorizontalPlacement::Center => (self.map.width - section.width as i32) / 2,
+            HorizontalPlacement::Right => self.map.width - 1 - section.width as i32,
+        };
+        let chunk_y = match section.placement.1 {
+            VerticalPlacement::Top => 0,
+            VerticalPlacement::Center => (self.map.height - section.height as i32) / 2,
+            VerticalPlacement::Bottom => self.map.height - 1 - section.height as i32,
+        };
+
+        let mut i = 0;
+        for ty in chunk_y..chunk_y + section.height as i32 {
+            for tx in chunk_x..chunk_x + section.width as i32 {
+                if tx < self.map.width && ty < self.map.height {
+                    let idx = self.map.xy_idx(tx, ty);
                     self.char_to_map(string_vec[i], idx);
                 }
                 i += 1;

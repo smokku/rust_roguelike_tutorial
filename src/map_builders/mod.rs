@@ -62,5 +62,8 @@ pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
     // }
 
     // result
-    Box::new(PrefabBuilder::new(depth))
+    Box::new(PrefabBuilder::new(
+        depth,
+        Some(Box::new(CellularAutomataBuilder::new(depth))),
+    ))
 }
