@@ -65,15 +65,43 @@ impl MapBuilder for PrefabBuilder {
 }
 
 impl PrefabBuilder {
-    pub fn new(depth: i32, previous_builder: Option<Box<dyn MapBuilder>>) -> Self {
+    pub fn new(
+        depth: i32,
+        mode: PrefabMode,
+        previous_builder: Option<Box<dyn MapBuilder>>,
+    ) -> Self {
         PrefabBuilder {
             map: Map::new(depth),
             starting_position: Position { x: 0, y: 0 },
             history: Vec::new(),
-            mode: PrefabMode::RoomVaults,
+            mode,
             previous_builder,
             spawn_list: Vec::new(),
         }
+    }
+
+    pub fn rex_level(depth: i32, template: &'static str) -> Self {
+        Self::new(depth, PrefabMode::RexLevel { template }, None)
+    }
+
+    pub fn constant(depth: i32, level: prefab_levels::PrefabLevel) -> Self {
+        Self::new(depth, PrefabMode::Constant { level }, None)
+    }
+
+    pub fn sectional(
+        depth: i32,
+        section: prefab_sections::PrefabSection,
+        previous_builder: Box<dyn MapBuilder>,
+    ) -> Self {
+        Self::new(
+            depth,
+            PrefabMode::Sectional { section },
+            Some(previous_builder),
+        )
+    }
+
+    pub fn vaults(depth: i32, previous_builder: Box<dyn MapBuilder>) -> Self {
+        Self::new(depth, PrefabMode::RoomVaults, Some(previous_builder))
     }
 
     fn build(&mut self) {
