@@ -251,7 +251,7 @@ impl PrefabBuilder {
         self.apply_previous_iteration(|_x, _y, _idx, _name| true);
 
         // Note that this is a place-holder and will be moved out of this function
-        let master_vault_list = vec![TOTALLY_NOT_A_TRAP];
+        let master_vault_list = vec![TOTALLY_NOT_A_TRAP, CHECKERBOARD, SILLY_SMILE];
 
         // Filter the vault list down to ones that are applicable to the current depth
         let possible_vaults: Vec<&PrefabRoom> = master_vault_list
