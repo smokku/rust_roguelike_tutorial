@@ -316,6 +316,18 @@ impl PrefabBuilder {
             let chunk_x = pos.x;
             let chunk_y = pos.y;
 
+            let map_width = self.map.width;
+            self.spawn_list.retain(|e| {
+                let idx = e.0 as i32;
+                let x = idx % map_width;
+                let y = idx / map_width;
+
+                x < chunk_x
+                    || x > chunk_x + vault.width as i32
+                    || y < chunk_y
+                    || y > chunk_y + vault.height as i32
+            });
+
             let string_vec = PrefabBuilder::read_ascii_to_vec(vault.template, vault.width);
             let mut i = 0;
             for ty in 0..vault.height {
