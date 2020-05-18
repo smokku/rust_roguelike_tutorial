@@ -27,8 +27,7 @@ pub const UNDERGROUND_FORT: PrefabSection = PrefabSection {
     placement: (HorizontalPlacement::Right, VerticalPlacement::Center),
 };
 
-const RIGHT_FORT: &str = "
-     #
+const RIGHT_FORT: &str = "     #
   #######
   #     #
   #     #######

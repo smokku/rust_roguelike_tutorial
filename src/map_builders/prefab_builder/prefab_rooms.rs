@@ -16,7 +16,6 @@ pub const TOTALLY_NOT_A_TRAP: PrefabRoom = PrefabRoom {
 };
 
 const TOTALLY_NOT_A_TRAP_MAP: &str = "
-
  ^^^
  ^!^
  ^^^
@@ -32,7 +31,6 @@ pub const SILLY_SMILE: PrefabRoom = PrefabRoom {
 };
 
 const SILLY_SMILE_MAP: &str = "
-
  ^  ^
   ##
 
@@ -49,7 +47,6 @@ pub const CHECKERBOARD: PrefabRoom = PrefabRoom {
 };
 
 const CHECKERBOARD_MAP: &str = "
-
  #^#
  g#%#
  #!#

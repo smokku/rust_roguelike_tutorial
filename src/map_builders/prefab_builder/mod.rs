@@ -2,7 +2,6 @@ use super::{
     get_central_starting_position, remove_unreachable_areas_returning_most_distant, spawner, Map,
     MapBuilder, Position, TileType, SHOW_MAPGEN_VISUALIZER,
 };
-use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashSet;
 
@@ -164,18 +163,24 @@ impl PrefabBuilder {
         }
     }
 
-    fn read_ascii_to_vec(template: &str, width: usize) -> Vec<char> {
-        template
+    fn read_ascii_to_vec(template: &str, width: usize, height: usize) -> Vec<char> {
+        let vec: Vec<char> = template
             .lines()
             .map(|line| format!("{: <width$}", line, width = width))
             .collect::<Vec<_>>()
             .concat()
             .chars()
-            .collect()
+            .collect();
+        if vec.len() != width * height {
+            panic!("Loaded template did not yield the expected number of characters. Got {}, expected {}.\n{:?}", vec.len(), width * height, template);
+        }
+
+        vec
     }
 
     fn load_ascii_map(&mut self, level: &prefab_levels::PrefabLevel) {
-        let string_vec = PrefabBuilder::read_ascii_to_vec(level.template, level.width);
+        let string_vec =
+            PrefabBuilder::read_ascii_to_vec(level.template, level.width, level.height);
 
         let mut i = 0;
         for ty in 0..level.height {
@@ -211,7 +216,8 @@ impl PrefabBuilder {
     fn apply_sectional(&mut self, section: &prefab_sections::PrefabSection) {
         use prefab_sections::*;
 
-        let string_vec = PrefabBuilder::read_ascii_to_vec(section.template, section.width);
+        let string_vec =
+            PrefabBuilder::read_ascii_to_vec(section.template, section.width, section.height);
 
         // Place the new section
         let chunk_x = match section.placement.0 {
@@ -343,7 +349,8 @@ impl PrefabBuilder {
                         || y > chunk_y + vault.height as i32
                 });
 
-                let string_vec = PrefabBuilder::read_ascii_to_vec(vault.template, vault.width);
+                let string_vec =
+                    PrefabBuilder::read_ascii_to_vec(vault.template, vault.width, vault.height);
                 let mut i = 0;
                 for ty in 0..vault.height {
                     for tx in 0..vault.width {
