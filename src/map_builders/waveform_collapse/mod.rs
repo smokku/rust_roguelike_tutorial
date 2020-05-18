@@ -33,7 +33,12 @@ impl MapBuilder for WaveformCollapseBuilder {
     }
 
     fn get_snapshot_history(&self) -> Vec<Map> {
-        self.history.clone()
+        let mut history = Vec::new();
+        if let Some(derive_from) = &self.derive_from {
+            history.extend(derive_from.get_snapshot_history());
+        }
+        history.extend(self.history.clone());
+        history
     }
 
     fn build_map(&mut self) {

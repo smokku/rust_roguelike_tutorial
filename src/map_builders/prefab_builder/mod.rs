@@ -42,7 +42,12 @@ impl MapBuilder for PrefabBuilder {
     }
 
     fn get_snapshot_history(&self) -> Vec<Map> {
-        self.history.clone()
+        let mut history = Vec::new();
+        if let Some(previous_builder) = &self.previous_builder {
+            history.extend(previous_builder.get_snapshot_history());
+        }
+        history.extend(self.history.clone());
+        history
     }
 
     fn build_map(&mut self) {
