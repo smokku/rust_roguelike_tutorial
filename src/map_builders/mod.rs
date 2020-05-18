@@ -69,6 +69,13 @@ pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
     // result
     Box::new(PrefabBuilder::vaults(
         depth,
-        Box::new(SimpleMapBuilder::new(depth)),
+        Box::new(PrefabBuilder::sectional(
+            depth,
+            prefab_builder::prefab_sections::UNDERGROUND_FORT,
+            Box::new(WaveformCollapseBuilder::derived_map(
+                depth,
+                Box::new(CellularAutomataBuilder::new(depth)),
+            )),
+        )),
     ))
 }
