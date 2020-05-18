@@ -251,6 +251,12 @@ impl PrefabBuilder {
         // Apply the previous builder, and keep all entities it spawns (for now)
         self.apply_previous_iteration(|_x, _y, _idx, _name| true);
 
+        // Do we want a vault at all?
+        let vault_roll = rng.roll_dice(1, 6) + self.map.depth;
+        if vault_roll < 4 {
+            return;
+        }
+
         // Note that this is a place-holder and will be moved out of this function
         let master_vault_list = vec![TOTALLY_NOT_A_TRAP, CHECKERBOARD, SILLY_SMILE];
 
