@@ -1,5 +1,4 @@
 use super::{spawner, Map, MapBuilder, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER};
-use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
 const MIN_ROOM_SIZE: i32 = 8;

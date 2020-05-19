@@ -3,7 +3,6 @@ use super::{
     remove_unreachable_areas_returning_most_distant, spawner, Map, MapBuilder, Position, TileType,
     SHOW_MAPGEN_VISUALIZER,
 };
-use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashMap;
 

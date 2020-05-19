@@ -2,7 +2,6 @@ use super::{
     generate_voronoi_spawn_regions, paint, remove_unreachable_areas_returning_most_distant,
     spawner, Map, MapBuilder, Position, Symmetry, TileType, SHOW_MAPGEN_VISUALIZER,
 };
-use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 use std::collections::HashMap;
 

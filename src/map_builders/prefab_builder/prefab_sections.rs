@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(PartialEq, Copy, Clone)]
 pub enum HorizontalPlacement {
     Left,
@@ -5,6 +6,7 @@ pub enum HorizontalPlacement {
     Right,
 }
 
+#[allow(dead_code)]
 #[derive(PartialEq, Copy, Clone)]
 pub enum VerticalPlacement {
     Top,

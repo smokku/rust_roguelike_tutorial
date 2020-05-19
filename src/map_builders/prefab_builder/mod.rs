@@ -1,5 +1,5 @@
 use super::{
-    get_central_starting_position, remove_unreachable_areas_returning_most_distant, spawner, Map,
+    get_central_starting_position, remove_unreachable_areas_returning_most_distant, Map,
     MapBuilder, Position, TileType, SHOW_MAPGEN_VISUALIZER,
 };
 use rltk::RandomNumberGenerator;
@@ -9,6 +9,7 @@ pub mod prefab_levels;
 pub mod prefab_rooms;
 pub mod prefab_sections;
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq)]
 pub enum PrefabMode {
     RexLevel {
@@ -85,6 +86,7 @@ impl PrefabBuilder {
         }
     }
 
+    #[allow(dead_code)]
     pub fn rex_level(depth: i32, template: &'static str) -> Self {
         Self::new(depth, PrefabMode::RexLevel { template }, None)
     }

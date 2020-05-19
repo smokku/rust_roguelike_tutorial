@@ -383,7 +383,7 @@ impl State {
         self.resources.insert(map);
 
         // Spawn bad guys
-        builder.spawn_entities(&mut self.world, &mut self.resources);
+        builder.spawn_entities(&mut self.world);
 
         // Place the player and update resources
         let player_start = builder.get_starting_position();

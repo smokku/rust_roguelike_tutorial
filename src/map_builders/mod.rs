@@ -32,7 +32,7 @@ pub trait MapBuilder {
     fn take_snapshot(&mut self);
     fn get_spawn_list(&self) -> &Vec<(usize, String)>;
 
-    fn spawn_entities(&mut self, world: &mut World, resources: &mut Resources) {
+    fn spawn_entities(&mut self, world: &mut World) {
         for (idx, name) in self.get_spawn_list().iter() {
             spawner::spawn_entity(world, idx, name);
         }

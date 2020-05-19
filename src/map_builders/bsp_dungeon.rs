@@ -1,6 +1,5 @@
 use super::{
-    apply_room_to_map, spawner, Map, MapBuilder, Position, Rect, Resources, TileType, World,
-    SHOW_MAPGEN_VISUALIZER,
+    apply_room_to_map, spawner, Map, MapBuilder, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER,
 };
 use rltk::RandomNumberGenerator;
 

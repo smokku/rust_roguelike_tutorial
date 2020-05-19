@@ -2,7 +2,6 @@ use super::{
     apply_horizontal_tunnel, apply_room_to_map, apply_vertical_tunnel, spawner, Map, MapBuilder,
     Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER,
 };
-use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
 pub struct SimpleMapBuilder {
