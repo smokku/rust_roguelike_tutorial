@@ -1,5 +1,6 @@
 use super::{spawner, Map, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER};
 use legion::prelude::*;
+use rltk::RandomNumberGenerator;
 
 mod common;
 use common::*;
@@ -37,6 +38,88 @@ pub trait MapBuilder {
             spawner::spawn_entity(world, idx, name);
         }
     }
+}
+
+pub struct BuilderMap {
+    pub map: Map,
+    pub starting_position: Option<Position>,
+    pub rooms: Option<Vec<Rect>>,
+    pub history: Vec<Map>,
+    pub spawn_list: Vec<(usize, String)>,
+}
+
+impl BuilderMap {
+    fn take_snapshot(&mut self) {
+        if SHOW_MAPGEN_VISUALIZER {
+            let mut snapshot = self.map.clone();
+            for v in snapshot.revealed_tiles.iter_mut() {
+                *v = true;
+            }
+            self.history.push(snapshot);
+        }
+    }
+}
+
+pub struct BuilderChain {
+    starter: Option<Box<dyn InitialMapBuilder>>,
+    builders: Vec<Box<dyn MetaMapBuilder>>,
+    pub build_data: BuilderMap,
+}
+
+impl BuilderChain {
+    pub fn new(depth: i32) -> Self {
+        BuilderChain {
+            starter: None,
+            builders: Vec::new(),
+            build_data: BuilderMap {
+                map: Map::new(depth),
+                starting_position: None,
+                rooms: None,
+                history: Vec::new(),
+                spawn_list: Vec::new(),
+            },
+        }
+    }
+
+    pub fn start_with(&mut self, starter: Box<dyn InitialMapBuilder>) {
+        match self.starter {
+            None => self.starter = Some(starter),
+            Some(_) => panic!("You can only have one starting builder."),
+        };
+    }
+
+    pub fn with(&mut self, meta_builder: Box<dyn MetaMapBuilder>) {
+        self.builders.push(meta_builder);
+    }
+
+    pub fn build_map(&mut self, rng: &mut RandomNumberGenerator) {
+        match &mut self.starter {
+            None => panic!("Cannot run a map builder chain without a starting build system"),
+            Some(starter) => {
+                // Build the starting map
+                starter.build_map(rng, &mut self.build_data);
+            }
+        }
+
+        // Build additional layers in turn
+        for metabuilder in self.builders.iter_mut() {
+            metabuilder.build_map(rng, &mut self.build_data);
+        }
+    }
+
+    fn spawn_entities(&mut self, world: &mut World) {
+        for (idx, name) in self.build_data.spawn_list.iter() {
+            spawner::spawn_entity(world, idx, name);
+        }
+    }
+}
+
+pub trait InitialMapBuilder {
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
+}
+
+pub trait MetaMapBuilder {
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
 }
 
 pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
