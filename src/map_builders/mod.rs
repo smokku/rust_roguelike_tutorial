@@ -24,6 +24,12 @@ mod waveform_collapse;
 use waveform_collapse::WaveformCollapseBuilder;
 mod prefab_builder;
 use prefab_builder::PrefabBuilder;
+mod room_based_spawner;
+use room_based_spawner::RoomBasedSpawner;
+mod room_based_starting_position;
+use room_based_starting_position::RoomBasedStartingPosition;
+mod room_based_stairs;
+use room_based_stairs::RoomBasedStairs;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -107,7 +113,7 @@ impl BuilderChain {
         }
     }
 
-    fn spawn_entities(&mut self, world: &mut World) {
+    pub fn spawn_entities(&mut self, world: &mut World) {
         for (idx, name) in self.build_data.spawn_list.iter() {
             spawner::spawn_entity(world, idx, name);
         }
@@ -122,46 +128,11 @@ pub trait MetaMapBuilder {
     fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
 }
 
-pub fn random_builder(depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = rltk::RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 18);
-    let mut result: Box<dyn MapBuilder> = match builder {
-        1 => Box::new(BspDungeonBuilder::new(depth)),
-        2 => Box::new(BspInteriorBuilder::new(depth)),
-        3 => Box::new(CellularAutomataBuilder::new(depth)),
-        4 => Box::new(DrunkardsWalkBuilder::open_area(depth)),
-        5 => Box::new(DrunkardsWalkBuilder::open_halls(depth)),
-        6 => Box::new(DrunkardsWalkBuilder::winding_passage(depth)),
-        7 => Box::new(DrunkardsWalkBuilder::fat_passage(depth)),
-        8 => Box::new(DrunkardsWalkBuilder::fearful_symmetry(depth)),
-        9 => Box::new(MazeBuilder::new(depth)),
-        10 => Box::new(DLABuilder::walk_inwards(depth)),
-        11 => Box::new(DLABuilder::walk_outwards(depth)),
-        12 => Box::new(DLABuilder::central_attractor(depth)),
-        13 => Box::new(DLABuilder::insectoid(depth)),
-        14 => Box::new(VoronoiCellBuilder::new(depth)),
-        15 => Box::new(VoronoiCellBuilder::manhattan(depth)),
-        16 => Box::new(VoronoiCellBuilder::chebyshev(depth)),
-        17 => Box::new(PrefabBuilder::constant(
-            depth,
-            prefab_builder::prefab_levels::WFC_POPULATED,
-        )),
-        _ => Box::new(SimpleMapBuilder::new(depth)),
-    };
-
-    if rng.roll_dice(1, 3) == 1 {
-        result = Box::new(WaveformCollapseBuilder::derived_map(depth, result));
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        result = Box::new(PrefabBuilder::sectional(
-            depth,
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-            result,
-        ));
-    }
-
-    result = Box::new(PrefabBuilder::vaults(depth, result));
-
-    result
+pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
+    let mut builder = BuilderChain::new(depth);
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(RoomBasedStartingPosition::new());
+    builder.with(RoomBasedStairs::new());
+    builder
 }

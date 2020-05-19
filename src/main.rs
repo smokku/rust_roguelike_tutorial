@@ -1,5 +1,5 @@
 use legion::prelude::*;
-use rltk::{GameState, Point, Rltk};
+use rltk::{GameState, Point, RandomNumberGenerator, Rltk, RltkBuilder};
 
 mod components;
 pub use components::*;
@@ -376,17 +376,19 @@ impl State {
         self.mapgen_history.clear();
 
         // Build a new map
-        let mut builder = map_builders::random_builder(depth);
-        builder.build_map();
-        self.mapgen_history = builder.get_snapshot_history();
-        let map = builder.get_map();
+        let mut rng = self.resources.get_mut::<RandomNumberGenerator>().unwrap();
+        let mut builder = map_builders::random_builder(depth, &mut rng);
+        builder.build_map(&mut rng);
+        std::mem::drop(rng); // do not borrow self anymore
+        self.mapgen_history = builder.build_data.history.clone();
+        let map = builder.build_data.map.clone();
         self.resources.insert(map);
 
         // Spawn bad guys
         builder.spawn_entities(&mut self.world);
 
         // Place the player and update resources
-        let player_start = builder.get_starting_position();
+        let player_start = builder.build_data.starting_position.unwrap().clone();
         self.resources
             .insert(Point::new(player_start.x, player_start.y));
 
@@ -404,7 +406,6 @@ impl State {
 }
 
 fn main() -> rltk::BError {
-    use rltk::{RandomNumberGenerator, RltkBuilder};
     let mut context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build()
