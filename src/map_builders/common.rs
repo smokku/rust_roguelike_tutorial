@@ -109,6 +109,26 @@ pub fn get_central_starting_position(map: &Map) -> Position {
     starting_position
 }
 
+pub fn draw_corridor(map: &mut Map, x1: i32, y1: i32, x2: i32, y2: i32) {
+    let mut x = x1;
+    let mut y = y1;
+
+    while x != x2 || y != y2 {
+        if x < x2 {
+            x += 1;
+        } else if x > x2 {
+            x -= 1;
+        } else if y < y2 {
+            y += 1;
+        } else if y > y2 {
+            y -= 1;
+        }
+
+        let idx = map.xy_idx(x, y);
+        map.tiles[idx] = TileType::Floor;
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Symmetry {

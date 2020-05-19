@@ -62,6 +62,7 @@ impl SimpleMapBuilder {
                 build_data.take_snapshot();
             }
         }
+
         build_data.rooms = Some(rooms);
     }
 }
