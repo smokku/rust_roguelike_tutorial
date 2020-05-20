@@ -30,6 +30,14 @@ mod room_based_starting_position;
 use room_based_starting_position::RoomBasedStartingPosition;
 mod room_based_stairs;
 use room_based_stairs::RoomBasedStairs;
+mod area_starting_points;
+use area_starting_points::*;
+mod cull_unreachable;
+use cull_unreachable::CullUnreachable;
+mod voronoi_spawning;
+use voronoi_spawning::VoronoiSpawning;
+mod distant_exit;
+use distant_exit::DistantExit;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
@@ -130,9 +138,10 @@ pub trait MetaMapBuilder {
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(BspInteriorBuilder::new());
-    builder.with(RoomBasedSpawner::new());
-    builder.with(RoomBasedStartingPosition::new());
-    builder.with(RoomBasedStairs::new());
+    builder.start_with(CellularAutomataBuilder::new());
+    builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
+    builder.with(CullUnreachable::new());
+    builder.with(VoronoiSpawning::new());
+    builder.with(DistantExit::new());
     builder
 }
