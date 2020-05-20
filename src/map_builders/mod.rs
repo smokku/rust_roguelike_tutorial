@@ -138,7 +138,7 @@ pub trait MetaMapBuilder {
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(CellularAutomataBuilder::new());
+    builder.start_with(DrunkardsWalkBuilder::fearful_symmetry());
     builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
