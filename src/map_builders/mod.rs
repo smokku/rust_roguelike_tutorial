@@ -140,9 +140,13 @@ pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderCha
     let mut builder = BuilderChain::new(depth);
     builder.start_with(VoronoiCellBuilder::pythagoras());
     builder.with(WaveformCollapseBuilder::new());
+    builder.with(PrefabBuilder::vaults());
     builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
+    builder.with(PrefabBuilder::sectional(
+        prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    ));
     builder.with(DistantExit::new());
     builder
 }
