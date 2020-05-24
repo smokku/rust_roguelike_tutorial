@@ -39,21 +39,6 @@ use voronoi_spawning::VoronoiSpawning;
 mod distant_exit;
 use distant_exit::DistantExit;
 
-pub trait MapBuilder {
-    fn build_map(&mut self);
-    fn get_map(&self) -> Map;
-    fn get_starting_position(&self) -> Position;
-    fn get_snapshot_history(&self) -> Vec<Map>;
-    fn take_snapshot(&mut self);
-    fn get_spawn_list(&self) -> &Vec<(usize, String)>;
-
-    fn spawn_entities(&mut self, world: &mut World) {
-        for (idx, name) in self.get_spawn_list().iter() {
-            spawner::spawn_entity(world, idx, name);
-        }
-    }
-}
-
 pub struct BuilderMap {
     pub map: Map,
     pub starting_position: Option<Position>,
