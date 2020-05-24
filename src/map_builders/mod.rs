@@ -121,17 +121,63 @@ pub trait MetaMapBuilder {
     fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
 }
 
+/// Returns initial map builder and a bool,
+/// indicating whether or not we picked an algorithm that provides room data.
+pub fn random_initial_builder(
+    rng: &mut RandomNumberGenerator,
+) -> (Box<dyn InitialMapBuilder>, bool) {
+    let builder = rng.roll_dice(1, 18);
+    match builder {
+        1 => (BspDungeonBuilder::new(), true),
+        2 => (BspInteriorBuilder::new(), true),
+        3 => (CellularAutomataBuilder::new(), false),
+        4 => (DrunkardsWalkBuilder::open_area(), false),
+        5 => (DrunkardsWalkBuilder::open_halls(), false),
+        6 => (DrunkardsWalkBuilder::winding_passage(), false),
+        7 => (DrunkardsWalkBuilder::fat_passage(), false),
+        8 => (DrunkardsWalkBuilder::fearful_symmetry(), false),
+        9 => (MazeBuilder::new(), false),
+        10 => (DLABuilder::walk_inwards(), false),
+        11 => (DLABuilder::walk_outwards(), false),
+        12 => (DLABuilder::central_attractor(), false),
+        13 => (DLABuilder::insectoid(), false),
+        14 => (VoronoiCellBuilder::pythagoras(), false),
+        15 => (VoronoiCellBuilder::manhattan(), false),
+        16 => (VoronoiCellBuilder::chebyshev(), false),
+        17 => (
+            PrefabBuilder::constant(prefab_builder::prefab_levels::WFC_POPULATED),
+            false,
+        ),
+        _ => (SimpleMapBuilder::new(), true),
+    }
+}
+
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(VoronoiCellBuilder::pythagoras());
-    builder.with(WaveformCollapseBuilder::new());
+    let (random_starter, has_rooms) = random_initial_builder(rng);
+    builder.start_with(random_starter);
+    if has_rooms {
+        builder.with(RoomBasedStartingPosition::new());
+        builder.with(RoomBasedStairs::new());
+        builder.with(RoomBasedSpawner::new());
+    } else {
+        builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
+        builder.with(CullUnreachable::new());
+        builder.with(VoronoiSpawning::new());
+        builder.with(DistantExit::new());
+    }
+
+    if rng.roll_dice(1, 3) == 1 {
+        builder.with(WaveformCollapseBuilder::new());
+    }
+
+    if rng.roll_dice(1, 20) == 1 {
+        builder.with(PrefabBuilder::sectional(
+            prefab_builder::prefab_sections::UNDERGROUND_FORT,
+        ));
+    }
+
     builder.with(PrefabBuilder::vaults());
-    builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
-    builder.with(CullUnreachable::new());
-    builder.with(VoronoiSpawning::new());
-    builder.with(PrefabBuilder::sectional(
-        prefab_builder::prefab_sections::UNDERGROUND_FORT,
-    ));
-    builder.with(DistantExit::new());
+
     builder
 }
