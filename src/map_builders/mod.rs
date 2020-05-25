@@ -154,30 +154,37 @@ pub fn random_initial_builder(
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    let (random_starter, has_rooms) = random_initial_builder(rng);
-    builder.start_with(random_starter);
-    if has_rooms {
-        builder.with(RoomBasedStartingPosition::new());
-        builder.with(RoomBasedStairs::new());
-        builder.with(RoomBasedSpawner::new());
-    } else {
-        builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
-        builder.with(CullUnreachable::new());
-        builder.with(VoronoiSpawning::new());
-        builder.with(DistantExit::new());
-    }
-
-    if rng.roll_dice(1, 3) == 1 {
-        builder.with(WaveformCollapseBuilder::new());
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        builder.with(PrefabBuilder::sectional(
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-        ));
-    }
-
-    builder.with(PrefabBuilder::vaults());
-
+    builder.start_with(VoronoiCellBuilder::pythagoras());
+    builder.with(CellularAutomataBuilder::new());
+    builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
+    builder.with(CullUnreachable::new());
+    builder.with(VoronoiSpawning::new());
+    builder.with(DistantExit::new());
     builder
+    // let (random_starter, has_rooms) = random_initial_builder(rng);
+    // builder.start_with(random_starter);
+    // if has_rooms {
+    //     builder.with(RoomBasedStartingPosition::new());
+    //     builder.with(RoomBasedStairs::new());
+    //     builder.with(RoomBasedSpawner::new());
+    // } else {
+    //     builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
+    //     builder.with(CullUnreachable::new());
+    //     builder.with(VoronoiSpawning::new());
+    //     builder.with(DistantExit::new());
+    // }
+
+    // if rng.roll_dice(1, 3) == 1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+    // }
+
+    // if rng.roll_dice(1, 20) == 1 {
+    //     builder.with(PrefabBuilder::sectional(
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //     ));
+    // }
+
+    // builder.with(PrefabBuilder::vaults());
+
+    // builder
 }
