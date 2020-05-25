@@ -1,4 +1,4 @@
-use super::{paint, BuilderMap, InitialMapBuilder, Position, Symmetry, TileType};
+use super::{paint, BuilderMap, InitialMapBuilder, MetaMapBuilder, Position, Symmetry, TileType};
 use rltk::RandomNumberGenerator;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -20,6 +20,12 @@ pub struct DrunkardsWalkBuilder {
 }
 
 impl InitialMapBuilder for DrunkardsWalkBuilder {
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
+    }
+}
+
+impl MetaMapBuilder for DrunkardsWalkBuilder {
     fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.build(rng, build_data);
     }
@@ -50,7 +56,7 @@ impl DrunkardsWalkBuilder {
         })
     }
 
-    pub fn winding_passage() -> Box<Self> {
+    pub fn winding_passages() -> Box<Self> {
         Self::new(DrunkardSettings {
             spawn_mode: DrunkSpawnMode::Random,
             drunken_lifetime: 100,

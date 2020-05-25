@@ -133,7 +133,7 @@ pub fn random_initial_builder(
         3 => (CellularAutomataBuilder::new(), false),
         4 => (DrunkardsWalkBuilder::open_area(), false),
         5 => (DrunkardsWalkBuilder::open_halls(), false),
-        6 => (DrunkardsWalkBuilder::winding_passage(), false),
+        6 => (DrunkardsWalkBuilder::winding_passages(), false),
         7 => (DrunkardsWalkBuilder::fat_passage(), false),
         8 => (DrunkardsWalkBuilder::fearful_symmetry(), false),
         9 => (MazeBuilder::new(), false),
@@ -154,8 +154,8 @@ pub fn random_initial_builder(
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(VoronoiCellBuilder::pythagoras());
-    builder.with(CellularAutomataBuilder::new());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(DrunkardsWalkBuilder::winding_passages());
     builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
