@@ -42,6 +42,8 @@ mod room_exploder;
 use room_exploder::RoomExploder;
 mod room_corner_rounding;
 use room_corner_rounding::RoomCornerRounder;
+mod rooms_corridors_dogleg;
+use rooms_corridors_dogleg::DoglegCorridors;
 
 pub struct BuilderMap {
     pub map: Map,
@@ -158,12 +160,11 @@ pub fn random_initial_builder(
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(BspDungeonBuilder::new());
-    builder.with(RoomCornerRounder::new());
-    builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
-    builder.with(CullUnreachable::new());
-    builder.with(VoronoiSpawning::new());
-    builder.with(DistantExit::new());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(DoglegCorridors::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(RoomBasedStairs::new());
+    builder.with(RoomBasedStartingPosition::new());
     builder
     // let (random_starter, has_rooms) = random_initial_builder(rng);
     // builder.start_with(random_starter);
