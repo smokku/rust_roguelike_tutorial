@@ -66,7 +66,7 @@ impl DrunkardsWalkBuilder {
         })
     }
 
-    pub fn fat_passage() -> Box<Self> {
+    pub fn fat_passages() -> Box<Self> {
         Self::new(DrunkardSettings {
             spawn_mode: DrunkSpawnMode::Random,
             drunken_lifetime: 100,
