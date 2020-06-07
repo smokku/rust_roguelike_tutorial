@@ -1,16 +1,5 @@
-use super::{Map, Position, Rect, TileType};
-use rltk::RandomNumberGenerator;
+use super::{Map, TileType};
 use std::cmp::{max, min};
-use std::collections::HashMap;
-
-pub fn apply_room_to_map(map: &mut Map, room: &Rect) {
-    for y in room.y1 + 1..=room.y2 {
-        for x in room.x1 + 1..=room.x2 {
-            let idx = map.xy_idx(x, y);
-            map.tiles[idx] = TileType::Floor;
-        }
-    }
-}
 
 pub fn apply_horizontal_tunnel(map: &mut Map, x1: i32, x2: i32, y: i32) {
     for x in min(x1, x2)..=max(x1, x2) {

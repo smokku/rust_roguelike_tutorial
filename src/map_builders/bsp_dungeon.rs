@@ -1,4 +1,4 @@
-use super::{apply_room_to_map, draw_corridor, BuilderMap, InitialMapBuilder, Map, Rect, TileType};
+use super::{BuilderMap, InitialMapBuilder, Rect, TileType};
 use rltk::RandomNumberGenerator;
 
 pub struct BspDungeonBuilder {
@@ -35,11 +35,9 @@ impl BspDungeonBuilder {
             let rect = self.get_random_rect(rng);
             let candidate = self.get_room_candidate(&rect, rng);
 
-            if self.is_possible(&candidate, &build_data.map) {
-                apply_room_to_map(&mut build_data.map, &candidate);
+            if self.is_possible(&candidate, &build_data, &rooms) {
                 rooms.push(candidate);
                 self.partition_rect(&rect);
-                build_data.take_snapshot();
             }
 
             n_rooms += 1;
@@ -99,12 +97,16 @@ impl BspDungeonBuilder {
         result
     }
 
-    fn is_possible(&self, rect: &Rect, map: &Map) -> bool {
+    fn is_possible(&self, rect: &Rect, build_data: &BuilderMap, rooms: &Vec<Rect>) -> bool {
         let mut expanded = *rect;
         expanded.x1 -= 2;
         expanded.x2 += 2;
         expanded.y1 -= 2;
         expanded.y2 += 2;
+
+        if rooms.iter().any(|r| r.intersects(&rect)) {
+            return false;
+        }
 
         for y in expanded.y1..=expanded.y2 {
             for x in expanded.x1..=expanded.x2 {
@@ -114,15 +116,15 @@ impl BspDungeonBuilder {
                 if y < 1 {
                     return false;
                 }
-                if x > map.width - 2 {
+                if x > build_data.map.width - 2 {
                     return false;
                 }
-                if y > map.height - 2 {
+                if y > build_data.map.height - 2 {
                     return false;
                 }
 
-                let idx = map.xy_idx(x, y);
-                if map.tiles[idx] != TileType::Wall {
+                let idx = build_data.map.xy_idx(x, y);
+                if build_data.map.tiles[idx] != TileType::Wall {
                     return false;
                 }
             }
