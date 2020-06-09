@@ -264,29 +264,24 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(BspInteriorBuilder::new());
+    let type_roll = rng.roll_dice(1, 2);
+    match type_roll {
+        1 => random_room_builder(rng, &mut builder),
+        _ => random_shape_builder(rng, &mut builder),
+    }
+
+    if rng.roll_dice(1, 3) == 1 {
+        builder.with(WaveformCollapseBuilder::new());
+    }
+
+    if rng.roll_dice(1, 20) == 1 {
+        builder.with(PrefabBuilder::sectional(
+            prefab_builder::prefab_sections::UNDERGROUND_FORT,
+        ));
+    }
+
     builder.with(DoorPlacement::new());
-    builder.with(RoomBasedSpawner::new());
-    builder.with(RoomBasedStairs::new());
-    builder.with(RoomBasedStartingPosition::new());
+    builder.with(PrefabBuilder::vaults());
+
     builder
-    // let type_roll = rng.roll_dice(1, 2);
-    // match type_roll {
-    //     1 => random_room_builder(rng, &mut builder),
-    //     _ => random_shape_builder(rng, &mut builder),
-    // }
-
-    // if rng.roll_dice(1, 3) == 1 {
-    //     builder.with(WaveformCollapseBuilder::new());
-    // }
-
-    // if rng.roll_dice(1, 20) == 1 {
-    //     builder.with(PrefabBuilder::sectional(
-    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
-    //     ));
-    // }
-
-    // builder.with(PrefabBuilder::vaults());
-
-    // builder
 }
