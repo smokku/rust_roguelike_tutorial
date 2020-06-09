@@ -135,6 +135,7 @@ pub fn spawn_entity(world: &mut World, idx: &usize, name: &str) {
         "Rations" => rations(world, x, y),
         "Magic Mapping Scroll" => magic_mapping_scroll(world, x, y),
         "Bear Trap" => bear_trap(world, x, y),
+        "Door" => door(world, x, y),
         _ => {}
     }
 }
@@ -394,6 +395,24 @@ fn bear_trap(world: &mut World, x: i32, y: i32) {
                 name: "Bear Trap".to_string(),
             },
             InflictsDamage { damage: 6 },
+        )],
+    );
+}
+
+fn door(world: &mut World, x: i32, y: i32) {
+    world.insert(
+        (),
+        vec![(
+            Position { x, y },
+            Renderable {
+                glyph: rltk::to_cp437('+'),
+                fg: RGB::named(rltk::CHOCOLATE),
+                bg: RGB::named(rltk::BLACK),
+                render_order: 2,
+            },
+            Name {
+                name: "Door".to_string(),
+            },
         )],
     );
 }
