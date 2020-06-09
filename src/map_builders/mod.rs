@@ -54,6 +54,8 @@ mod rooms_corridors_nearest;
 use rooms_corridors_nearest::NearestCorridors;
 mod rooms_corridors_lines;
 use rooms_corridors_lines::StraightLineCorridors;
+mod room_corridor_spawner;
+use room_corridor_spawner::CorridorSpawner;
 
 pub struct BuilderMap {
     pub map: Map,
@@ -258,6 +260,7 @@ pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderCha
     builder.with(RoomSorter::new(RoomSort::LEFTMOST));
     builder.with(StraightLineCorridors::new());
     builder.with(RoomBasedSpawner::new());
+    builder.with(CorridorSpawner::new());
     builder.with(RoomBasedStairs::new());
     builder.with(RoomBasedStartingPosition::new());
     builder
