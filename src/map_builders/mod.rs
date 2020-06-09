@@ -56,6 +56,8 @@ mod rooms_corridors_lines;
 use rooms_corridors_lines::StraightLineCorridors;
 mod room_corridor_spawner;
 use room_corridor_spawner::CorridorSpawner;
+mod door_placement;
+use door_placement::DoorPlacement;
 
 pub struct BuilderMap {
     pub map: Map,
@@ -262,23 +264,33 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    let type_roll = rng.roll_dice(1, 2);
-    match type_roll {
-        1 => random_room_builder(rng, &mut builder),
-        _ => random_shape_builder(rng, &mut builder),
-    }
-
-    if rng.roll_dice(1, 3) == 1 {
-        builder.with(WaveformCollapseBuilder::new());
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        builder.with(PrefabBuilder::sectional(
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-        ));
-    }
-
-    builder.with(PrefabBuilder::vaults());
-
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(RoomDrawer::new());
+    builder.with(RoomSorter::new(RoomSort::LEFTMOST));
+    builder.with(StraightLineCorridors::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(CorridorSpawner::new());
+    builder.with(RoomBasedStairs::new());
+    builder.with(RoomBasedStartingPosition::new());
+    builder.with(DoorPlacement::new());
     builder
+    // let type_roll = rng.roll_dice(1, 2);
+    // match type_roll {
+    //     1 => random_room_builder(rng, &mut builder),
+    //     _ => random_shape_builder(rng, &mut builder),
+    // }
+
+    // if rng.roll_dice(1, 3) == 1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+    // }
+
+    // if rng.roll_dice(1, 20) == 1 {
+    //     builder.with(PrefabBuilder::sectional(
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //     ));
+    // }
+
+    // builder.with(PrefabBuilder::vaults());
+
+    // builder
 }
