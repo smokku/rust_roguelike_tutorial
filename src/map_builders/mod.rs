@@ -249,6 +249,10 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
         )),
     }
 
+    random_shape_finish(rng, builder);
+}
+
+fn random_shape_finish(rng: &mut rltk::RandomNumberGenerator, builder: &mut BuilderChain) {
     // Set the start to the center and cull
     builder.with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER));
     builder.with(CullUnreachable::new());
@@ -272,6 +276,7 @@ pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderCha
 
     if rng.roll_dice(1, 3) == 1 {
         builder.with(WaveformCollapseBuilder::new());
+        random_shape_finish(rng, &mut builder);
     }
 
     if rng.roll_dice(1, 20) == 1 {
