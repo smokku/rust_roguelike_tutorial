@@ -264,15 +264,11 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
 
 pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(depth);
-    builder.start_with(SimpleMapBuilder::new());
-    builder.with(RoomDrawer::new());
-    builder.with(RoomSorter::new(RoomSort::LEFTMOST));
-    builder.with(StraightLineCorridors::new());
+    builder.start_with(BspInteriorBuilder::new());
+    builder.with(DoorPlacement::new());
     builder.with(RoomBasedSpawner::new());
-    builder.with(CorridorSpawner::new());
     builder.with(RoomBasedStairs::new());
     builder.with(RoomBasedStartingPosition::new());
-    builder.with(DoorPlacement::new());
     builder
     // let type_roll = rng.roll_dice(1, 2);
     // match type_roll {

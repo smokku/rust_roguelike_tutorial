@@ -27,6 +27,14 @@ impl DoorPlacement {
                     }
                 }
             }
+        } else {
+            // There are no corridors - scan for possible places
+            let tiles = build_data.map.tiles.clone();
+            for (i, tile) in tiles.iter().enumerate() {
+                if *tile == TileType::Floor && self.door_possible(build_data, i) {
+                    build_data.spawn_list.push((i, "Door".to_string()));
+                }
+            }
         }
     }
 
