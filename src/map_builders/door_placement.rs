@@ -16,7 +16,7 @@ impl DoorPlacement {
         Box::new(DoorPlacement {})
     }
 
-    fn doors(&mut self, _rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn doors(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         if let Some(halls_original) = &build_data.corridors {
             let halls = halls_original.clone(); // To avoid nested borrowing
             for hall in halls.iter() {
@@ -31,7 +31,10 @@ impl DoorPlacement {
             // There are no corridors - scan for possible places
             let tiles = build_data.map.tiles.clone();
             for (i, tile) in tiles.iter().enumerate() {
-                if *tile == TileType::Floor && self.door_possible(build_data, i) {
+                if *tile == TileType::Floor
+                    && self.door_possible(build_data, i)
+                    && rng.roll_dice(1, 3) == 1
+                {
                     build_data.spawn_list.push((i, "Door".to_string()));
                 }
             }
