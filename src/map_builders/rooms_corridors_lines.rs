@@ -50,8 +50,10 @@ impl StraightLineCorridors {
                 let mut corridor = Vec::new();
                 for cell in line.iter() {
                     let idx = build_data.map.xy_idx(cell.x, cell.y);
-                    build_data.map.tiles[idx] = TileType::Floor;
-                    corridor.push(idx);
+                    if build_data.map.tiles[idx] != TileType::Floor {
+                        build_data.map.tiles[idx] = TileType::Floor;
+                        corridor.push(idx);
+                    }
                 }
                 connected.insert(i);
                 corridors.push(corridor);
