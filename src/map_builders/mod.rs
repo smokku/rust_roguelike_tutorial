@@ -184,6 +184,13 @@ fn random_room_builder(rng: &mut RandomNumberGenerator, builder: &mut BuilderCha
 
         builder.with(RoomDrawer::new());
 
+        let modifier_roll = rng.roll_dice(1, 6);
+        match modifier_roll {
+            1 => builder.with(RoomExploder::new()),
+            2 => builder.with(RoomCornerRounder::new()),
+            _ => {}
+        }
+
         let corridor_roll = rng.roll_dice(1, 4);
         match corridor_roll {
             1 => builder.with(DoglegCorridors::new()),
@@ -195,13 +202,6 @@ fn random_room_builder(rng: &mut RandomNumberGenerator, builder: &mut BuilderCha
         let corridor_spawn_roll = rng.roll_dice(1, 2);
         if corridor_spawn_roll == 1 {
             builder.with(CorridorSpawner::new());
-        }
-
-        let modifier_roll = rng.roll_dice(1, 6);
-        match modifier_roll {
-            1 => builder.with(RoomExploder::new()),
-            2 => builder.with(RoomCornerRounder::new()),
-            _ => {}
         }
     }
 
