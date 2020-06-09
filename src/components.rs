@@ -219,3 +219,13 @@ pub struct EntryTrigger;
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "bfd72dfa-446e-49bc-99ab-259eb6e0cbf3"]
 pub struct SingleActivation;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "4e87fd9c-ce64-4464-bf0f-ea1bca2d3827"]
+pub struct BlocksVisibility;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "9998e1d1-bc60-4ebc-8edd-cf7b112df34b"]
+pub struct Door {
+    pub open: bool,
+}

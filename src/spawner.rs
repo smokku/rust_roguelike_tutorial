@@ -401,7 +401,7 @@ fn bear_trap(world: &mut World, x: i32, y: i32) {
 
 fn door(world: &mut World, x: i32, y: i32) {
     world.insert(
-        (),
+        (BlocksTile, BlocksVisibility),
         vec![(
             Position { x, y },
             Renderable {
@@ -413,6 +413,7 @@ fn door(world: &mut World, x: i32, y: i32) {
             Name {
                 name: "Door".to_string(),
             },
+            Door { open: false },
         )],
     );
 }

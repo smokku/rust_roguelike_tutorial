@@ -392,6 +392,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<DefenseBonus>(),
         ComponentRegistration::of::<ParticleLifetime>(),
         ComponentRegistration::of::<HungerClock>(),
+        ComponentRegistration::of::<Door>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),
@@ -404,6 +405,7 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<Hidden>(),
         TagRegistration::of::<EntryTrigger>(),
         TagRegistration::of::<SingleActivation>(),
+        TagRegistration::of::<BlocksVisibility>(),
     ];
 
     SerializeImpl {
