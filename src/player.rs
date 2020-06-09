@@ -1,7 +1,4 @@
-use super::{
-    gamelog::GameLog, CombatStats, HungerClock, HungerState, Item, Map, Monster, Player, Position,
-    RunState, State, TileType, Viewshed, WantsToMelee, WantsToPickupItem,
-};
+use super::{components::*, gamelog::GameLog, Map, RunState, State, TileType, Viewshed};
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
@@ -10,6 +7,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
     let map = gs.resources.get::<Map>().unwrap();
 
     let mut wants_to_melee = Vec::new();
+    let mut open_doors = Vec::new();
     unsafe {
         let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
         for (entity, (mut pos, mut viewshed)) in query.iter_entities_unchecked(&gs.world) {
@@ -25,6 +23,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
                     // Store attack target
                     wants_to_melee.push((entity, *potential_target));
                     continue; // So we don't move after attacking
+                }
+                if let Some(_door) = gs.world.get_component::<Door>(*potential_target) {
+                    open_doors.push(*potential_target);
+                    viewshed.dirty = true;
                 }
             }
 
@@ -47,6 +49,22 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
         gs.world
             .add_component(*entity, WantsToMelee { target: *target })
             .expect("Add target failed");
+    }
+
+    // open doors
+    for entity in open_doors.iter() {
+        if let Some(mut door) = gs.world.get_component_mut::<Door>(*entity) {
+            door.open = true;
+        }
+        gs.world
+            .remove_tag::<BlocksVisibility>(*entity)
+            .expect("Cannot remove BlocksVisibility tag");
+        gs.world
+            .remove_tag::<BlocksTile>(*entity)
+            .expect("Cannot remove BlocksTile tag");
+        if let Some(mut glyph) = gs.world.get_component_mut::<Renderable>(*entity) {
+            glyph.glyph = rltk::to_cp437('/');
+        }
     }
 }
 
