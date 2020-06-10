@@ -9,6 +9,7 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod camera;
 mod damage_system;
 mod gamelog;
 mod gui;
@@ -84,20 +85,7 @@ impl GameState for State {
         match runstate {
             RunState::MainMenu { .. } | RunState::GameOver => {}
             _ => {
-                draw_map(&*self.resources.get::<Map>().unwrap(), ctx);
-
-                // Draw Renderable entities
-                let map = self.resources.get::<Map>().unwrap();
-                let query = <(Read<Position>, Read<Renderable>)>::query().filter(!tag::<Hidden>());
-                let mut data = query.iter(&self.world).collect::<Vec<_>>();
-                data.sort_by(|a, b| b.1.render_order.cmp(&a.1.render_order));
-                for (pos, render) in data.iter() {
-                    let idx = map.xy_idx(pos.x, pos.y);
-                    if map.visible_tiles[idx] {
-                        ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
-                    }
-                }
-
+                camera::render_camera(&self.world, &self.resources, ctx);
                 gui::draw_ui(&self.world, &self.resources, ctx);
             }
         }
