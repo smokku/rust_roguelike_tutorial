@@ -31,8 +31,8 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
             }
 
             if !map.blocked[dest_idx] {
-                pos.x = min(79, max(0, dest_x));
-                pos.y = min(49, max(0, dest_y));
+                pos.x = min(map.width - 1, max(0, dest_x));
+                pos.y = min(map.height - 1, max(0, dest_y));
 
                 viewshed.dirty = true;
 

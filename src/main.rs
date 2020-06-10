@@ -365,7 +365,7 @@ impl State {
 
         // Build a new map
         let mut rng = self.resources.get_mut::<RandomNumberGenerator>().unwrap();
-        let mut builder = map_builders::random_builder(depth, &mut rng);
+        let mut builder = map_builders::random_builder(depth, 64, 64, &mut rng);
         builder.build_map(&mut rng);
         std::mem::drop(rng); // do not borrow self anymore
         self.mapgen_history = builder.build_data.history.clone();
@@ -416,7 +416,7 @@ fn main() -> rltk::BError {
     // Insert placeholder values for "Start Game" map generator
     resources.insert(Point::new(0, 0));
     resources.insert(spawner::player(&mut world, 0, 0));
-    resources.insert(Map::new(1));
+    resources.insert(Map::new(1, 64, 64));
 
     let schedules = vec![
         Schedule::builder()
