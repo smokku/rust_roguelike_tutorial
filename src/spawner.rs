@@ -1,4 +1,4 @@
-use super::{components::*, map::MAP_WIDTH, random_table::RandomTable, Map, Rect, TileType};
+use super::{components::*, random_table::RandomTable, Map, Rect, TileType};
 use legion::prelude::*;
 use rltk::{FontCharType, RandomNumberGenerator, RGB};
 use std::collections::HashMap;
@@ -117,9 +117,9 @@ pub fn spawn_region(
 }
 
 // Spawn a named entity at the location
-pub fn spawn_entity(world: &mut World, idx: &usize, name: &str) {
-    let x = (*idx % MAP_WIDTH) as i32;
-    let y = (*idx / MAP_WIDTH) as i32;
+pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
+    let x = *idx as i32 % map.width;
+    let y = *idx as i32 / map.width;
 
     match name.as_ref() {
         "Goblin" => goblin(world, x, y),

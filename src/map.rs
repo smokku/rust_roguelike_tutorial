@@ -4,10 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use type_uuid::TypeUuid;
 
-pub const MAP_WIDTH: usize = 80;
-pub const MAP_HEIGHT: usize = 43;
-pub const MAP_COUNT: usize = MAP_WIDTH * MAP_HEIGHT;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
@@ -59,15 +55,16 @@ impl Map {
     }
 
     /// Generates an empty map, consisting entirely of solid walls
-    pub fn new(depth: i32) -> Self {
+    pub fn new(depth: i32, width: i32, height: i32) -> Self {
+        let map_tile_count = (width * height) as usize;
         Map {
-            tiles: vec![TileType::Wall; MAP_COUNT],
-            width: MAP_WIDTH as i32,
-            height: MAP_HEIGHT as i32,
-            revealed_tiles: vec![false; MAP_COUNT],
-            visible_tiles: vec![false; MAP_COUNT],
-            blocked: vec![false; MAP_COUNT],
-            tile_content: vec![Vec::new(); MAP_COUNT],
+            tiles: vec![TileType::Wall; map_tile_count],
+            width,
+            height,
+            revealed_tiles: vec![false; map_tile_count],
+            visible_tiles: vec![false; map_tile_count],
+            blocked: vec![false; map_tile_count],
+            tile_content: vec![Vec::new(); map_tile_count],
             depth,
             bloodstains: HashSet::new(),
             view_blocked: HashSet::new(),
@@ -207,7 +204,7 @@ pub fn draw_map(map: &Map, ctx: &mut Rltk) {
 
         // Move the coordinates
         x += 1;
-        if x > 79 {
+        if x > map.width - 1 {
             x = 0;
             y += 1;
         }

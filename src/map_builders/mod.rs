@@ -87,12 +87,12 @@ pub struct BuilderChain {
 }
 
 impl BuilderChain {
-    pub fn new(depth: i32) -> Self {
+    pub fn new(depth: i32, width: i32, height: i32) -> Self {
         BuilderChain {
             starter: None,
             builders: Vec::new(),
             build_data: BuilderMap {
-                map: Map::new(depth),
+                map: Map::new(depth, width, height),
                 starting_position: None,
                 rooms: None,
                 corridors: None,
@@ -123,14 +123,14 @@ impl BuilderChain {
         }
 
         // Build additional layers in turn
-        for metabuilder in self.builders.iter_mut() {
-            metabuilder.build_map(rng, &mut self.build_data);
+        for meta_builder in self.builders.iter_mut() {
+            meta_builder.build_map(rng, &mut self.build_data);
         }
     }
 
     pub fn spawn_entities(&mut self, world: &mut World) {
         for (idx, name) in self.build_data.spawn_list.iter() {
-            spawner::spawn_entity(world, idx, name);
+            spawner::spawn_entity(world, &self.build_data.map, idx, name);
         }
     }
 }
@@ -266,8 +266,13 @@ fn random_shape_finish(rng: &mut rltk::RandomNumberGenerator, builder: &mut Buil
     builder.with(DistantExit::new());
 }
 
-pub fn random_builder(depth: i32, rng: &mut RandomNumberGenerator) -> BuilderChain {
-    let mut builder = BuilderChain::new(depth);
+pub fn random_builder(
+    depth: i32,
+    width: i32,
+    height: i32,
+    rng: &mut RandomNumberGenerator,
+) -> BuilderChain {
+    let mut builder = BuilderChain::new(depth, width, height);
     let type_roll = rng.roll_dice(1, 2);
     match type_roll {
         1 => random_room_builder(rng, &mut builder),
