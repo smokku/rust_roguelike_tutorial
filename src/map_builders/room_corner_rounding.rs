@@ -37,7 +37,7 @@ impl RoomCornerRounder {
         }
     }
 
-    fn build(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn build(&mut self, _rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         let rooms = if let Some(rooms_builder) = &build_data.rooms {
             rooms_builder.clone()
         } else {

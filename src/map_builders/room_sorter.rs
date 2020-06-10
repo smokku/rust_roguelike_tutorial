@@ -1,4 +1,4 @@
-use super::{BuilderMap, MetaMapBuilder, Rect};
+use super::{BuilderMap, MetaMapBuilder};
 use rltk::RandomNumberGenerator;
 
 pub enum RoomSort {
@@ -24,7 +24,7 @@ impl RoomSorter {
     }
 
     fn sorter(&mut self, _rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
-        let mut rooms = build_data.rooms.as_mut().unwrap();
+        let rooms = build_data.rooms.as_mut().unwrap();
         match self.sort_by {
             RoomSort::LEFTMOST => rooms.sort_by(|a, b| a.x1.cmp(&b.x1)),
             RoomSort::RIGHTMOST => rooms.sort_by(|a, b| b.x2.cmp(&a.x2)),

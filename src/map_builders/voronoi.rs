@@ -20,6 +20,7 @@ impl InitialMapBuilder for VoronoiCellBuilder {
 }
 
 impl VoronoiCellBuilder {
+    #[allow(dead_code)]
     pub fn new() -> Box<Self> {
         Box::new(VoronoiCellBuilder {
             n_seeds: 64,

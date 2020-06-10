@@ -16,7 +16,7 @@ impl NearestCorridors {
         Box::new(NearestCorridors {})
     }
 
-    fn corridors(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn corridors(&mut self, _rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         let rooms = if let Some(rooms_builder) = &build_data.rooms {
             rooms_builder.clone()
         } else {

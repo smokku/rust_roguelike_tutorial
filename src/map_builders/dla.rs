@@ -28,6 +28,7 @@ impl MetaMapBuilder for DLABuilder {
 }
 
 impl DLABuilder {
+    #[allow(dead_code)]
     pub fn new() -> Box<Self> {
         Box::new(DLABuilder {
             algorithm: DLAAlgorithm::WalkInwards,
@@ -73,6 +74,7 @@ impl DLABuilder {
         })
     }
 
+    #[allow(dead_code)]
     pub fn heavy_erosion() -> Box<Self> {
         Box::new(DLABuilder {
             algorithm: DLAAlgorithm::WalkInwards,

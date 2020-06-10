@@ -37,12 +37,14 @@ impl InitialMapBuilder for PrefabBuilder {
 }
 
 impl PrefabBuilder {
+    #[allow(dead_code)]
     pub fn new() -> Box<Self> {
         Box::new(PrefabBuilder {
             mode: PrefabMode::RoomVaults,
         })
     }
 
+    #[allow(dead_code)]
     pub fn rex_level(template: &'static str) -> Box<Self> {
         Box::new(PrefabBuilder {
             mode: PrefabMode::RexLevel { template },
