@@ -1,4 +1,4 @@
-use super::{components::*, gamelog::GameLog, rex_assets::RexAssets, Map, RunState, State};
+use super::{camera, components::*, gamelog::GameLog, rex_assets::RexAssets, Map, RunState, State};
 use legion::prelude::*;
 use rltk::{FontCharType, Point, Rltk, VirtualKeyCode, RGB};
 
@@ -86,16 +86,24 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
 
 fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let map = resources.get::<Map>().unwrap();
+    let (min_x, _max_x, min_y, _max_y) = camera::get_screen_bounds(resources, ctx);
 
     let mouse_pos = ctx.mouse_pos();
-    if mouse_pos.0 >= map.width || mouse_pos.1 >= map.height {
+    let mouse_map_pos = (mouse_pos.0 + min_x, mouse_pos.1 + min_y);
+    if mouse_map_pos.0 >= map.width - 1
+        || mouse_map_pos.1 >= map.height - 1
+        || mouse_map_pos.0 < 1
+        || mouse_map_pos.1 < 1
+    {
+        return;
+    }
+    if !map.visible_tiles[map.xy_idx(mouse_map_pos.0, mouse_map_pos.1)] {
         return;
     }
     let mut tooltip = Vec::new();
     let query = <(Read<Name>, Read<Position>)>::query().filter(!tag::<Hidden>());
     for (name, position) in query.iter(&world) {
-        let idx = map.xy_idx(position.x, position.y);
-        if position.x == mouse_pos.0 && position.y == mouse_pos.1 && map.visible_tiles[idx] {
+        if position.x == mouse_map_pos.0 && position.y == mouse_map_pos.1 {
             tooltip.push(name.name.to_string());
         }
     }

@@ -4,8 +4,7 @@ use rltk::{Point, Rltk, RGB};
 
 const SHOW_BOUNDARIES: bool = true;
 
-pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
-    let map = resources.get::<Map>().unwrap();
+pub fn get_screen_bounds(resources: &Resources, ctx: &Rltk) -> (i32, i32, i32, i32) {
     let player_pos = resources.get::<Point>().unwrap();
     let (x_chars, y_chars) = ctx.get_char_size();
 
@@ -16,6 +15,13 @@ pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let max_x = min_x + x_chars as i32;
     let min_y = player_pos.y - center_y;
     let max_y = min_y + y_chars as i32;
+
+    (min_x, max_x, min_y, max_y)
+}
+
+pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
+    let map = resources.get::<Map>().unwrap();
+    let (min_x, max_x, min_y, max_y) = get_screen_bounds(resources, ctx);
 
     // Draw the Map
     let map_width = map.width - 1;
