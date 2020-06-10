@@ -98,7 +98,9 @@ impl GameState for State {
                     runstate = self.mapgen_next_state.unwrap();
                 } else {
                     ctx.cls();
-                    draw_map(&self.mapgen_history[self.mapgen_index], ctx);
+                    if self.mapgen_index < self.mapgen_history.len() {
+                        camera::render_debug_map(&self.mapgen_history[self.mapgen_index], ctx);
+                    }
 
                     const MAX_VISUALIZATION_TIME: i32 = 15000; // Let the visualization be around 15 seconds
                     let frame_timer: f32 = f32::max(
