@@ -1,6 +1,12 @@
 mod item_structs;
-use item_structs::Prefabs;
+use item_structs::*;
 mod prefab_master;
+pub use prefab_master::*;
+use std::sync::Mutex;
+
+lazy_static! {
+    pub static ref PREFABS: Mutex<PrefabMaster> = Mutex::new(PrefabMaster::empty());
+}
 
 rltk::embedded_resource!(PREFAB_FILE, "../../prefabs/spawns.ron");
 
@@ -16,5 +22,6 @@ pub fn load_prefabs() {
         std::str::from_utf8(&raw_data).expect("Unable to convert to a valid UTF-8 string.");
 
     let decoder: Prefabs = ron::de::from_str(&raw_string).expect("Unable to parse RON");
-    rltk::console::log(format!("{:?}", decoder));
+
+    PREFABS.lock().unwrap().load(decoder);
 }
