@@ -20,6 +20,7 @@ mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
 mod particle_system;
+mod prefabs;
 mod random_table;
 mod rex_assets;
 mod saveload_system;
@@ -401,6 +402,8 @@ fn main() -> rltk::BError {
         .build()
         .unwrap();
     context.with_post_scanlines(true);
+
+    prefabs::load_prefabs();
 
     let universe = Universe::new();
     let mut world = universe.create_world();
