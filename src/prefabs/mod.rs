@@ -1,5 +1,6 @@
 mod item_structs;
-use item_structs::Prefab;
+use item_structs::Prefabs;
+mod prefab_master;
 
 rltk::embedded_resource!(PREFAB_FILE, "../../prefabs/spawns.ron");
 
@@ -14,6 +15,6 @@ pub fn load_prefabs() {
     let raw_string =
         std::str::from_utf8(&raw_data).expect("Unable to convert to a valid UTF-8 string.");
 
-    let decoder: Prefab = ron::de::from_str(&raw_string).expect("Unable to parse RON");
+    let decoder: Prefabs = ron::de::from_str(&raw_string).expect("Unable to parse RON");
     rltk::console::log(format!("{:?}", decoder));
 }
