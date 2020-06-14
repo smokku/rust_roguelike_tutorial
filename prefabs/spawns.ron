@@ -1,4 +1,5 @@
-Spawns(
+#![enable(implicit_some)]
+(
     items: [
         (
             name: "Health Potion",
@@ -10,7 +11,7 @@ Spawns(
             ),
             consumable: (
                 effects: {
-                    provides_healing: 8,
+                    "provides_healing": "8",
                 }
             )
         ),
@@ -24,8 +25,8 @@ Spawns(
             ),
             consumable: (
                 effects: {
-                    ranged: 6,
-                    damage: 20,
+                    "ranged": "6",
+                    "damage": "20",
                 }
             )
         ),

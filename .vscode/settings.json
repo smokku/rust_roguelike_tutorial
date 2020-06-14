@@ -22,6 +22,7 @@
         "saveload",
         "scanlines",
         "schedulable",
+        "structs",
         "unequip",
         "unserializable",
         "uuid",
