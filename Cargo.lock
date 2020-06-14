@@ -1282,6 +1282,7 @@ name = "rust_roguelike_tutorial"
 version = "0.1.0"
 dependencies = [
  "erased-serde 0.3.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "legion 0.2.1",
  "rltk 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",

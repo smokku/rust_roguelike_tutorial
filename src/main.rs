@@ -462,3 +462,6 @@ fn main() -> rltk::BError {
 
     rltk::main_loop(context, gs)
 }
+
+#[macro_use]
+extern crate lazy_static;

@@ -1,7 +1,7 @@
 use super::Prefabs;
 use std::collections::HashMap;
 
-struct PrefabMaster {
+pub struct PrefabMaster {
     prefabs: Prefabs,
     item_index: HashMap<String, usize>,
 }
