@@ -1,4 +1,4 @@
-use super::{components::*, random_table::RandomTable, Map, Rect, TileType};
+use super::{components::*, prefabs::*, random_table::RandomTable, Map, Rect, TileType};
 use legion::prelude::*;
 use rltk::{FontCharType, RandomNumberGenerator, RGB};
 use std::collections::HashMap;
@@ -121,13 +121,21 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
     let x = *idx as i32 % map.width;
     let y = *idx as i32 / map.width;
 
+    let item_result = spawn_named_item(
+        &PREFABS.lock().unwrap(),
+        world,
+        name,
+        SpawnType::AtPosition { x, y },
+    );
+    if item_result.is_some() {
+        return;
+    }
+
     match name.as_ref() {
         "Goblin" => goblin(world, x, y),
         "Orc" => orc(world, x, y),
-        "Health Potion" => health_potion(world, x, y),
         "Fireball Scroll" => fireball_scroll(world, x, y),
         "Confusion Scroll" => confusion_scroll(world, x, y),
-        "Magic Missile Scroll" => magic_missile_scroll(world, x, y),
         "Dagger" => dagger(world, x, y),
         "Shield" => shield(world, x, y),
         "Longsword" => longsword(world, x, y),
@@ -172,45 +180,6 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
                 defense: 1,
                 power: 4,
             },
-        )],
-    );
-}
-
-fn health_potion(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('¡'),
-                fg: RGB::named(rltk::MAGENTA),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Health Potion".to_string(),
-            },
-            ProvidesHealing { heal_amount: 8 },
-        )],
-    );
-}
-
-fn magic_missile_scroll(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437(')'),
-                fg: RGB::named(rltk::CYAN),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Magic Missile Scroll".to_string(),
-            },
-            Ranged { range: 6 },
-            InflictsDamage { damage: 8 },
         )],
     );
 }
