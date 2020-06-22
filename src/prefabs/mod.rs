@@ -7,11 +7,14 @@ mod item_structs;
 use item_structs::*;
 mod mob_structs;
 use mob_structs::*;
+mod prop_structs;
+use prop_structs::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Prefabs {
     pub items: Vec<Item>,
     pub mobs: Vec<Mob>,
+    pub props: Vec<Prop>,
 }
 
 lazy_static! {

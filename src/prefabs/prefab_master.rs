@@ -10,6 +10,7 @@ pub struct PrefabMaster {
     prefabs: Prefabs,
     item_index: HashMap<String, usize>,
     mob_index: HashMap<String, usize>,
+    prop_index: HashMap<String, usize>,
 }
 
 impl PrefabMaster {
@@ -18,9 +19,11 @@ impl PrefabMaster {
             prefabs: Prefabs {
                 items: Vec::new(),
                 mobs: Vec::new(),
+                props: Vec::new(),
             },
             item_index: HashMap::new(),
             mob_index: HashMap::new(),
+            prop_index: HashMap::new(),
         }
     }
 
@@ -32,6 +35,9 @@ impl PrefabMaster {
         }
         for (i, mob) in self.prefabs.mobs.iter().enumerate() {
             self.mob_index.insert(mob.name.clone(), i);
+        }
+        for (i, prop) in self.prefabs.props.iter().enumerate() {
+            self.prop_index.insert(prop.name.clone(), i);
         }
     }
 }
@@ -66,6 +72,8 @@ pub fn spawn_named_entity(
         return spawn_named_item(prefabs, world, key, pos);
     } else if prefabs.mob_index.contains_key(key) {
         return spawn_named_mob(prefabs, world, key, pos);
+    } else if prefabs.prop_index.contains_key(key) {
+        return spawn_named_prop(prefabs, world, key, pos);
     }
 
     None
@@ -269,6 +277,91 @@ pub fn spawn_named_mob(
             world
                 .add_tag(entity, BlocksTile {})
                 .expect("Cannot add tag");
+        }
+
+        return Some(entity);
+    }
+
+    None
+}
+
+pub fn spawn_named_prop(
+    prefabs: &PrefabMaster,
+    world: &mut World,
+    key: &str,
+    pos: SpawnType,
+) -> Option<Entity> {
+    if prefabs.prop_index.contains_key(key) {
+        let prop_template = &prefabs.prefabs.props[prefabs.prop_index[key]];
+        let entity = world.insert(
+            (Monster,),
+            vec![(Name {
+                name: prop_template.name.clone(),
+            },)],
+        )[0];
+
+        spawn_position(world, entity, pos);
+
+        // Renderable
+        if let Some(renderable) = &prop_template.renderable {
+            world
+                .add_component(entity, get_renderable_component(renderable))
+                .expect("Cannot add component");
+        }
+
+        if let Some(hidden) = prop_template.hidden {
+            if hidden {
+                world.add_tag(entity, Hidden {}).expect("Cannot add tag");
+            }
+        }
+        if let Some(blocks_tile) = prop_template.blocks_tile {
+            if blocks_tile {
+                world
+                    .add_tag(entity, BlocksTile {})
+                    .expect("Cannot add tag");
+            }
+        }
+        if let Some(blocks_visibility) = prop_template.blocks_visibility {
+            if blocks_visibility {
+                world
+                    .add_tag(entity, BlocksVisibility {})
+                    .expect("Cannot add tag");
+            }
+        }
+        if let Some(door_open) = prop_template.door_open {
+            world
+                .add_component(entity, Door { open: door_open })
+                .expect("Cannot add component");
+        }
+        if let Some(entry_trigger) = &prop_template.entry_trigger {
+            world
+                .add_tag(entity, EntryTrigger {})
+                .expect("Cannot add tag");
+            for (effect, value) in entry_trigger.effects.iter() {
+                match effect.as_str() {
+                    "damage" => {
+                        world
+                            .add_component(
+                                entity,
+                                InflictsDamage {
+                                    damage: value.parse().unwrap(),
+                                },
+                            )
+                            .expect("Cannot add component");
+                    }
+                    "single_activation" => {
+                        world
+                            .add_tag(entity, SingleActivation {})
+                            .expect("Cannot add tag");
+                    }
+                    effect_name => {
+                        rltk::console::log(format!(
+                            "Warning: consumable effect {} not implemented.",
+                            effect_name
+                        ));
+                    }
+                }
+            }
         }
 
         return Some(entity);
