@@ -134,10 +134,6 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
     match name.as_ref() {
         "Goblin" => goblin(world, x, y),
         "Orc" => orc(world, x, y),
-        "Dagger" => dagger(world, x, y),
-        "Shield" => shield(world, x, y),
-        "Longsword" => longsword(world, x, y),
-        "Tower Shield" => tower_shield(world, x, y),
         "Bear Trap" => bear_trap(world, x, y),
         "Door" => door(world, x, y),
         _ => {}
@@ -176,94 +172,6 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
                 defense: 1,
                 power: 4,
             },
-        )],
-    );
-}
-
-fn dagger(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item,),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('/'),
-                fg: RGB::named(rltk::CYAN),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Dagger".to_string(),
-            },
-            Equippable {
-                slot: EquipmentSlot::Melee,
-            },
-            MeleePowerBonus { power: 2 },
-        )],
-    );
-}
-
-fn shield(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item,),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('('),
-                fg: RGB::named(rltk::CYAN),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Shield".to_string(),
-            },
-            Equippable {
-                slot: EquipmentSlot::Shield,
-            },
-            DefenseBonus { defense: 1 },
-        )],
-    );
-}
-
-fn longsword(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item,),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('/'),
-                fg: RGB::named(rltk::YELLOW),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Longsword".to_string(),
-            },
-            Equippable {
-                slot: EquipmentSlot::Melee,
-            },
-            MeleePowerBonus { power: 4 },
-        )],
-    );
-}
-
-fn tower_shield(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item,),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('('),
-                fg: RGB::named(rltk::YELLOW),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Tower Shield".to_string(),
-            },
-            Equippable {
-                slot: EquipmentSlot::Shield,
-            },
-            DefenseBonus { defense: 3 },
         )],
     );
 }

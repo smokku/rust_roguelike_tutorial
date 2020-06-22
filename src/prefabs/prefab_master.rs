@@ -144,6 +144,56 @@ pub fn spawn_named_item(
             }
         }
 
+        // Weapon
+        if let Some(weapon) = &item_template.weapon {
+            match weapon.range.as_str() {
+                "melee" => {
+                    world
+                        .add_component(
+                            entity,
+                            Equippable {
+                                slot: EquipmentSlot::Melee,
+                            },
+                        )
+                        .expect("Cannot add component");
+                    world
+                        .add_component(
+                            entity,
+                            MeleePowerBonus {
+                                power: weapon.power_bonus,
+                            },
+                        )
+                        .expect("Cannot add component");
+                }
+                range_type => {
+                    rltk::console::log(format!(
+                        "Warning: range type {} not implemented.",
+                        range_type
+                    ));
+                }
+            }
+        }
+
+        // Shield
+        if let Some(shield) = &item_template.shield {
+            world
+                .add_component(
+                    entity,
+                    Equippable {
+                        slot: EquipmentSlot::Shield,
+                    },
+                )
+                .expect("Cannot add component");
+            world
+                .add_component(
+                    entity,
+                    DefenseBonus {
+                        defense: shield.defense_bonus,
+                    },
+                )
+                .expect("Cannot add component");
+        }
+
         return Some(entity);
     }
 
