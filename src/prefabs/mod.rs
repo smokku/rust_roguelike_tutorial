@@ -1,8 +1,18 @@
-mod item_structs;
-use item_structs::*;
+use serde::Deserialize;
+use std::sync::Mutex;
+
 mod prefab_master;
 pub use prefab_master::*;
-use std::sync::Mutex;
+mod item_structs;
+use item_structs::*;
+mod mob_structs;
+use mob_structs::*;
+
+#[derive(Deserialize, Debug)]
+pub struct Prefabs {
+    pub items: Vec<Item>,
+    pub mobs: Vec<Mob>,
+}
 
 lazy_static! {
     pub static ref PREFABS: Mutex<PrefabMaster> = Mutex::new(PrefabMaster::empty());

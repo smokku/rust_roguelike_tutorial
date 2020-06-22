@@ -1,6 +1,6 @@
 use super::{components::*, prefabs::*, random_table::RandomTable, Map, Rect, TileType};
 use legion::prelude::*;
-use rltk::{FontCharType, RandomNumberGenerator, RGB};
+use rltk::{RandomNumberGenerator, RGB};
 use std::collections::HashMap;
 
 const MAX_MONSTERS: i32 = 4;
@@ -121,7 +121,7 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
     let x = *idx as i32 % map.width;
     let y = *idx as i32 / map.width;
 
-    let item_result = spawn_named_item(
+    let item_result = spawn_named_entity(
         &PREFABS.lock().unwrap(),
         world,
         name,
@@ -132,48 +132,10 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
     }
 
     match name.as_ref() {
-        "Goblin" => goblin(world, x, y),
-        "Orc" => orc(world, x, y),
         "Bear Trap" => bear_trap(world, x, y),
         "Door" => door(world, x, y),
         _ => {}
     }
-}
-
-fn orc(world: &mut World, x: i32, y: i32) {
-    monster(world, x, y, rltk::to_cp437('o'), "Orc");
-}
-fn goblin(world: &mut World, x: i32, y: i32) {
-    monster(world, x, y, rltk::to_cp437('g'), "Goblin");
-}
-
-fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
-    world.insert(
-        (Monster, BlocksTile),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph,
-                fg: RGB::named(rltk::RED),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 1,
-            },
-            Viewshed {
-                visible_tiles: Vec::new(),
-                range: 8,
-                dirty: true,
-            },
-            Name {
-                name: name.to_string(),
-            },
-            CombatStats {
-                max_hp: 16,
-                hp: 16,
-                defense: 1,
-                power: 4,
-            },
-        )],
-    );
 }
 
 fn bear_trap(world: &mut World, x: i32, y: i32) {
