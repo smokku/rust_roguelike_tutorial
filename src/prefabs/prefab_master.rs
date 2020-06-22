@@ -104,6 +104,36 @@ pub fn spawn_named_item(
                             )
                             .expect("Cannot add component");
                     }
+                    "area_of_effect" => {
+                        world
+                            .add_component(
+                                entity,
+                                AreaOfEffect {
+                                    radius: value.parse().unwrap(),
+                                },
+                            )
+                            .expect("Cannot add component");
+                    }
+                    "confusion" => {
+                        world
+                            .add_component(
+                                entity,
+                                Confusion {
+                                    turns: value.parse().unwrap(),
+                                },
+                            )
+                            .expect("Cannot add component");
+                    }
+                    "magic_mapping" => {
+                        world
+                            .add_tag(entity, MagicMapper {})
+                            .expect("Cannot add tag");
+                    }
+                    "food" => {
+                        world
+                            .add_tag(entity, ProvidesFood {})
+                            .expect("Cannot add tag");
+                    }
                     effect_name => {
                         rltk::console::log(format!(
                             "Warning: consumable effect {} not implemented.",
