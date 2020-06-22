@@ -134,14 +134,10 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
     match name.as_ref() {
         "Goblin" => goblin(world, x, y),
         "Orc" => orc(world, x, y),
-        "Fireball Scroll" => fireball_scroll(world, x, y),
-        "Confusion Scroll" => confusion_scroll(world, x, y),
         "Dagger" => dagger(world, x, y),
         "Shield" => shield(world, x, y),
         "Longsword" => longsword(world, x, y),
         "Tower Shield" => tower_shield(world, x, y),
-        "Rations" => rations(world, x, y),
-        "Magic Mapping Scroll" => magic_mapping_scroll(world, x, y),
         "Bear Trap" => bear_trap(world, x, y),
         "Door" => door(world, x, y),
         _ => {}
@@ -180,47 +176,6 @@ fn monster(world: &mut World, x: i32, y: i32, glyph: FontCharType, name: &str) {
                 defense: 1,
                 power: 4,
             },
-        )],
-    );
-}
-
-fn fireball_scroll(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437(')'),
-                fg: RGB::named(rltk::ORANGE),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Fireball Scroll".to_string(),
-            },
-            Ranged { range: 6 },
-            InflictsDamage { damage: 20 },
-            AreaOfEffect { radius: 3 },
-        )],
-    );
-}
-
-fn confusion_scroll(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437(')'),
-                fg: RGB::named(rltk::PINK),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Confusion Scroll".to_string(),
-            },
-            Ranged { range: 6 },
-            Confusion { turns: 4 },
         )],
     );
 }
@@ -309,42 +264,6 @@ fn tower_shield(world: &mut World, x: i32, y: i32) {
                 slot: EquipmentSlot::Shield,
             },
             DefenseBonus { defense: 3 },
-        )],
-    );
-}
-
-fn rations(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, ProvidesFood, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('%'),
-                fg: RGB::named(rltk::GREEN),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Rations".to_string(),
-            },
-        )],
-    );
-}
-
-fn magic_mapping_scroll(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Item, MagicMapper, Consumable),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437(')'),
-                fg: RGB::named(rltk::CYAN3),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Scroll of Magic Mapping".to_string(),
-            },
         )],
     );
 }
