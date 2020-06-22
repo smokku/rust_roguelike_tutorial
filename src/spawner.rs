@@ -131,47 +131,5 @@ pub fn spawn_entity(world: &mut World, map: &Map, idx: &usize, name: &str) {
         return;
     }
 
-    match name.as_ref() {
-        "Bear Trap" => bear_trap(world, x, y),
-        "Door" => door(world, x, y),
-        _ => {}
-    }
-}
-
-fn bear_trap(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (Hidden, EntryTrigger, SingleActivation),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('^'),
-                fg: RGB::named(rltk::RED),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Bear Trap".to_string(),
-            },
-            InflictsDamage { damage: 6 },
-        )],
-    );
-}
-
-fn door(world: &mut World, x: i32, y: i32) {
-    world.insert(
-        (BlocksTile, BlocksVisibility),
-        vec![(
-            Position { x, y },
-            Renderable {
-                glyph: rltk::to_cp437('+'),
-                fg: RGB::named(rltk::CHOCOLATE),
-                bg: RGB::named(rltk::BLACK),
-                render_order: 2,
-            },
-            Name {
-                name: "Door".to_string(),
-            },
-            Door { open: false },
-        )],
-    );
+    rltk::console::log(format!("WARNING: Don't know how to spawn [{}]!", name));
 }
