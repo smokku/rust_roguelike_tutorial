@@ -99,7 +99,9 @@ pub fn spawn_region(
 
     // Actually spawn the monsters
     for (idx, spawn) in spawn_points.iter() {
-        spawn_list.push((*idx, (*spawn).clone()));
+        if let Some(spawn) = spawn {
+            spawn_list.push((*idx, (*spawn).clone()));
+        }
     }
 }
 
