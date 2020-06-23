@@ -1,7 +1,7 @@
 use super::{Prefabs, SpawnTableEntry};
 use crate::{components::*, random_table::RandomTable};
 use legion::prelude::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub enum SpawnType {
     AtPosition { x: i32, y: i32 },
@@ -31,14 +31,46 @@ impl PrefabMaster {
     pub fn load(&mut self, prefabs: Prefabs) {
         self.prefabs = prefabs;
         self.item_index = HashMap::new();
+
+        let mut used_names = HashSet::<String>::new();
         for (i, item) in self.prefabs.items.iter().enumerate() {
+            if used_names.contains(&item.name) {
+                rltk::console::log(format!(
+                    "WARNING - duplicate item name in prefabs [{}]",
+                    item.name
+                ));
+            }
             self.item_index.insert(item.name.clone(), i);
+            used_names.insert(item.name.clone());
         }
         for (i, mob) in self.prefabs.mobs.iter().enumerate() {
+            if used_names.contains(&mob.name) {
+                rltk::console::log(format!(
+                    "WARNING - duplicate mob name in prefabs [{}]",
+                    mob.name
+                ));
+            }
             self.mob_index.insert(mob.name.clone(), i);
+            used_names.insert(mob.name.clone());
         }
         for (i, prop) in self.prefabs.props.iter().enumerate() {
+            if used_names.contains(&prop.name) {
+                rltk::console::log(format!(
+                    "WARNING - duplicate prop name in prefabs [{}]",
+                    prop.name
+                ));
+            }
             self.prop_index.insert(prop.name.clone(), i);
+            used_names.insert(prop.name.clone());
+        }
+
+        for spawn in self.prefabs.spawn_table.iter() {
+            if !used_names.contains(&spawn.name) {
+                rltk::console::log(format!(
+                    "WARNING - Spawn tables references unspecified entity [{}]",
+                    spawn.name
+                ));
+            }
         }
     }
 }
