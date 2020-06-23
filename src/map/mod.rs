@@ -4,12 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use type_uuid::TypeUuid;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum TileType {
-    Wall,
-    Floor,
-    DownStairs,
-}
+mod tile_type;
+pub use tile_type::{tile_cost, tile_opaque, tile_walkable, TileType};
 
 #[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[uuid = "09e57cda-e925-47f0-a3f6-107c86fa76bd"]
@@ -44,7 +40,7 @@ impl Map {
 
     pub fn populate_blocked(&mut self) {
         for (i, tile) in self.tiles.iter_mut().enumerate() {
-            self.blocked[i] = *tile == TileType::Wall;
+            self.blocked[i] = !tile_walkable(*tile);
         }
     }
 
@@ -74,7 +70,7 @@ impl Map {
 
 impl BaseMap for Map {
     fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx] == TileType::Wall || self.view_blocked.contains(&idx)
+        idx >= self.tiles.len() || tile_opaque(self.tiles[idx]) || self.view_blocked.contains(&idx)
     }
 
     fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
@@ -82,33 +78,34 @@ impl BaseMap for Map {
         let x = idx as i32 % self.width;
         let y = idx as i32 / self.width;
         let w = self.width as usize;
+        let tt = self.tiles[idx];
 
         // Cardinal directions
         if self.is_exit_valid(x - 1, y) {
-            exits.push((idx - 1, 1.0))
+            exits.push((idx - 1, tile_cost(tt)));
         };
         if self.is_exit_valid(x + 1, y) {
-            exits.push((idx + 1, 1.0))
+            exits.push((idx + 1, tile_cost(tt)));
         };
         if self.is_exit_valid(x, y - 1) {
-            exits.push((idx - w, 1.0))
+            exits.push((idx - w, tile_cost(tt)));
         };
         if self.is_exit_valid(x, y + 1) {
-            exits.push((idx + w, 1.0))
+            exits.push((idx + w, tile_cost(tt)));
         };
 
         // Diagonals
         if self.is_exit_valid(x - 1, y - 1) {
-            exits.push((idx - 1 - w, 1.45))
+            exits.push((idx - 1 - w, tile_cost(tt) * 1.45));
         };
         if self.is_exit_valid(x + 1, y - 1) {
-            exits.push((idx + 1 - w, 1.45))
+            exits.push((idx + 1 - w, tile_cost(tt) * 1.45));
         };
         if self.is_exit_valid(x - 1, y + 1) {
-            exits.push((idx - 1 + w, 1.45))
+            exits.push((idx - 1 + w, tile_cost(tt) * 1.45));
         };
         if self.is_exit_valid(x + 1, y + 1) {
-            exits.push((idx + 1 + w, 1.45))
+            exits.push((idx + 1 + w, tile_cost(tt) * 1.45));
         };
 
         exits
