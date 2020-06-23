@@ -1,4 +1,4 @@
-use super::{spawner, Map, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER};
+use super::{spawner, tile_walkable, Map, Position, Rect, TileType, SHOW_MAPGEN_VISUALIZER};
 use legion::prelude::*;
 use rltk::RandomNumberGenerator;
 
