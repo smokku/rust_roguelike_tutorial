@@ -21,6 +21,18 @@ impl InitialMapBuilder for TownBuilder {
     }
 }
 
+enum BuildingTag {
+    Pub,
+    Temple,
+    Blacksmith,
+    Clothier,
+    Alchemist,
+    PlayerHouse,
+    Hovel,
+    Abandoned,
+    Unassigned,
+}
+
 impl TownBuilder {
     pub fn new() -> Box<Self> {
         Box::new(TownBuilder {})
@@ -42,11 +54,8 @@ impl TownBuilder {
         build_data.map.tiles[exit_idx] = TileType::DownStairs;
         build_data.take_snapshot();
 
-        let mut building_size = Vec::new();
-        for (i, (_bx, _by, bw, bh)) in buildings.iter().enumerate() {
-            building_size.push((i, bw * bh));
-        }
-        building_size.sort_by(|a, b| b.1.cmp(&a.1));
+        let building_size = self.sort_buildings(&buildings);
+        self.building_factory(rng, build_data, &buildings, &building_size);
 
         // Start in the pub
         let (pub_x, pub_y, pub_w, pub_h) = &buildings[building_size[0].0];
@@ -288,6 +297,48 @@ impl TownBuilder {
                 }
             }
             build_data.take_snapshot();
+        }
+    }
+
+    fn sort_buildings(
+        &mut self,
+        buildings: &[(i32, i32, i32, i32)],
+    ) -> Vec<(usize, i32, BuildingTag)> {
+        let mut building_size: Vec<(usize, i32, BuildingTag)> = Vec::new();
+        for (i, (_bx, _by, bw, bh)) in buildings.iter().enumerate() {
+            building_size.push((i, bw * bh, BuildingTag::Unassigned));
+        }
+        building_size.sort_by(|a, b| b.1.cmp(&a.1));
+
+        for (i, b) in building_size.iter_mut().enumerate() {
+            b.2 = match i {
+                0 => BuildingTag::Pub,
+                1 => BuildingTag::Temple,
+                2 => BuildingTag::Blacksmith,
+                3 => BuildingTag::Clothier,
+                4 => BuildingTag::Alchemist,
+                5 => BuildingTag::PlayerHouse,
+                _ => BuildingTag::Hovel,
+            }
+        }
+        let last_index = building_size.len() - 1;
+        building_size[last_index].2 = BuildingTag::Abandoned;
+
+        building_size
+    }
+
+    fn building_factory(
+        &mut self,
+        rng: &mut rltk::RandomNumberGenerator,
+        build_data: &mut BuilderMap,
+        buildings: &[(i32, i32, i32, i32)],
+        building_index: &[(usize, i32, BuildingTag)],
+    ) {
+        for (i, building) in buildings.iter().enumerate() {
+            let build_type = &building_index[i].2;
+            match build_type {
+                _ => {}
+            }
         }
     }
 }
