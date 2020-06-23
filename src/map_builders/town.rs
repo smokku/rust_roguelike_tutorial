@@ -6,7 +6,7 @@ pub fn town_builder(
     depth: i32,
     width: i32,
     height: i32,
-    rng: &mut RandomNumberGenerator,
+    _rng: &mut RandomNumberGenerator,
 ) -> BuilderChain {
     let mut chain = BuilderChain::new(depth, width, height);
     chain.start_with(TownBuilder::new());
