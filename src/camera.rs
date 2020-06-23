@@ -24,14 +24,11 @@ pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let (min_x, max_x, min_y, max_y) = get_screen_bounds(resources, ctx);
 
     // Draw the Map
-    let map_width = map.width - 1;
-    let map_height = map.height - 1;
-
     let mut y = 0;
     for ty in min_y..max_y {
         let mut x = 0;
         for tx in min_x..max_x {
-            if tx > 0 && tx < map_width && ty > 0 && ty < map_height {
+            if tx >= 0 && tx < map.width && ty >= 0 && ty < map.height {
                 let idx = map.xy_idx(tx, ty);
                 if map.revealed_tiles[idx] {
                     let (glyph, fg, bg) = get_tile_glyph(idx, &*map);
@@ -60,10 +57,10 @@ pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
         if map.visible_tiles[idx] {
             let entity_screen_x = pos.x - min_x;
             let entity_screen_y = pos.y - min_y;
-            if entity_screen_x > 0
-                && entity_screen_x < map_width
-                && entity_screen_y > 0
-                && entity_screen_y < map_height
+            if entity_screen_x >= 0
+                && entity_screen_x < map.width
+                && entity_screen_y >= 0
+                && entity_screen_y < map.height
             {
                 ctx.set(
                     entity_screen_x,
@@ -96,7 +93,7 @@ pub fn render_debug_map(map: &Map, ctx: &mut Rltk) {
     for ty in min_y..max_y {
         let mut x = 0;
         for tx in min_x..max_x {
-            if tx > 0 && tx < map_width && ty > 0 && ty < map_height {
+            if tx >= 0 && tx < map_width && ty >= 0 && ty < map_height {
                 let idx = map.xy_idx(tx, ty);
                 if map.revealed_tiles[idx] {
                     let (glyph, fg, bg) = get_tile_glyph(idx, &*map);
