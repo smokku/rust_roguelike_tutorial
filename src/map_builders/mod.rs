@@ -58,6 +58,8 @@ mod room_corridor_spawner;
 use room_corridor_spawner::CorridorSpawner;
 mod door_placement;
 use door_placement::DoorPlacement;
+mod town;
+use town::town_builder;
 
 pub struct BuilderMap {
     pub map: Map,
@@ -294,4 +296,17 @@ pub fn random_builder(
     builder.with(PrefabBuilder::vaults());
 
     builder
+}
+
+pub fn level_builder(
+    depth: i32,
+    width: i32,
+    height: i32,
+    rng: &mut RandomNumberGenerator,
+) -> BuilderChain {
+    rltk::console::log(format!("Depth: {}", depth));
+    match depth {
+        1 => town_builder(depth, width, height, rng),
+        _ => random_builder(depth, width, height, rng),
+    }
 }
