@@ -9,9 +9,12 @@ mod mob_structs;
 use mob_structs::*;
 mod prop_structs;
 use prop_structs::*;
+mod spawn_table_structs;
+use spawn_table_structs::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Prefabs {
+    pub spawn_table: Vec<SpawnTableEntry>,
     pub items: Vec<Item>,
     pub mobs: Vec<Mob>,
     pub props: Vec<Prop>,

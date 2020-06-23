@@ -1,5 +1,5 @@
-use super::Prefabs;
-use crate::components::*;
+use super::{Prefabs, SpawnTableEntry};
+use crate::{components::*, random_table::RandomTable};
 use legion::prelude::*;
 use std::collections::HashMap;
 
@@ -17,6 +17,7 @@ impl PrefabMaster {
     pub fn empty() -> Self {
         PrefabMaster {
             prefabs: Prefabs {
+                spawn_table: Vec::new(),
                 items: Vec::new(),
                 mobs: Vec::new(),
                 props: Vec::new(),
@@ -80,13 +81,13 @@ pub fn spawn_named_entity(
 }
 
 pub fn spawn_named_item(
-    prefabs: &PrefabMaster,
+    pm: &PrefabMaster,
     world: &mut World,
     key: &str,
     pos: SpawnType,
 ) -> Option<Entity> {
-    if prefabs.item_index.contains_key(key) {
-        let item_template = &prefabs.prefabs.items[prefabs.item_index[key]];
+    if pm.item_index.contains_key(key) {
+        let item_template = &pm.prefabs.items[pm.item_index[key]];
         let entity = world.insert(
             (Item,),
             vec![(Name {
@@ -237,13 +238,13 @@ pub fn spawn_named_item(
 }
 
 pub fn spawn_named_mob(
-    prefabs: &PrefabMaster,
+    pm: &PrefabMaster,
     world: &mut World,
     key: &str,
     pos: SpawnType,
 ) -> Option<Entity> {
-    if prefabs.mob_index.contains_key(key) {
-        let mob_template = &prefabs.prefabs.mobs[prefabs.mob_index[key]];
+    if pm.mob_index.contains_key(key) {
+        let mob_template = &pm.prefabs.mobs[pm.mob_index[key]];
         let entity = world.insert(
             (Monster,),
             vec![(
@@ -286,13 +287,13 @@ pub fn spawn_named_mob(
 }
 
 pub fn spawn_named_prop(
-    prefabs: &PrefabMaster,
+    pm: &PrefabMaster,
     world: &mut World,
     key: &str,
     pos: SpawnType,
 ) -> Option<Entity> {
-    if prefabs.prop_index.contains_key(key) {
-        let prop_template = &prefabs.prefabs.props[prefabs.prop_index[key]];
+    if pm.prop_index.contains_key(key) {
+        let prop_template = &pm.prefabs.props[pm.prop_index[key]];
         let entity = world.insert(
             (Monster,),
             vec![(Name {
@@ -368,4 +369,24 @@ pub fn spawn_named_prop(
     }
 
     None
+}
+
+pub fn get_spawn_table_for_depth(pm: &PrefabMaster, depth: i32) -> RandomTable {
+    let available_options: Vec<&SpawnTableEntry> = pm
+        .prefabs
+        .spawn_table
+        .iter()
+        .filter(|entry| entry.min_depth <= depth && depth <= entry.max_depth)
+        .collect();
+
+    let mut rt = RandomTable::new();
+    for entry in available_options.iter() {
+        let mut weight = entry.weight;
+        if entry.add_map_depth_to_weight.is_some() {
+            weight += depth;
+        }
+        rt = rt.add(entry.name.clone(), weight);
+    }
+
+    rt
 }
