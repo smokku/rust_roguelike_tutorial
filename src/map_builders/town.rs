@@ -41,6 +41,7 @@ impl TownBuilder {
         let (mut available_building_tiles, wall_gap_y) = self.town_walls(rng, build_data);
         let mut buildings = self.buildings(rng, build_data, &mut available_building_tiles);
         let doors = self.add_doors(rng, build_data, &mut buildings, wall_gap_y);
+        self.add_paths(build_data, &doors);
 
         // Make visible for screenshot
         for t in build_data.map.visible_tiles.iter_mut() {
@@ -180,7 +181,7 @@ impl TownBuilder {
         // Outline buildings
         let map_clone = build_data.map.clone();
         for y in 2..map_clone.height - 2 {
-            for x in 32..map_clone.width - 2 {
+            for x in 33..map_clone.width - 2 {
                 let idx = map_clone.xy_idx(x, y);
                 if map_clone.tiles[idx] == TileType::WoodFloor {
                     let mut non_floor_neighbors = 0;
@@ -231,5 +232,50 @@ impl TownBuilder {
         build_data.take_snapshot();
 
         doors
+    }
+
+    fn add_paths(&mut self, build_data: &mut BuilderMap, doors: &[usize]) {
+        let mut roads = Vec::new();
+        for y in 0..build_data.map.height {
+            for x in 0..build_data.map.width {
+                let idx = build_data.map.xy_idx(x, y);
+                if build_data.map.tiles[idx] == TileType::Road {
+                    roads.push(idx);
+                }
+            }
+        }
+
+        build_data.map.populate_blocked();
+        for door_idx in doors.iter() {
+            let mut nearest_roads = Vec::new();
+            let door_pt = rltk::Point::new(
+                *door_idx as i32 % build_data.map.width as i32,
+                *door_idx as i32 / build_data.map.width as i32,
+            );
+            for r in roads.iter() {
+                nearest_roads.push((
+                    *r,
+                    rltk::DistanceAlg::PythagorasSquared.distance2d(
+                        door_pt,
+                        rltk::Point::new(
+                            *r as i32 % build_data.map.width as i32,
+                            *r as i32 / build_data.map.width as i32,
+                        ),
+                    ),
+                ))
+            }
+            nearest_roads.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
+            let destination = nearest_roads[0].0;
+            let path = rltk::a_star_search(*door_idx, destination, &mut build_data.map);
+            if path.success {
+                for step in path.steps.iter() {
+                    let idx = *step as usize;
+                    build_data.map.tiles[idx] = TileType::Road;
+                    roads.push(idx);
+                }
+            }
+            build_data.take_snapshot();
+        }
     }
 }
