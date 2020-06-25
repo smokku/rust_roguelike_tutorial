@@ -174,6 +174,61 @@
 
     mobs: [
         (
+            name: "Barkeep",
+            renderable: (
+                glyph: '☺',
+                fg: "#EE82EE",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            stats: (
+                max_hp: 16,
+                hp: 16,
+                defense: 1,
+                power: 4,
+            ),
+            vision_range: 4,
+            ai: "bystander",
+        ),
+        (
+            name: "Shady Salesman",
+            renderable: (
+                glyph: 'h',
+                fg: "#EE82EE",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            stats: (
+                max_hp: 16,
+                hp: 16,
+                defense: 1,
+                power: 4,
+            ),
+            vision_range: 4,
+            ai: "bystander",
+        ),
+        (
+            name: "Patron",
+            renderable: (
+                glyph: '☺',
+                fg: "#AAAAAA",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            stats: (
+                max_hp: 16,
+                hp: 16,
+                defense: 1,
+                power: 4,
+            ),
+            vision_range: 4,
+            ai: "bystander",
+        ),
+
+        (
             name: "Orc",
             renderable: (
                 glyph: 'o',
@@ -189,6 +244,7 @@
                 power: 4,
             ),
             vision_range: 8,
+            ai: "melee",
         ),
         (
             name: "Goblin",
@@ -206,6 +262,7 @@
                 power: 3,
             ),
             vision_range: 8,
+            ai: "melee",
         ),
         (
             name: "Kobold",
@@ -223,6 +280,7 @@
                 power: 2,
             ),
             vision_range : 4,
+            ai: "melee",
         ),
     ],
 
