@@ -278,7 +278,7 @@ pub fn spawn_named_mob(
     if pm.mob_index.contains_key(key) {
         let mob_template = &pm.prefabs.mobs[pm.mob_index[key]];
         let entity = world.insert(
-            (Monster,),
+            (),
             vec![(
                 Name {
                     name: mob_template.name.clone(),
@@ -298,6 +298,15 @@ pub fn spawn_named_mob(
         )[0];
 
         spawn_position(world, entity, pos);
+
+        // AI Type
+        match mob_template.ai.as_str() {
+            "melee" => world.add_tag(entity, Monster {}).expect("Cannot add tag"),
+            "bystander" => world.add_tag(entity, Bystander {}).expect("Cannot add tag"),
+            ai_type => {
+                rltk::console::log(format!("Warning: AI type {} not implemented.", ai_type));
+            }
+        }
 
         // Renderable
         if let Some(renderable) = &mob_template.renderable {

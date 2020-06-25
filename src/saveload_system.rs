@@ -406,6 +406,7 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<EntryTrigger>(),
         TagRegistration::of::<SingleActivation>(),
         TagRegistration::of::<BlocksVisibility>(),
+        TagRegistration::of::<Bystander>(),
     ];
 
     SerializeImpl {

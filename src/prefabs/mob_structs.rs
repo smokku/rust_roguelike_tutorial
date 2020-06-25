@@ -8,6 +8,7 @@ pub struct Mob {
     pub blocks_tile: bool,
     pub stats: MobStats,
     pub vision_range: i32,
+    pub ai: String,
 }
 
 #[derive(Deserialize, Debug)]

@@ -229,3 +229,7 @@ pub struct BlocksVisibility;
 pub struct Door {
     pub open: bool,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "8937d655-3173-4646-9ff2-de4cce96285f"]
+pub struct Bystander;
