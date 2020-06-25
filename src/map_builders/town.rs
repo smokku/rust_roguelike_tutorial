@@ -331,7 +331,33 @@ impl TownBuilder {
             let building = &buildings[*i];
             match build_type {
                 BuildingTag::Pub => self.build_pub(building, build_data, rng),
+                BuildingTag::Temple => self.build_temple(building, build_data, rng),
                 _ => {}
+            }
+        }
+    }
+
+    fn random_building_spawn(
+        &mut self,
+        building: &(i32, i32, i32, i32),
+        build_data: &mut BuilderMap,
+        rng: &mut RandomNumberGenerator,
+        to_place: &mut Vec<&str>,
+        player_idx: usize,
+    ) {
+        to_place.reverse(); // So it is easy to pop() in order
+        let (bx, by, bw, bh) = *building;
+        for y in by..by + bh {
+            for x in bx..bx + bw {
+                let idx = build_data.map.xy_idx(x, y);
+                if build_data.map.tiles[idx] == TileType::WoodFloor
+                    && idx != player_idx
+                    && rng.roll_dice(1, 3) == 1
+                {
+                    if let Some(entity_tag) = to_place.pop() {
+                        build_data.spawn_list.push((idx, entity_tag.to_string()));
+                    }
+                };
             }
         }
     }
@@ -364,19 +390,25 @@ impl TownBuilder {
             "Table",
             "Chair",
         ];
-        to_place.reverse(); // So it is easy to pop() in order
-        for y in pub_y..pub_y + pub_h {
-            for x in pub_x..pub_x + pub_w {
-                let idx = build_data.map.xy_idx(x, y);
-                if build_data.map.tiles[idx] == TileType::WoodFloor
-                    && idx != player_idx
-                    && rng.roll_dice(1, 3) == 1
-                {
-                    if let Some(entity_tag) = to_place.pop() {
-                        build_data.spawn_list.push((idx, entity_tag.to_string()));
-                    }
-                };
-            }
-        }
+        self.random_building_spawn(building, build_data, rng, &mut to_place, player_idx);
+    }
+
+    fn build_temple(
+        &mut self,
+        building: &(i32, i32, i32, i32),
+        build_data: &mut BuilderMap,
+        rng: &mut RandomNumberGenerator,
+    ) {
+        // Place items
+        let mut to_place = vec![
+            "Priest",
+            "Parishioner",
+            "Parishioner",
+            "Chair",
+            "Chair",
+            "Candle",
+            "Candle",
+        ];
+        self.random_building_spawn(building, build_data, rng, &mut to_place, usize::MAX);
     }
 }
