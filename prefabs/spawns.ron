@@ -313,5 +313,33 @@
             blocks_visibility: true,
             door_open: false,
         ),
+
+        (
+            name: "Keg",
+            renderable: (
+                glyph: 'φ',
+                fg: "#AAAAAA",
+                bg: "#000000",
+                order: 2
+            ),
+        ),
+        (
+            name: "Table",
+            renderable: (
+                glyph: '╦',
+                fg: "#AAAAAA",
+                bg: "#000000",
+                order: 2,
+            ),
+        ),
+        (
+            name: "Chair",
+            renderable: (
+                glyph: '└',
+                fg: "#AAAAAA",
+                bg: "#000000",
+                order: 2,
+            ),
+        ),
     ],
 )

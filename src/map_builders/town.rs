@@ -362,7 +362,7 @@ impl TownBuilder {
             "Table",
             "Chair",
             "Table",
-            "chair",
+            "Chair",
         ];
         to_place.reverse(); // So it is easy to pop() in order
         for y in pub_y..pub_y + pub_h {
