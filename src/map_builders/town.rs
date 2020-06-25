@@ -57,13 +57,6 @@ impl TownBuilder {
         let building_size = self.sort_buildings(&buildings);
         self.building_factory(rng, build_data, &buildings, &building_size);
 
-        // Start in the pub
-        let (pub_x, pub_y, pub_w, pub_h) = &buildings[building_size[0].0];
-        build_data.starting_position = Some(Position {
-            x: pub_x + pub_w / 2,
-            y: pub_y + pub_h / 2,
-        });
-
         // Make visible for screenshot
         for t in build_data.map.visible_tiles.iter_mut() {
             *t = true;
@@ -202,7 +195,7 @@ impl TownBuilder {
         // Outline buildings
         let map_clone = build_data.map.clone();
         for y in 2..map_clone.height - 2 {
-            for x in 33..map_clone.width - 2 {
+            for x in 31..map_clone.width - 2 {
                 let idx = map_clone.xy_idx(x, y);
                 if map_clone.tiles[idx] == TileType::WoodFloor {
                     let mut non_floor_neighbors = 0;
@@ -337,7 +330,52 @@ impl TownBuilder {
         for (i, _size, build_type) in building_index.iter() {
             let building = &buildings[*i];
             match build_type {
+                BuildingTag::Pub => self.build_pub(building, build_data, rng),
                 _ => {}
+            }
+        }
+    }
+
+    fn build_pub(
+        &mut self,
+        building: &(i32, i32, i32, i32),
+        build_data: &mut BuilderMap,
+        rng: &mut RandomNumberGenerator,
+    ) {
+        // Place the Player
+        let (pub_x, pub_y, pub_w, pub_h) = *building;
+        let player_x = pub_x + pub_w / 2;
+        let player_y = pub_y + pub_h / 2;
+        let player_idx = build_data.map.xy_idx(player_x, player_y);
+        build_data.starting_position = Some(Position {
+            x: player_x,
+            y: player_y,
+        });
+
+        // Place other items
+        let mut to_place = vec![
+            "Barkeep",
+            "Shady Salesman",
+            "Patron",
+            "Patron",
+            "Keg",
+            "Table",
+            "Chair",
+            "Table",
+            "chair",
+        ];
+        to_place.reverse(); // So it is easy to pop() in order
+        for y in pub_y..pub_y + pub_h {
+            for x in pub_x..pub_x + pub_w {
+                let idx = build_data.map.xy_idx(x, y);
+                if build_data.map.tiles[idx] == TileType::WoodFloor
+                    && idx != player_idx
+                    && rng.roll_dice(1, 3) == 1
+                {
+                    if let Some(entity_tag) = to_place.pop() {
+                        build_data.spawn_list.push((idx, entity_tag.to_string()));
+                    }
+                };
             }
         }
     }
