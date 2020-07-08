@@ -9,8 +9,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
     let mut wants_to_melee = Vec::new();
     let mut open_doors = Vec::new();
     unsafe {
-        let query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
-        for (entity, (mut pos, mut viewshed)) in query.iter_entities_unchecked(&gs.world) {
+        let players_query = <(Write<Position>, Write<Viewshed>)>::query().filter(tag::<Player>());
+        for (player_entity, (mut pos, mut viewshed)) in
+            players_query.iter_entities_unchecked(&gs.world)
+        {
             let dest_x = pos.x + delta_x;
             let dest_y = pos.y + delta_y;
             if dest_x < 0 || dest_x > map.width - 1 || dest_y < 0 || dest_y > map.height - 1 {
@@ -18,19 +20,32 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
             }
             let dest_idx = map.xy_idx(dest_x, dest_y);
 
+            let mut recompute_blocked = false;
             for potential_target in map.tile_content[dest_idx].iter() {
-                if let Some(_target) = gs.world.get_component::<CombatStats>(*potential_target) {
+                if let Some(_target) = gs.world.get_tag::<Bystander>(*potential_target) {
+                    if let Some(mut target_position) = gs
+                        .world
+                        .get_component_mut_unchecked::<Position>(*potential_target)
+                    {
+                        target_position.x = pos.x;
+                        target_position.y = pos.y;
+                        recompute_blocked = true;
+                    }
+                } else if let Some(_target) =
+                    gs.world.get_component::<CombatStats>(*potential_target)
+                {
                     // Store attack target
-                    wants_to_melee.push((entity, *potential_target));
-                    continue; // So we don't move after attacking
+                    wants_to_melee.push((player_entity, *potential_target));
                 }
+
                 if let Some(_door) = gs.world.get_component::<Door>(*potential_target) {
                     open_doors.push(*potential_target);
                     viewshed.dirty = true;
                 }
             }
 
-            if !map.blocked[dest_idx] {
+            // FIXME: recompute blocked tiles, but this needs to wait until spatial indexing service
+            if !map.blocked[dest_idx] || recompute_blocked {
                 pos.x = min(map.width - 1, max(0, dest_x));
                 pos.y = min(map.height - 1, max(0, dest_y));
 
