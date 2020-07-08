@@ -102,7 +102,7 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
     }
     let mut tooltip = Vec::new();
     let query = <(Read<Name>, Read<Position>)>::query().filter(!tag::<Hidden>());
-    for (name, position) in query.iter(&world) {
+    for (name, position) in query.iter(world) {
         if position.x == mouse_map_pos.0 && position.y == mouse_map_pos.1 {
             tooltip.push(name.name.to_string());
         }

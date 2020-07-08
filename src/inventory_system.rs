@@ -10,7 +10,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .build(|command_buffer, world, (player, gamelog), query| {
             // NOTE: In case of multiple requests to pick item up, the last one wins.
             // (As the InBackpack component gets overwritten)
-            for (entity, pickup) in query.iter_entities(&world) {
+            for (entity, pickup) in query.iter_entities(world) {
                 command_buffer.remove_component::<WantsToPickupItem>(entity);
                 command_buffer.remove_component::<Position>(pickup.item);
                 command_buffer.add_component(
@@ -52,7 +52,7 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
              world,
              (player, gamelog, map, particle_builder, runstate),
              (query, query_equipped)| {
-                for (entity, use_item) in query.iter_entities(&world) {
+                for (entity, use_item) in query.iter_entities(world) {
                     let player_entity = **player;
                     let item_entity = use_item.item;
                     let mut used_item = false;
@@ -121,7 +121,7 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                         // Remove any items the target has in the item's slot
                         let mut to_unequip = Vec::new();
                         for (item_entity, (already_equipped, name)) in
-                            query_equipped.iter_entities(&world)
+                            query_equipped.iter_entities(world)
                         {
                             if already_equipped.owner == target
                                 && already_equipped.slot == target_slot
@@ -284,7 +284,7 @@ pub fn item_drop() -> Box<(dyn Schedulable + 'static)> {
         .write_resource::<GameLog>()
         .read_component::<Name>()
         .build(|command_buffer, world, (player, gamelog), query| {
-            for (entity, (to_drop, dropper_pos)) in query.iter_entities(&world) {
+            for (entity, (to_drop, dropper_pos)) in query.iter_entities(world) {
                 let item_entity = to_drop.item;
                 command_buffer.remove_component::<InBackpack>(item_entity);
                 command_buffer.add_component(item_entity, *dropper_pos);
@@ -309,7 +309,7 @@ pub fn item_remove() -> Box<(dyn Schedulable + 'static)> {
         .write_resource::<GameLog>()
         .read_component::<Name>()
         .build(|command_buffer, world, (player, gamelog), query| {
-            for (entity, to_remove) in query.iter_entities(&world) {
+            for (entity, to_remove) in query.iter_entities(world) {
                 let item_entity = to_remove.item;
                 command_buffer.remove_component::<Equipped>(item_entity);
                 command_buffer.add_component(item_entity, InBackpack { owner: entity });

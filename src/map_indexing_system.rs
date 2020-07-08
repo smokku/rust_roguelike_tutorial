@@ -8,7 +8,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .build(|_, world, map, query| {
             map.populate_blocked();
             map.clear_content_index();
-            for (entity, position) in query.iter_entities(&world) {
+            for (entity, position) in query.iter_entities(world) {
                 let idx = map.xy_idx(position.x, position.y);
 
                 // If they block, update the blocking list
