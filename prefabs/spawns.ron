@@ -408,6 +408,24 @@
             vision_range : 4,
             ai: "melee",
         ),
+        (
+            name: "Rat",
+            renderable: (
+                glyph: 'r',
+                fg: "#FF0000",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            stats: (
+                max_hp: 2,
+                hp: 2,
+                defense: 1,
+                power: 3,
+            ),
+            vision_range: 8,
+            ai: "melee",
+        ),
     ],
 
     props: [
