@@ -8,8 +8,8 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .write_resource::<GameLog>()
         .with_query(Write::<HungerClock>::query())
         .build(
-            |command_buffer, mut world, (player_entity, runstate, log), query| {
-                for (entity, mut clock) in query.iter_entities_mut(&mut world) {
+            |command_buffer, world, (player_entity, runstate, log), query| {
+                for (entity, mut clock) in query.iter_entities_mut(world) {
                     let is_player = entity == **player_entity;
 
                     let proceed = match **runstate {

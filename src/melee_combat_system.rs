@@ -54,7 +54,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             }
 
                             let mut defensive_bonus = 0;
-                            for (defense_bonus, equipped_by) in query_defense.iter(&world) {
+                            for (defense_bonus, equipped_by) in query_defense.iter(world) {
                                 if equipped_by.owner == target {
                                     defensive_bonus += defense_bonus.defense;
                                 }
