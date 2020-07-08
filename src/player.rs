@@ -22,7 +22,9 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
 
             let mut recompute_blocked = false;
             for potential_target in map.tile_content[dest_idx].iter() {
-                if let Some(_target) = gs.world.get_tag::<Bystander>(*potential_target) {
+                let bystander = gs.world.get_tag::<Bystander>(*potential_target);
+                let vendor = gs.world.get_tag::<Vendor>(*potential_target);
+                if bystander.is_some() || vendor.is_some() {
                     if let Some(mut target_position) = gs
                         .world
                         .get_component_mut_unchecked::<Position>(*potential_target)

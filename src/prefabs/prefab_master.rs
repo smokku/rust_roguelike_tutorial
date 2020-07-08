@@ -303,6 +303,7 @@ pub fn spawn_named_mob(
         match mob_template.ai.as_str() {
             "melee" => world.add_tag(entity, Monster {}).expect("Cannot add tag"),
             "bystander" => world.add_tag(entity, Bystander {}).expect("Cannot add tag"),
+            "vendor" => world.add_tag(entity, Vendor {}).expect("Cannot add tag"),
             ai_type => {
                 rltk::console::log(format!("Warning: AI type {} not implemented.", ai_type));
             }
