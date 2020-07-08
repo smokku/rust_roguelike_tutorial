@@ -1,5 +1,6 @@
 use super::{BuilderChain, BuilderMap, InitialMapBuilder, Position, TileType};
-use rltk::RandomNumberGenerator;
+use pathfinding::prelude::astar;
+use rltk::{BaseMap, RandomNumberGenerator};
 use std::collections::HashSet;
 
 pub fn town_builder(
@@ -281,11 +282,34 @@ impl TownBuilder {
             }
             nearest_roads.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-            let destination = nearest_roads[0].0;
-            let path = rltk::a_star_search(*door_idx, destination, &mut build_data.map);
-            if path.success {
-                for step in path.steps.iter() {
-                    let idx = *step as usize;
+            let destination = rltk::Point::new(
+                nearest_roads[0].0 as i32 % build_data.map.width as i32,
+                nearest_roads[0].0 as i32 / build_data.map.width as i32,
+            );
+            if let Some(path) = astar(
+                &door_pt,
+                |&p| {
+                    let p_idx = build_data.map.xy_idx(p.x, p.y);
+                    build_data
+                        .map
+                        .get_available_exits(p_idx)
+                        .iter()
+                        .map(|(idx, cost)| {
+                            (
+                                rltk::Point::new(
+                                    *idx as i32 % build_data.map.width as i32,
+                                    *idx as i32 / build_data.map.width as i32,
+                                ),
+                                (*cost * 256.) as i32,
+                            )
+                        })
+                        .collect::<Vec<(rltk::Point, i32)>>()
+                },
+                |&p| (rltk::DistanceAlg::PythagorasSquared.distance2d(door_pt, p) * 256.) as i32,
+                |&p| p == destination,
+            ) {
+                for step in path.0.iter() {
+                    let idx = build_data.map.xy_idx(step.x, step.y);
                     build_data.map.tiles[idx] = TileType::Road;
                     roads.push(idx);
                 }
