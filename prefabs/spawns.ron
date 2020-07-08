@@ -189,7 +189,7 @@
                 power: 4,
             ),
             vision_range: 4,
-            ai: "bystander",
+            ai: "vendor",
         ),
         (
             name: "Shady Salesman",
@@ -207,7 +207,7 @@
                 power: 4,
             ),
             vision_range: 4,
-            ai: "bystander",
+            ai: "vendor",
         ),
         (
             name: "Patron",
@@ -279,7 +279,7 @@
                 power: 4,
             ),
             vision_range: 4,
-            ai: "bystander",
+            ai: "vendor",
         ),
         (
             name: "Clothier",
@@ -297,7 +297,7 @@
                 power: 4,
             ),
             vision_range: 4,
-            ai: "bystander",
+            ai: "vendor",
         ),
         (
             name: "Alchemist",
@@ -315,7 +315,7 @@
                 power: 4,
             ),
             vision_range: 4,
-            ai: "bystander",
+            ai: "vendor",
         ),
         (
             name: "Mom",
