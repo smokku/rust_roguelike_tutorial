@@ -139,7 +139,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
             fg = RGB::from_f32(0.0, 1.0, 1.0);
         }
         TileType::Bridge => {
-            glyph = rltk::to_cp437('.');
+            glyph = rltk::to_cp437('▒');
             fg = RGB::named(rltk::CHOCOLATE);
         }
         TileType::Road => {

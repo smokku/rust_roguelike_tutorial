@@ -47,8 +47,8 @@ impl TownBuilder {
     ) {
         self.grass_layer(build_data);
         self.water_and_piers(rng, build_data);
-        let (mut available_building_tiles, wall_gap_y) = self.town_walls(rng, build_data);
-        let mut buildings = self.buildings(rng, build_data, &mut available_building_tiles);
+        let (mut available_town_tiles, wall_gap_y) = self.town_walls(rng, build_data);
+        let mut buildings = self.buildings(rng, build_data, &mut available_town_tiles);
         let doors = self.add_doors(rng, build_data, &mut buildings, wall_gap_y);
         self.add_paths(build_data, &doors);
 
@@ -58,6 +58,9 @@ impl TownBuilder {
 
         let building_size = self.sort_buildings(&buildings);
         self.building_factory(rng, build_data, &buildings, &building_size);
+
+        self.spawn_dockers(rng, build_data);
+        self.spawn_townsfolk(rng, build_data, &mut available_town_tiles);
 
         // Make visible for screenshot
         for t in build_data.map.visible_tiles.iter_mut() {
@@ -97,7 +100,7 @@ impl TownBuilder {
             let y = rng.roll_dice(1, build_data.map.height) - 1;
             for x in 2 + rng.roll_dice(1, 6)..water_width[y as usize] + 4 {
                 let idx = build_data.map.xy_idx(x, y);
-                build_data.map.tiles[idx] = TileType::WoodFloor;
+                build_data.map.tiles[idx] = TileType::Bridge;
             }
             build_data.take_snapshot();
         }
@@ -108,7 +111,7 @@ impl TownBuilder {
         rng: &mut RandomNumberGenerator,
         build_data: &mut BuilderMap,
     ) -> (HashSet<usize>, i32) {
-        let mut available_building_tiles = HashSet::new();
+        let mut available_town_tiles = HashSet::new();
         let wall_gap_y = rng.roll_dice(1, build_data.map.height - 9) + 5;
         for y in 1..build_data.map.height - 2 {
             if !(y > wall_gap_y - 4 && y < wall_gap_y + 4) {
@@ -121,7 +124,7 @@ impl TownBuilder {
                     let gravel_idx = build_data.map.xy_idx(x, y);
                     build_data.map.tiles[gravel_idx] = TileType::Gravel;
                     if y > 2 && y < build_data.map.height - 1 {
-                        available_building_tiles.insert(gravel_idx);
+                        available_town_tiles.insert(gravel_idx);
                     }
                 }
             } else {
@@ -141,14 +144,14 @@ impl TownBuilder {
         }
         build_data.take_snapshot();
 
-        (available_building_tiles, wall_gap_y)
+        (available_town_tiles, wall_gap_y)
     }
 
     fn buildings(
         &mut self,
         rng: &mut RandomNumberGenerator,
         build_data: &mut BuilderMap,
-        available_building_tiles: &mut HashSet<usize>,
+        available_town_tiles: &mut HashSet<usize>,
     ) -> Vec<(i32, i32, i32, i32)> {
         let mut buildings = Vec::new();
         let mut n_buildings = 0;
@@ -170,7 +173,7 @@ impl TownBuilder {
                         possible = false;
                     } else {
                         let idx = build_data.map.xy_idx(x, y);
-                        if !available_building_tiles.contains(&idx) {
+                        if !available_town_tiles.contains(&idx) {
                             possible = false;
                         }
                     }
@@ -183,11 +186,11 @@ impl TownBuilder {
                     for x in bx..bx + bw {
                         let idx = build_data.map.xy_idx(x, y);
                         build_data.map.tiles[idx] = TileType::WoodFloor;
-                        available_building_tiles.remove(&idx);
-                        available_building_tiles.remove(&(idx + 1));
-                        available_building_tiles.remove(&(idx + build_data.map.width as usize));
-                        available_building_tiles.remove(&(idx - 1));
-                        available_building_tiles.remove(&(idx - build_data.map.width as usize));
+                        available_town_tiles.remove(&idx);
+                        available_town_tiles.remove(&(idx + 1));
+                        available_town_tiles.remove(&(idx + build_data.map.width as usize));
+                        available_town_tiles.remove(&(idx - 1));
+                        available_town_tiles.remove(&(idx - build_data.map.width as usize));
                     }
                 }
                 build_data.take_snapshot();
@@ -519,6 +522,42 @@ impl TownBuilder {
                     && rng.roll_dice(1, 2) == 1
                 {
                     build_data.spawn_list.push((idx, "Rat".to_string()));
+                }
+            }
+        }
+    }
+
+    fn spawn_dockers(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+        for (idx, tt) in build_data.map.tiles.iter().enumerate() {
+            if *tt == TileType::Bridge && rng.roll_dice(1, 6) == 1 {
+                let roll = rng.roll_dice(1, 3);
+                match roll {
+                    1 => build_data.spawn_list.push((idx, "Dock Worker".to_string())),
+                    2 => build_data
+                        .spawn_list
+                        .push((idx, "Wannabe Pirate".to_string())),
+                    _ => build_data.spawn_list.push((idx, "Fisher".to_string())),
+                }
+            }
+        }
+    }
+
+    fn spawn_townsfolk(
+        &mut self,
+        rng: &mut RandomNumberGenerator,
+        build_data: &mut BuilderMap,
+        available_town_tiles: &mut HashSet<usize>,
+    ) {
+        for idx in available_town_tiles.iter() {
+            if rng.roll_dice(1, 10) == 1 {
+                let roll = rng.roll_dice(1, 4);
+                match roll {
+                    1 => build_data.spawn_list.push((*idx, "Peasant".to_string())),
+                    2 => build_data.spawn_list.push((*idx, "Drunk".to_string())),
+                    3 => build_data
+                        .spawn_list
+                        .push((*idx, "Dock Worker".to_string())),
+                    _ => build_data.spawn_list.push((*idx, "Fisher".to_string())),
                 }
             }
         }
