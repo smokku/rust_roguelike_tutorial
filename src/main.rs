@@ -9,6 +9,7 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod bystander_ai_system;
 mod camera;
 mod damage_system;
 mod gamelog;
@@ -428,6 +429,7 @@ fn main() -> rltk::BError {
             .add_system(visibility_system::build())
             .build(),
         Schedule::builder()
+            .add_system(bystander_ai_system::build())
             .add_system(monster_ai_system::build())
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee
             .add_system(damage_system::build()) // Turns SufferDamage to HP reduction
