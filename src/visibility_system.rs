@@ -23,8 +23,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                 let mut seen_tiles: HashSet<usize> = HashSet::new();
                 for chunk in viewshed_query.iter_chunks_mut(world) {
                     // Is this the players chunk?
-                    let p = chunk.tag::<Player>();
-                    let player_chunk = if let Some(_p) = p {
+                    let player_chunk = if let Some(_p) = chunk.tag::<Player>() {
                         // Reset visibility
                         for t in map.visible_tiles.iter_mut() {
                             *t = false;
