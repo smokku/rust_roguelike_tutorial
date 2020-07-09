@@ -316,6 +316,18 @@ pub fn spawn_named_mob(
                 .expect("Cannot add component");
         }
 
+        // Quips
+        if let Some(quips) = &mob_template.quips {
+            world
+                .add_component(
+                    entity,
+                    Quips {
+                        available: quips.clone(),
+                    },
+                )
+                .expect("Cannot add component");
+        }
+
         if mob_template.blocks_tile {
             world
                 .add_tag(entity, BlocksTile {})

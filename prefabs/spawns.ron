@@ -226,6 +226,7 @@
             ),
             vision_range: 4,
             ai: "bystander",
+            quips : [ "Quiet down, it's too early!", "Oh my, I drank too much.", "Still saving the world, eh?" ],
         ),
         (
             name: "Priest",

@@ -237,3 +237,9 @@ pub struct Bystander;
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "401102d1-3cbb-451f-8989-c5b9aa7539bb"]
 pub struct Vendor;
+
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "a15abace-8292-4203-88e8-c2ba0093e789"]
+pub struct Quips {
+    pub available: Vec<String>,
+}
