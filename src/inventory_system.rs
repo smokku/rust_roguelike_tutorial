@@ -1,4 +1,6 @@
-use super::{components::*, gamelog::GameLog, particle_system::ParticleBuilder, Map, RunState};
+use super::{
+    components::*, field_of_view, gamelog::GameLog, particle_system::ParticleBuilder, Map, RunState,
+};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -79,13 +81,7 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                                 Some(area_effect) => {
                                     // AoE
                                     target_tiles =
-                                        rltk::field_of_view(target, area_effect.radius, &**map);
-                                    target_tiles.retain(|p| {
-                                        p.x > 0
-                                            && p.x < map.width - 1
-                                            && p.y > 0
-                                            && p.y < map.height - 1
-                                    });
+                                        field_of_view(target, area_effect.radius as usize, &**map);
                                 }
                             }
                             for tile in target_tiles.iter() {

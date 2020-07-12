@@ -6,6 +6,8 @@ use type_uuid::TypeUuid;
 
 mod tile_type;
 pub use tile_type::{tile_cost, tile_opaque, tile_walkable, TileType};
+mod fov;
+pub use fov::field_of_view;
 
 #[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[uuid = "09e57cda-e925-47f0-a3f6-107c86fa76bd"]
