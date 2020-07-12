@@ -1,6 +1,9 @@
-use super::{gamelog::GameLog, BlocksVisibility, Hidden, Map, Name, Player, Position, Viewshed};
+use super::{
+    field_of_view, gamelog::GameLog, BlocksVisibility, Hidden, Map, Name, Player, Position,
+    Viewshed,
+};
 use legion::prelude::*;
-use rltk::{field_of_view, Point};
+use rltk::Point;
 use std::collections::HashSet;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -41,11 +44,11 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                         if viewshed.dirty {
                             viewshed.dirty = false;
                             viewshed.visible_tiles.clear();
-                            viewshed.visible_tiles =
-                                field_of_view(Point::new(pos.x, pos.y), viewshed.range, &**map);
-                            viewshed.visible_tiles.retain(|p| {
-                                p.x >= 0 && p.x < map.width && p.y >= 0 && p.y < map.height
-                            });
+                            viewshed.visible_tiles = field_of_view(
+                                Point::new(pos.x, pos.y),
+                                viewshed.range as usize,
+                                &**map,
+                            );
                         }
 
                         // If this is the player, reveal what they can see
