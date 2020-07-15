@@ -8,7 +8,7 @@ const MAX_MONSTERS: i32 = 4;
 // Spawns the player and returns the entity object.
 pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
     world.insert(
-        (Player, BlocksTile),
+        (Player,),
         vec![(
             Position { x, y },
             Renderable {

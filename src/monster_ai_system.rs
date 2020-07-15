@@ -1,6 +1,6 @@
 use super::{
-    particle_system::ParticleBuilder, Confusion, Map, Monster, Position, RunState, Viewshed,
-    WantsToMelee,
+    a_star_search, particle_system::ParticleBuilder, Confusion, Map, Monster, Position, RunState,
+    Viewshed, WantsToMelee,
 };
 use legion::prelude::*;
 use rltk::Point;
@@ -55,19 +55,18 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             );
                         } else if viewshed.visible_tiles.contains(&**player_pos) {
                             // Path to the player
-                            let path = rltk::a_star_search(
-                                map.xy_idx(pos.x, pos.y),
-                                map.xy_idx(player_pos.x, player_pos.y),
-                                &**map,
-                            );
-                            if path.success && path.steps.len() > 1 {
-                                let mut idx = map.xy_idx(pos.x, pos.y);
-                                map.blocked[idx] = false;
-                                pos.x = path.steps[1] as i32 % map.width;
-                                pos.y = path.steps[1] as i32 / map.width;
-                                idx = map.xy_idx(pos.x, pos.y);
-                                map.blocked[idx] = true;
-                                viewshed.dirty = true;
+                            if let Some((path, _cost)) =
+                                a_star_search(Point::new(pos.x, pos.y), **player_pos, &**map)
+                            {
+                                if path.len() > 1 {
+                                    let mut idx = map.xy_idx(pos.x, pos.y);
+                                    map.blocked[idx] = false;
+                                    pos.x = path[1].x;
+                                    pos.y = path[1].y;
+                                    idx = map.xy_idx(pos.x, pos.y);
+                                    map.blocked[idx] = true;
+                                    viewshed.dirty = true;
+                                }
                             }
                         }
                     }
