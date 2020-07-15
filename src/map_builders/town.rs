@@ -1,6 +1,6 @@
 use super::{BuilderChain, BuilderMap, InitialMapBuilder, Position, TileType};
-use pathfinding::prelude::astar;
-use rltk::{BaseMap, RandomNumberGenerator};
+use crate::a_star_search;
+use rltk::RandomNumberGenerator;
 use std::collections::HashSet;
 
 pub fn town_builder(
@@ -289,29 +289,8 @@ impl TownBuilder {
                 nearest_roads[0].0 as i32 % build_data.map.width as i32,
                 nearest_roads[0].0 as i32 / build_data.map.width as i32,
             );
-            if let Some(path) = astar(
-                &door_pt,
-                |&p| {
-                    let p_idx = build_data.map.xy_idx(p.x, p.y);
-                    build_data
-                        .map
-                        .get_available_exits(p_idx)
-                        .iter()
-                        .map(|(idx, cost)| {
-                            (
-                                rltk::Point::new(
-                                    *idx as i32 % build_data.map.width as i32,
-                                    *idx as i32 / build_data.map.width as i32,
-                                ),
-                                (*cost * 256.) as i32,
-                            )
-                        })
-                        .collect::<Vec<(rltk::Point, i32)>>()
-                },
-                |&p| (rltk::DistanceAlg::PythagorasSquared.distance2d(door_pt, p) * 256.) as i32,
-                |&p| p == destination,
-            ) {
-                for step in path.0.iter() {
+            if let Some((path, _cost)) = a_star_search(door_pt, destination, &build_data.map) {
+                for step in path.iter() {
                     let idx = build_data.map.xy_idx(step.x, step.y);
                     build_data.map.tiles[idx] = TileType::Road;
                     roads.push(idx);
