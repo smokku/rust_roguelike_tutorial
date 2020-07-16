@@ -289,7 +289,7 @@ impl TownBuilder {
                 nearest_roads[0].0 as i32 % build_data.map.width as i32,
                 nearest_roads[0].0 as i32 / build_data.map.width as i32,
             );
-            if let Some((path, _cost)) = a_star_search(door_pt, destination, &build_data.map) {
+            if let Some((path, _cost)) = a_star_search(door_pt, destination, 0., &build_data.map) {
                 for step in path.iter() {
                     let idx = build_data.map.xy_idx(step.x, step.y);
                     build_data.map.tiles[idx] = TileType::Road;

@@ -56,7 +56,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                         } else if viewshed.visible_tiles.contains(&**player_pos) {
                             // Path to the player
                             if let Some((path, _cost)) =
-                                a_star_search(Point::new(pos.x, pos.y), **player_pos, &**map)
+                                a_star_search(Point::new(pos.x, pos.y), **player_pos, 2., &**map)
                             {
                                 if path.len() > 1 {
                                     let mut idx = map.xy_idx(pos.x, pos.y);

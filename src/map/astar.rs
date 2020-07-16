@@ -2,7 +2,7 @@ use super::Map;
 use pathfinding::prelude::astar;
 use rltk::{BaseMap, DistanceAlg, Point};
 
-pub fn a_star_search(start: Point, end: Point, map: &Map) -> Option<(Vec<Point>, i32)> {
+pub fn a_star_search(start: Point, end: Point, dist: f32, map: &Map) -> Option<(Vec<Point>, i32)> {
     astar(
         &start,
         |p| {
@@ -21,6 +21,12 @@ pub fn a_star_search(start: Point, end: Point, map: &Map) -> Option<(Vec<Point>,
                 .collect::<Vec<(Point, i32)>>()
         },
         |p| (DistanceAlg::PythagorasSquared.distance2d(start, *p) * 256.) as i32,
-        |p| *p == end,
+        |p| {
+            if dist == 0. {
+                *p == end
+            } else {
+                DistanceAlg::PythagorasSquared.distance2d(end, *p) < dist
+            }
+        },
     )
 }
