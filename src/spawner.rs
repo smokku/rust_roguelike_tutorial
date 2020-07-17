@@ -1,4 +1,5 @@
 use super::{components::*, prefabs::*, random_table::RandomTable, Map, Rect, TileType};
+use crate::attr_bonus;
 use legion::prelude::*;
 use rltk::{RandomNumberGenerator, RGB};
 use std::collections::HashMap;
@@ -34,6 +35,28 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
             HungerClock {
                 state: HungerState::WellFed,
                 duration: 20,
+            },
+            Attributes {
+                might: Attribute {
+                    base: 11,
+                    modifiers: 0,
+                    bonus: attr_bonus(11),
+                },
+                fitness: Attribute {
+                    base: 11,
+                    modifiers: 0,
+                    bonus: attr_bonus(11),
+                },
+                quickness: Attribute {
+                    base: 11,
+                    modifiers: 0,
+                    bonus: attr_bonus(11),
+                },
+                intelligence: Attribute {
+                    base: 11,
+                    modifiers: 0,
+                    bonus: attr_bonus(11),
+                },
             },
         )],
     )[0]

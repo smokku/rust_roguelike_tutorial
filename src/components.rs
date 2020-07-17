@@ -243,3 +243,19 @@ pub struct Vendor;
 pub struct Quips {
     pub available: Vec<String>,
 }
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Attribute {
+    pub base: i32,
+    pub modifiers: i32,
+    pub bonus: i32,
+}
+
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "614c79e7-c29f-4f46-9ed8-1dd2979ffc34"]
+pub struct Attributes {
+    pub might: Attribute,
+    pub fitness: Attribute,
+    pub quickness: Attribute,
+    pub intelligence: Attribute,
+}
