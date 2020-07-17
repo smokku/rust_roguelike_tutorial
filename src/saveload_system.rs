@@ -393,6 +393,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<HungerClock>(),
         ComponentRegistration::of::<Door>(),
         ComponentRegistration::of::<Quips>(),
+        ComponentRegistration::of::<Attributes>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),

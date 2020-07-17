@@ -1,5 +1,5 @@
 use super::{Prefabs, SpawnTableEntry};
-use crate::{components::*, random_table::RandomTable};
+use crate::{attr_bonus, components::*, random_table::RandomTable};
 use legion::prelude::*;
 use std::collections::{HashMap, HashSet};
 
@@ -309,14 +309,12 @@ pub fn spawn_named_mob(
             }
         }
 
-        // Renderable
         if let Some(renderable) = &mob_template.renderable {
             world
                 .add_component(entity, get_renderable_component(renderable))
                 .expect("Cannot add component");
         }
 
-        // Quips
         if let Some(quips) = &mob_template.quips {
             world
                 .add_component(
@@ -327,6 +325,60 @@ pub fn spawn_named_mob(
                 )
                 .expect("Cannot add component");
         }
+
+        let mut attr = Attributes {
+            might: Attribute {
+                base: 11,
+                modifiers: 0,
+                bonus: attr_bonus(11),
+            },
+            fitness: Attribute {
+                base: 11,
+                modifiers: 0,
+                bonus: attr_bonus(11),
+            },
+            quickness: Attribute {
+                base: 11,
+                modifiers: 0,
+                bonus: attr_bonus(11),
+            },
+            intelligence: Attribute {
+                base: 11,
+                modifiers: 0,
+                bonus: attr_bonus(11),
+            },
+        };
+        if let Some(might) = mob_template.attributes.might {
+            attr.might = Attribute {
+                base: might,
+                modifiers: 0,
+                bonus: attr_bonus(might),
+            };
+        }
+        if let Some(fitness) = mob_template.attributes.fitness {
+            attr.fitness = Attribute {
+                base: fitness,
+                modifiers: 0,
+                bonus: attr_bonus(fitness),
+            };
+        }
+        if let Some(quickness) = mob_template.attributes.quickness {
+            attr.quickness = Attribute {
+                base: quickness,
+                modifiers: 0,
+                bonus: attr_bonus(quickness),
+            };
+        }
+        if let Some(intelligence) = mob_template.attributes.intelligence {
+            attr.intelligence = Attribute {
+                base: intelligence,
+                modifiers: 0,
+                bonus: attr_bonus(intelligence),
+            };
+        }
+        world
+            .add_component(entity, attr)
+            .expect("Cannot add component");
 
         if mob_template.blocks_tile {
             world

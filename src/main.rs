@@ -1,33 +1,35 @@
 use legion::prelude::*;
 use rltk::{GameState, Point, RandomNumberGenerator, Rltk, RltkBuilder};
 
-mod components;
-pub use components::*;
-mod map;
-pub use map::*;
-mod player;
-pub use player::*;
-mod rect;
-pub use rect::*;
 mod bystander_ai_system;
 mod camera;
+mod components;
 mod damage_system;
+mod game_system;
 mod gamelog;
 mod gui;
 mod hunger_system;
 mod inventory_system;
+mod map;
 mod map_builders;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
 mod particle_system;
+mod player;
 mod prefabs;
 mod random_table;
+mod rect;
 mod rex_assets;
 mod saveload_system;
 mod spawner;
 mod trigger_system;
 mod visibility_system;
+pub use components::*;
+pub use game_system::*;
+pub use map::*;
+pub use player::*;
+pub use rect::*;
 
 const SHOW_MAPGEN_VISUALIZER: bool = true;
 

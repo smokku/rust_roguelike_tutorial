@@ -10,6 +10,7 @@ pub struct Mob {
     pub vision_range: i32,
     pub ai: String,
     pub quips: Option<Vec<String>>,
+    pub attributes: MobAttributes,
 }
 
 #[derive(Deserialize, Debug)]
@@ -18,4 +19,12 @@ pub struct MobStats {
     pub hp: i32,
     pub power: i32,
     pub defense: i32,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MobAttributes {
+    pub might: Option<i32>,
+    pub fitness: Option<i32>,
+    pub quickness: Option<i32>,
+    pub intelligence: Option<i32>,
 }
