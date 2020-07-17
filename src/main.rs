@@ -96,9 +96,7 @@ impl GameState for State {
 
         match runstate {
             RunState::MapGeneration => {
-                if !SHOW_MAPGEN_VISUALIZER {
-                    runstate = self.mapgen_next_state.unwrap();
-                } else if self.mapgen_index >= self.mapgen_history.len() {
+                if !SHOW_MAPGEN_VISUALIZER || self.mapgen_index >= self.mapgen_history.len() {
                     runstate = self.mapgen_next_state.unwrap();
                 } else {
                     ctx.cls();
@@ -382,7 +380,7 @@ impl State {
         builder.spawn_entities(&mut self.world);
 
         // Place the player and update resources
-        let player_start = builder.build_data.starting_position.unwrap().clone();
+        let player_start = builder.build_data.starting_position.unwrap();
         self.resources
             .insert(Point::new(player_start.x, player_start.y));
 
