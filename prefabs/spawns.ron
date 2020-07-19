@@ -193,6 +193,9 @@
             attributes : (
                 intelligence: 13,
             ),
+            skills: {
+                "melee": 2,
+            },
         ),
         (
             name: "Shady Salesman",

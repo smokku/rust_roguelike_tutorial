@@ -149,6 +149,7 @@ impl TagRegistration {
     }
 }
 
+#[allow(clippy::type_complexity)]
 #[derive(Clone)]
 struct ComponentRegistration {
     uuid: type_uuid::Bytes,
@@ -394,6 +395,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Door>(),
         ComponentRegistration::of::<Quips>(),
         ComponentRegistration::of::<Attributes>(),
+        ComponentRegistration::of::<Skills>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),

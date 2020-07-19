@@ -380,6 +380,34 @@ pub fn spawn_named_mob(
             .add_component(entity, attr)
             .expect("Cannot add component");
 
+        let mut skills = Skills {
+            skills: HashMap::new(),
+        };
+        skills.skills.insert(Skill::Melee, 1);
+        skills.skills.insert(Skill::Defense, 1);
+        skills.skills.insert(Skill::Magic, 1);
+        if let Some(mobskills) = &mob_template.skills {
+            for sk in mobskills.iter() {
+                match sk.0.to_lowercase().as_str() {
+                    "melee" => {
+                        skills.skills.insert(Skill::Melee, *sk.1);
+                    }
+                    "defense" => {
+                        skills.skills.insert(Skill::Melee, *sk.1);
+                    }
+                    "magic" => {
+                        skills.skills.insert(Skill::Melee, *sk.1);
+                    }
+                    _ => {
+                        rltk::console::log(format!("Unknown skill referenced: \"{}\"", sk.0));
+                    }
+                }
+            }
+        }
+        world
+            .add_component(entity, skills)
+            .expect("Cannot add component");
+
         if mob_template.blocks_tile {
             world
                 .add_tag(entity, BlocksTile {})

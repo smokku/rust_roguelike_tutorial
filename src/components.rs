@@ -1,6 +1,7 @@
 use legion::prelude::*;
 use rltk::{FontCharType, Point, RGB};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use type_uuid::TypeUuid;
 
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -258,4 +259,17 @@ pub struct Attributes {
     pub fitness: Attribute,
     pub quickness: Attribute,
     pub intelligence: Attribute,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Skill {
+    Melee,
+    Defense,
+    Magic,
+}
+
+#[derive(TypeUuid, Clone, Debug, Serialize, Deserialize)]
+#[uuid = "28e5dc44-b610-4152-a3be-ce4e466f94a5"]
+pub struct Skills {
+    pub skills: HashMap<Skill, i32>,
 }
