@@ -1,5 +1,6 @@
 use super::Renderable;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 pub struct Mob {
@@ -11,6 +12,7 @@ pub struct Mob {
     pub ai: String,
     pub quips: Option<Vec<String>>,
     pub attributes: MobAttributes,
+    pub skills: Option<HashMap<String, i32>>,
 }
 
 #[derive(Deserialize, Debug)]
