@@ -396,6 +396,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Quips>(),
         ComponentRegistration::of::<Attributes>(),
         ComponentRegistration::of::<Skills>(),
+        ComponentRegistration::of::<Pools>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),

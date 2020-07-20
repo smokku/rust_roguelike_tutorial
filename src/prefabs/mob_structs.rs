@@ -13,6 +13,9 @@ pub struct Mob {
     pub quips: Option<Vec<String>>,
     pub attributes: MobAttributes,
     pub skills: Option<HashMap<String, i32>>,
+    pub level: Option<i32>,
+    pub hp: Option<i32>,
+    pub mana: Option<i32>,
 }
 
 #[derive(Deserialize, Debug)]
