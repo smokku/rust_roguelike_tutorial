@@ -1,7 +1,9 @@
 use super::{Prefabs, SpawnTableEntry};
-use crate::{attr_bonus, components::*, random_table::RandomTable};
+use crate::{attr_bonus, components::*, mana_at_level, npc_hp, random_table::RandomTable};
 use legion::prelude::*;
 use std::collections::{HashMap, HashSet};
+
+const BASE_ATTRIBUTE: i32 = 11;
 
 pub enum SpawnType {
     AtPosition { x: i32, y: i32 },
@@ -328,24 +330,24 @@ pub fn spawn_named_mob(
 
         let mut attr = Attributes {
             might: Attribute {
-                base: 11,
+                base: BASE_ATTRIBUTE,
                 modifiers: 0,
-                bonus: attr_bonus(11),
+                bonus: attr_bonus(BASE_ATTRIBUTE),
             },
             fitness: Attribute {
-                base: 11,
+                base: BASE_ATTRIBUTE,
                 modifiers: 0,
-                bonus: attr_bonus(11),
+                bonus: attr_bonus(BASE_ATTRIBUTE),
             },
             quickness: Attribute {
-                base: 11,
+                base: BASE_ATTRIBUTE,
                 modifiers: 0,
-                bonus: attr_bonus(11),
+                bonus: attr_bonus(BASE_ATTRIBUTE),
             },
             intelligence: Attribute {
-                base: 11,
+                base: BASE_ATTRIBUTE,
                 modifiers: 0,
-                bonus: attr_bonus(11),
+                bonus: attr_bonus(BASE_ATTRIBUTE),
             },
         };
         if let Some(might) = mob_template.attributes.might {
@@ -376,8 +378,35 @@ pub fn spawn_named_mob(
                 bonus: attr_bonus(intelligence),
             };
         }
+
+        let level = if mob_template.level.is_some() {
+            mob_template.level.unwrap()
+        } else {
+            1
+        };
+        let hit_points = npc_hp(attr.fitness.base, level);
+        let mana = mana_at_level(attr.intelligence.base, level);
+
         world
             .add_component(entity, attr)
+            .expect("Cannot add component");
+
+        world
+            .add_component(
+                entity,
+                Pools {
+                    level,
+                    experience: 0,
+                    hit_points: Pool {
+                        current: hit_points,
+                        max: hit_points,
+                    },
+                    mana: Pool {
+                        current: mana,
+                        max: mana,
+                    },
+                },
+            )
             .expect("Cannot add component");
 
         let mut skills = Skills {

@@ -273,3 +273,17 @@ pub enum Skill {
 pub struct Skills {
     pub skills: HashMap<Skill, i32>,
 }
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Pool {
+    pub max: i32,
+    pub current: i32,
+}
+
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "f2f8a991-a90c-46e0-b986-25da16ff384e"]
+pub struct Pools {
+    pub hit_points: Pool,
+    pub mana: Pool,
+    pub experience: i32,
+    pub level: i32,
+}

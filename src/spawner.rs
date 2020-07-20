@@ -1,10 +1,11 @@
 use super::{components::*, prefabs::*, random_table::RandomTable, Map, Rect, TileType};
-use crate::attr_bonus;
+use crate::{attr_bonus, mana_at_level, player_hp_at_level};
 use legion::prelude::*;
 use rltk::{RandomNumberGenerator, RGB};
 use std::collections::HashMap;
 
 const MAX_MONSTERS: i32 = 4;
+const BASE_ATTRIBUTE: i32 = 11;
 
 // Spawns the player and returns the entity object.
 pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
@@ -47,25 +48,37 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
                 might: Attribute {
                     base: 11,
                     modifiers: 0,
-                    bonus: attr_bonus(11),
+                    bonus: attr_bonus(BASE_ATTRIBUTE),
                 },
                 fitness: Attribute {
-                    base: 11,
+                    base: BASE_ATTRIBUTE,
                     modifiers: 0,
-                    bonus: attr_bonus(11),
+                    bonus: attr_bonus(BASE_ATTRIBUTE),
                 },
                 quickness: Attribute {
-                    base: 11,
+                    base: BASE_ATTRIBUTE,
                     modifiers: 0,
-                    bonus: attr_bonus(11),
+                    bonus: attr_bonus(BASE_ATTRIBUTE),
                 },
                 intelligence: Attribute {
-                    base: 11,
+                    base: BASE_ATTRIBUTE,
                     modifiers: 0,
-                    bonus: attr_bonus(11),
+                    bonus: attr_bonus(BASE_ATTRIBUTE),
                 },
             },
             skills,
+            Pools {
+                hit_points: Pool {
+                    current: player_hp_at_level(BASE_ATTRIBUTE, 1),
+                    max: player_hp_at_level(BASE_ATTRIBUTE, 1),
+                },
+                mana: Pool {
+                    current: mana_at_level(BASE_ATTRIBUTE, 1),
+                    max: mana_at_level(BASE_ATTRIBUTE, 1),
+                },
+                experience: 0,
+                level: 1,
+            },
         )],
     )[0]
 }
