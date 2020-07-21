@@ -182,9 +182,12 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                             let target_entity = *target_entity;
                             command_buffer.exec_mut(move |world| {
                                 if let Some(mut stats) =
-                                    world.get_component_mut::<CombatStats>(target_entity)
+                                    world.get_component_mut::<Pools>(target_entity)
                                 {
-                                    stats.hp = i32::min(stats.max_hp, stats.hp + heal_amount);
+                                    stats.hit_points.current = i32::min(
+                                        stats.hit_points.max,
+                                        stats.hit_points.current + heal_amount,
+                                    );
                                 }
                             });
                             if let Some(pos) = world.get_component::<Position>(target_entity) {

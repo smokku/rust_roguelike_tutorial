@@ -290,12 +290,6 @@ pub fn spawn_named_mob(
                     range: mob_template.vision_range,
                     dirty: true,
                 },
-                CombatStats {
-                    max_hp: mob_template.stats.max_hp,
-                    hp: mob_template.stats.hp,
-                    power: mob_template.stats.power,
-                    defense: mob_template.stats.defense,
-                },
             )],
         )[0];
 

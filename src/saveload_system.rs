@@ -378,7 +378,6 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Renderable>(),
         ComponentRegistration::of::<Viewshed>(),
         ComponentRegistration::of::<Name>(),
-        ComponentRegistration::of::<CombatStats>(),
         ComponentRegistration::of::<SufferDamage>(),
         ComponentRegistration::of::<Ranged>(),
         ComponentRegistration::of::<InflictsDamage>(),
