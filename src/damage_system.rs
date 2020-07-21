@@ -1,16 +1,16 @@
-use super::{gamelog::GameLog, CombatStats, Map, Name, Player, Position, RunState, SufferDamage};
+use super::{gamelog::GameLog, Map, Name, Player, Pools, Position, RunState, SufferDamage};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("damage")
         .with_query(Write::<SufferDamage>::query())
-        .write_component::<CombatStats>()
+        .write_component::<Pools>()
         .read_component::<Position>()
         .write_resource::<Map>()
         .build(|command_buffer, world, map, query| unsafe {
             for (entity, mut damage) in query.iter_entities_unchecked(world) {
-                if let Some(mut stats) = world.get_component_mut_unchecked::<CombatStats>(entity) {
-                    stats.hp -= damage.amount.iter().sum::<i32>();
+                if let Some(mut stats) = world.get_component_mut_unchecked::<Pools>(entity) {
+                    stats.hit_points.current -= damage.amount.iter().sum::<i32>();
                 }
 
                 if let Some(pos) = world.get_component::<Position>(entity) {
@@ -26,9 +26,9 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
 
 pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
     let mut dead = Vec::new();
-    let query = Read::<CombatStats>::query();
+    let query = Read::<Pools>::query();
     for (victim, stats) in query.iter_entities(world) {
-        if stats.hp < 1 {
+        if stats.hit_points.current < 1 {
             if let Some(_player) = world.get_tag::<Player>(victim) {
                 resources.insert(RunState::GameOver);
             } else {

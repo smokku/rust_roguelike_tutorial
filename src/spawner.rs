@@ -34,12 +34,6 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
             Name {
                 name: "Player".to_string(),
             },
-            CombatStats {
-                max_hp: 30,
-                hp: 30,
-                defense: 2,
-                power: 5,
-            },
             HungerClock {
                 state: HungerState::WellFed,
                 duration: 20,

@@ -46,15 +46,6 @@ pub struct Name {
 #[uuid = "8b2e566c-2e72-48b0-954b-dffb83051683"]
 pub struct BlocksTile;
 
-#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-#[uuid = "c810b39a-edcd-4435-9529-1c6fee305a8f"]
-pub struct CombatStats {
-    pub max_hp: i32,
-    pub hp: i32,
-    pub defense: i32,
-    pub power: i32,
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToMelee {
     pub target: Entity,

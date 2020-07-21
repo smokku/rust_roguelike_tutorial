@@ -33,9 +33,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, gs: &mut State) {
                         target_position.y = pos.y;
                         recompute_blocked = true;
                     }
-                } else if let Some(_target) =
-                    gs.world.get_component::<CombatStats>(*potential_target)
-                {
+                } else if let Some(_target) = gs.world.get_component::<Pools>(*potential_target) {
                     // Store attack target
                     wants_to_melee.push((player_entity, *potential_target));
                 }
@@ -155,8 +153,11 @@ fn skip_turn(gs: &mut State) -> RunState {
     }
 
     if can_heal {
-        if let Some(mut player_hp) = gs.world.get_component_mut::<CombatStats>(*player_entity) {
-            player_hp.hp = i32::min(player_hp.hp + 1, player_hp.max_hp);
+        if let Some(mut player_stats) = gs.world.get_component_mut::<Pools>(*player_entity) {
+            player_stats.hit_points.current = i32::min(
+                player_stats.hit_points.current + 1,
+                player_stats.hit_points.max,
+            );
         }
     }
 

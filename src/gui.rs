@@ -14,8 +14,11 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
 
     let player = resources.get::<Entity>().unwrap();
 
-    let stats = world.get_component::<CombatStats>(*player).unwrap();
-    let health = format!(" HP: {} / {}", stats.hp, stats.max_hp);
+    let stats = world.get_component::<Pools>(*player).unwrap();
+    let health = format!(
+        " HP: {} / {}",
+        stats.hit_points.current, stats.hit_points.max
+    );
     ctx.print_color(
         12,
         43,
@@ -27,8 +30,8 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         28,
         43,
         51,
-        stats.hp,
-        stats.max_hp,
+        stats.hit_points.current,
+        stats.hit_points.max,
         RGB::named(rltk::RED),
         RGB::named(rltk::BLACK),
     );

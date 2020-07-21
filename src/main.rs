@@ -339,8 +339,8 @@ impl State {
         gamelog
             .entries
             .push("You descend to the next level, and take a moment to heal.".to_string());
-        if let Some(mut health) = self.world.get_component_mut::<CombatStats>(*player_entity) {
-            health.hp = i32::max(health.hp, health.max_hp / 2);
+        if let Some(mut stats) = self.world.get_component_mut::<Pools>(*player_entity) {
+            stats.hit_points.current = i32::max(stats.hit_points.current, stats.hit_points.max / 2);
         }
     }
 
