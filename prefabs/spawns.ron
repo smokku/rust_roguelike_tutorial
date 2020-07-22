@@ -117,7 +117,9 @@
             ),
             weapon: (
                 range: "melee",
-                power_bonus: 2,
+                attribute: "quickness",
+                base_damage: "1d4",
+                hit_bonus: 0,
             ),
         ),
         (
