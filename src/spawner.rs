@@ -83,6 +83,18 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
         "Rusty Longsword",
         SpawnType::Equipped { by: player },
     );
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Dried Sausage",
+        SpawnType::Carried { by: player },
+    );
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Beer",
+        SpawnType::Carried { by: player },
+    );
 
     player
 }
