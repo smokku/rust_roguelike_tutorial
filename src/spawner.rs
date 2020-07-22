@@ -16,7 +16,7 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
     skills.skills.insert(Skill::Defense, 1);
     skills.skills.insert(Skill::Magic, 1);
 
-    world.insert(
+    let player = world.insert(
         (Player, BlocksTile),
         vec![(
             Position { x, y },
@@ -74,7 +74,17 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
                 level: 1,
             },
         )],
-    )[0]
+    )[0];
+
+    // Starting equipment
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Rusty Longsword",
+        SpawnType::Equipped { by: player },
+    );
+
+    player
 }
 
 fn room_table(map_depth: i32) -> RandomTable {

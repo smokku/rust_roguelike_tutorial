@@ -29,6 +29,8 @@ pub fn parse_dice_string(dice: &str) -> (i32, i32, i32) {
 
 pub enum SpawnType {
     AtPosition { x: i32, y: i32 },
+    Equipped { by: Entity },
+    Carried { by: Entity },
 }
 pub struct PrefabMaster {
     prefabs: Prefabs,
@@ -99,12 +101,41 @@ impl PrefabMaster {
     }
 }
 
-fn spawn_position(world: &mut World, entity: Entity, pos: SpawnType) {
+fn find_slot_for_equippable_item(tag: &str, pm: &PrefabMaster) -> EquipmentSlot {
+    if !pm.item_index.contains_key(tag) {
+        panic!("Trying to equip an unknown item: {}", tag);
+    }
+    let item_index = pm.item_index[tag];
+    let item = &pm.prefabs.items[item_index];
+    if let Some(wpn) = &item.weapon {
+        return match wpn.range.to_lowercase().as_str() {
+            "melee" => EquipmentSlot::Melee,
+            range => {
+                rltk::console::log(format!("Warning: unknown weapon range type [{}])", range));
+                EquipmentSlot::Melee
+            }
+        };
+    }
+    panic!("Trying to equip {}, but it has no slot tag.", tag);
+}
+
+fn spawn_position(world: &mut World, entity: Entity, pos: SpawnType, tag: &str, pm: &PrefabMaster) {
     // Spawn in the specified location
     match pos {
         SpawnType::AtPosition { x, y } => {
             world
                 .add_component(entity, Position { x, y })
+                .expect("Cannot add component");
+        }
+        SpawnType::Carried { by } => {
+            world
+                .add_component(entity, InBackpack { owner: by })
+                .expect("Cannot add component");
+        }
+        SpawnType::Equipped { by } => {
+            let slot = find_slot_for_equippable_item(tag, pm);
+            world
+                .add_component(entity, Equipped { owner: by, slot })
                 .expect("Cannot add component");
         }
     }
@@ -120,18 +151,23 @@ fn get_renderable_component(renderable: &super::item_structs::Renderable) -> Ren
 }
 
 pub fn spawn_named_entity(
-    prefabs: &PrefabMaster,
+    pm: &PrefabMaster,
     world: &mut World,
     key: &str,
     pos: SpawnType,
 ) -> Option<Entity> {
-    if prefabs.item_index.contains_key(key) {
-        return spawn_named_item(prefabs, world, key, pos);
-    } else if prefabs.mob_index.contains_key(key) {
-        return spawn_named_mob(prefabs, world, key, pos);
-    } else if prefabs.prop_index.contains_key(key) {
-        return spawn_named_prop(prefabs, world, key, pos);
+    if pm.item_index.contains_key(key) {
+        return spawn_named_item(pm, world, key, pos);
+    } else if pm.mob_index.contains_key(key) {
+        return spawn_named_mob(pm, world, key, pos);
+    } else if pm.prop_index.contains_key(key) {
+        return spawn_named_prop(pm, world, key, pos);
     }
+
+    rltk::console::log(format!(
+        "Warning: attempt to spawn unknown entity: [{}]",
+        key
+    ));
 
     None
 }
@@ -151,7 +187,7 @@ pub fn spawn_named_item(
             },)],
         )[0];
 
-        spawn_position(world, entity, pos);
+        spawn_position(world, entity, pos, key, pm);
 
         // Renderable
         if let Some(renderable) = &item_template.renderable {
@@ -332,7 +368,7 @@ pub fn spawn_named_mob(
             )],
         )[0];
 
-        spawn_position(world, entity, pos);
+        spawn_position(world, entity, pos, key, pm);
 
         // AI Type
         match mob_template.ai.as_str() {
@@ -497,7 +533,7 @@ pub fn spawn_named_prop(
             },)],
         )[0];
 
-        spawn_position(world, entity, pos);
+        spawn_position(world, entity, pos, key, pm);
 
         // Renderable
         if let Some(renderable) = &prop_template.renderable {
