@@ -108,6 +108,21 @@
             ),
         ),
         (
+            name: "Rusty Longsword",
+            renderable: (
+                glyph: '/',
+                fg: "#BB77BB",
+                bg: "#000000",
+                order: 2,
+            ),
+            weapon: (
+                range: "melee",
+                attribute: "might",
+                base_damage: "1d8-1",
+                hit_bonus: -1,
+            ),
+        ),
+        (
             name: "Dagger",
             renderable: (
                 glyph: '/',
@@ -132,7 +147,24 @@
             ),
             weapon: (
                 range: "melee",
-                power_bonus: 4,
+                attribute: "might",
+                base_damage: "1d8",
+                hit_bonus: 0,
+            ),
+        ),
+        (
+            name: "Battleaxe",
+            renderable: (
+                glyph: '¶',
+                fg: "#FF55FF",
+                bg: "#000000",
+                order: 2,
+            ),
+            weapon: (
+                range: "melee",
+                attribute: "might",
+                base_damage: "1d8+1",
+                hit_bonus: 0
             ),
         ),
         (
@@ -157,19 +189,6 @@
             ),
             shield: (
                 defense_bonus: 3,
-            ),
-        ),
-        (
-            name: "Battleaxe",
-            renderable: (
-                glyph: '¶',
-                fg: "#FF55FF",
-                bg: "#000000",
-                order: 2,
-            ),
-            weapon: (
-                range: "melee",
-                power_bonus: 5,
             ),
         ),
     ],
