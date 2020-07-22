@@ -22,7 +22,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
             |command_buffer,
              world,
              (log, particle_builder, rng),
-             (query, _query_melee, _query_defense)| {
+             (query, query_melee, _query_defense)| {
                 for (entity, (wants_melee, attacker_attributes, attacker_skills, attacker_pools)) in
                     query.iter_entities(world)
                 {
@@ -48,10 +48,31 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             if attacker_pools.hit_points.current > 0
                                 && target_pools.hit_points.current > 0
                             {
+                                let mut weapon_info = MeleeWeapon {
+                                    attribute: WeaponAttribute::Might,
+                                    hit_bonus: 0,
+                                    damage_n_dice: 1,
+                                    damage_die_type: 4,
+                                    damage_bonus: 0,
+                                };
+
+                                for (melee, wielded) in query_melee.iter(world) {
+                                    if wielded.owner == entity
+                                        && wielded.slot == EquipmentSlot::Melee
+                                    {
+                                        weapon_info = *melee;
+                                    }
+                                }
+
                                 let natural_roll = rng.roll_dice(1, 20);
-                                let attribute_hit_bonus = attacker_attributes.might.bonus;
+                                let attribute_hit_bonus = match weapon_info.attribute {
+                                    WeaponAttribute::Might => attacker_attributes.might.bonus,
+                                    WeaponAttribute::Quickness => {
+                                        attacker_attributes.quickness.bonus
+                                    }
+                                };
                                 let skill_hit_bonus = skill_bonus(Skill::Melee, &*attacker_skills);
-                                let weapon_hit_bonus = 0; // TODO: Once weapons support this
+                                let weapon_hit_bonus = weapon_info.hit_bonus;
                                 let mut status_hit_bonus = 0;
                                 if let Some(hc) = world.get_component::<HungerClock>(entity) {
                                     if hc.state == HungerState::WellFed {
@@ -91,12 +112,15 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                         );
                                     }
                                 } else if natural_roll == 20 || modified_hit_roll > armor_class {
-                                    // Target hit! Until we support weapons we're going with 1d4
-                                    let base_damage = rng.roll_dice(1, 4);
+                                    // Target hit!
+                                    let base_damage = rng.roll_dice(
+                                        weapon_info.damage_n_dice,
+                                        weapon_info.damage_die_type,
+                                    );
                                     let attr_damage_bonus = attacker_attributes.might.bonus;
                                     let skill_damage_bonus =
                                         skill_bonus(Skill::Melee, &*attacker_skills);
-                                    let weapon_damage_bonus = 0;
+                                    let weapon_damage_bonus = weapon_info.damage_bonus;
 
                                     let damage = i32::max(
                                         0,
