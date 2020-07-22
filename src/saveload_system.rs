@@ -387,7 +387,6 @@ fn get_serializer() -> SerializeImpl {
         // ComponentRegistration::of::<InBackpack>(), // FIXME: Do not loose player backpack!
         ComponentRegistration::of::<Equippable>(),
         // ComponentRegistration::of::<Equipped>(), // FIXME: Do not loose player equipment!
-        ComponentRegistration::of::<MeleePowerBonus>(),
         ComponentRegistration::of::<DefenseBonus>(),
         ComponentRegistration::of::<ParticleLifetime>(),
         ComponentRegistration::of::<HungerClock>(),
@@ -396,6 +395,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Attributes>(),
         ComponentRegistration::of::<Skills>(),
         ComponentRegistration::of::<Pools>(),
+        ComponentRegistration::of::<MeleeWeapon>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),

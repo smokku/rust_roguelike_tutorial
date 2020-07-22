@@ -1,9 +1,31 @@
 use super::{Prefabs, SpawnTableEntry};
 use crate::{attr_bonus, components::*, mana_at_level, npc_hp, random_table::RandomTable};
 use legion::prelude::*;
+use regex::Regex;
 use std::collections::{HashMap, HashSet};
 
 const BASE_ATTRIBUTE: i32 = 11;
+
+pub fn parse_dice_string(dice: &str) -> (i32, i32, i32) {
+    lazy_static! {
+        static ref DICE_RE: Regex = Regex::new(r"(\d+)d(\d+)([\+\-]\d+)?").unwrap();
+    }
+    let mut n_dice = 1;
+    let mut die_type = 4;
+    let mut die_bonus = 0;
+    for cap in DICE_RE.captures_iter(dice) {
+        if let Some(group) = cap.get(1) {
+            n_dice = group.as_str().parse::<i32>().expect("Not a digit");
+        }
+        if let Some(group) = cap.get(2) {
+            die_type = group.as_str().parse::<i32>().expect("Not a digit");
+        }
+        if let Some(group) = cap.get(3) {
+            die_bonus = group.as_str().parse::<i32>().expect("Not a digit");
+        }
+    }
+    (n_dice, die_type, die_bonus)
+}
 
 pub enum SpawnType {
     AtPosition { x: i32, y: i32 },
@@ -227,13 +249,30 @@ pub fn spawn_named_item(
                             },
                         )
                         .expect("Cannot add component");
+                    let (n_dice, die_type, die_bonus) = parse_dice_string(&weapon.base_damage);
+                    let mut wpn = MeleeWeapon {
+                        attribute: WeaponAttribute::Might,
+                        damage_n_dice: n_dice,
+                        damage_die_type: die_type,
+                        damage_bonus: die_bonus,
+                        hit_bonus: weapon.hit_bonus,
+                    };
+                    match weapon.attribute.to_lowercase().as_str() {
+                        "quickness" => {
+                            wpn.attribute = WeaponAttribute::Quickness;
+                        }
+                        "might" => {
+                            wpn.attribute = WeaponAttribute::Might;
+                        }
+                        _ => {
+                            rltk::console::log(format!(
+                                "Warning: weapon attribute {} not implemented.",
+                                weapon.attribute
+                            ));
+                        }
+                    }
                     world
-                        .add_component(
-                            entity,
-                            MeleePowerBonus {
-                                power: weapon.power_bonus,
-                            },
-                        )
+                        .add_component(entity, wpn)
                         .expect("Cannot add component");
                 }
                 range_type => {

@@ -160,12 +160,6 @@ pub struct Equipped {
 }
 
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-#[uuid = "bfa76812-9216-4360-829c-9b8816cb8d1b"]
-pub struct MeleePowerBonus {
-    pub power: i32,
-}
-
-#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "9c0725df-a532-488c-a890-84a7dc186686"]
 pub struct DefenseBonus {
     pub defense: i32,
@@ -236,14 +230,14 @@ pub struct Quips {
     pub available: Vec<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Attribute {
     pub base: i32,
     pub modifiers: i32,
     pub bonus: i32,
 }
 
-#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "614c79e7-c29f-4f46-9ed8-1dd2979ffc34"]
 pub struct Attributes {
     pub might: Attribute,
@@ -264,17 +258,33 @@ pub enum Skill {
 pub struct Skills {
     pub skills: HashMap<Skill, i32>,
 }
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pool {
     pub max: i32,
     pub current: i32,
 }
 
-#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "f2f8a991-a90c-46e0-b986-25da16ff384e"]
 pub struct Pools {
     pub hit_points: Pool,
     pub mana: Pool,
     pub experience: i32,
     pub level: i32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum WeaponAttribute {
+    Might,
+    Quickness,
+}
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "43a4e3d5-dc45-465a-9c42-4672dfca6c16"]
+pub struct MeleeWeapon {
+    pub attribute: WeaponAttribute,
+    pub damage_n_dice: i32,
+    pub damage_die_type: i32,
+    pub damage_bonus: i32,
+    pub hit_bonus: i32,
 }

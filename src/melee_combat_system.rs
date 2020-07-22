@@ -13,7 +13,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<Name>()
         .read_component::<Position>()
         .read_component::<HungerClock>()
-        .with_query(<(Read<MeleePowerBonus>, Read<Equipped>)>::query())
+        .with_query(<(Read<MeleeWeapon>, Read<Equipped>)>::query())
         .with_query(<(Read<DefenseBonus>, Read<Equipped>)>::query())
         .write_resource::<GameLog>()
         .write_resource::<ParticleBuilder>()
