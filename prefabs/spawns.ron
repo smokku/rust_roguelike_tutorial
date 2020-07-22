@@ -93,6 +93,7 @@
                 },
             ),
         ),
+
         (
             name: "Rations",
             renderable: (
@@ -107,6 +108,35 @@
                 },
             ),
         ),
+        (
+            name: "Dried Sausage",
+            renderable: (
+                glyph: '%',
+                fg: "#00FF00",
+                bg: "#000000",
+                order: 2,
+            ),
+            consumable: (
+                effects: {
+                    "food": "",
+                },
+            ),
+        ),
+        (
+            name: "Beer",
+            renderable: (
+                glyph: '!',
+                fg: "#FF00FF",
+                bg: "#000000",
+                order: 2,
+            ),
+            consumable: (
+                effects: {
+                    "provides_healing": "4",
+                },
+            ),
+        ),
+
         (
             name: "Rusty Longsword",
             renderable: (
@@ -167,6 +197,7 @@
                 hit_bonus: 0
             ),
         ),
+
         (
             name: "Shield",
             renderable: (
