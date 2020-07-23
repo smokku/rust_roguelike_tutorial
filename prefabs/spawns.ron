@@ -194,7 +194,22 @@
                 range: "melee",
                 attribute: "might",
                 base_damage: "1d8+1",
-                hit_bonus: 0
+                hit_bonus: 0,
+            ),
+        ),
+        (
+            name: "Cudgel",
+            renderable: (
+                glyph: '/',
+                fg: "#A52A2A",
+                bg: "#000000",
+                order: 2,
+            ),
+            weapon: (
+                range: "melee",
+                attribute: "Quickness",
+                base_damage: "1d4",
+                hit_bonus: 0,
             ),
         ),
 
@@ -263,7 +278,46 @@
                 slot: "legs",
                 armor_class: 0.1,
             ),
-        )
+        ),
+        (
+            name: "Cloth Tunic",
+            renderable: (
+                glyph: '[',
+                fg: "#00FF00",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "Torso",
+                armor_class: 0.1,
+            ),
+        ),
+        (
+            name: "Cloth Pants",
+            renderable: (
+                glyph: '[',
+                fg: "#00FFFF",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "Legs",
+                armor_class: 0.1,
+            ),
+        ),
+        (
+            name: "Slippers",
+            renderable: (
+                glyph: '[',
+                fg: "#FF9999",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "Legs",
+                armor_class: 0.1,
+            ),
+        ),
     ],
 
     mobs: [
@@ -284,6 +338,7 @@
             skills: {
                 "melee": 2,
             },
+            equipped: ["Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers"],
         ),
         (
             name: "Shady Salesman",
@@ -481,7 +536,7 @@
             skills: {
                 "melee": -1,
                 "defense": -1,
-            }
+            },
         ),
         (
             name: "Orc",

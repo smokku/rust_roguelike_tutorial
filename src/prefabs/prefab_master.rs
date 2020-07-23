@@ -522,6 +522,13 @@ pub fn spawn_named_mob(
             .add_component(entity, skills)
             .expect("Cannot add component");
 
+        // Are they wielding anything?
+        if let Some(wielding) = &mob_template.equipped {
+            for tag in wielding.iter() {
+                spawn_named_entity(pm, world, tag, SpawnType::Equipped { by: entity });
+            }
+        }
+
         if mob_template.blocks_tile {
             world
                 .add_tag(entity, BlocksTile {})
