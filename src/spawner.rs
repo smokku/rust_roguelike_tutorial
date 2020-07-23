@@ -95,6 +95,24 @@ pub fn player(world: &mut World, x: i32, y: i32) -> Entity {
         "Beer",
         SpawnType::Carried { by: player },
     );
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Stained Tunic",
+        SpawnType::Equipped { by: player },
+    );
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Torn Trousers",
+        SpawnType::Equipped { by: player },
+    );
+    spawn_named_entity(
+        &PREFABS.lock().unwrap(),
+        world,
+        "Old Boots",
+        SpawnType::Equipped { by: player },
+    );
 
     player
 }

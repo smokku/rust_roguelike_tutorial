@@ -103,7 +103,7 @@ impl PrefabMaster {
 
 fn find_slot_for_equippable_item(tag: &str, pm: &PrefabMaster) -> EquipmentSlot {
     if !pm.item_index.contains_key(tag) {
-        panic!("Trying to equip an unknown item: {}", tag);
+        panic!("Trying to equip an unknown item [{}]", tag);
     }
     let item_index = pm.item_index[tag];
     let item = &pm.prefabs.items[item_index];
@@ -116,7 +116,10 @@ fn find_slot_for_equippable_item(tag: &str, pm: &PrefabMaster) -> EquipmentSlot 
             }
         };
     }
-    panic!("Trying to equip {}, but it has no slot tag.", tag);
+    if let Some(wearable) = &item.wearable {
+        return string_to_slot(&wearable.slot);
+    }
+    panic!("Trying to equip [{}], but it has no slot tag.", tag);
 }
 
 fn spawn_position(world: &mut World, entity: Entity, pos: SpawnType, tag: &str, pm: &PrefabMaster) {
@@ -170,6 +173,22 @@ pub fn spawn_named_entity(
     ));
 
     None
+}
+
+pub fn string_to_slot(slot: &str) -> EquipmentSlot {
+    match slot.to_lowercase().as_str() {
+        "shield" => EquipmentSlot::Shield,
+        "head" => EquipmentSlot::Head,
+        "torso" => EquipmentSlot::Torso,
+        "legs" => EquipmentSlot::Legs,
+        "feet" => EquipmentSlot::Feet,
+        "hands" => EquipmentSlot::Hands,
+        "melee" => EquipmentSlot::Melee,
+        _ => {
+            rltk::console::log(format!("Warning: unknown equipment slot type [{}])", slot));
+            EquipmentSlot::Melee
+        }
+    }
 }
 
 pub fn spawn_named_item(
@@ -321,20 +340,17 @@ pub fn spawn_named_item(
         }
 
         // Shield
-        if let Some(shield) = &item_template.shield {
+        if let Some(wearable) = &item_template.wearable {
+            let slot = string_to_slot(&wearable.slot);
             world
-                .add_component(
-                    entity,
-                    Equippable {
-                        slot: EquipmentSlot::Shield,
-                    },
-                )
+                .add_component(entity, Equippable { slot })
                 .expect("Cannot add component");
             world
                 .add_component(
                     entity,
-                    DefenseBonus {
-                        defense: shield.defense_bonus,
+                    Wearable {
+                        slot,
+                        armor_class: wearable.armor_class,
                     },
                 )
                 .expect("Cannot add component");
