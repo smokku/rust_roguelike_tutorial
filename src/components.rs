@@ -144,6 +144,11 @@ pub struct Confusion {
 pub enum EquipmentSlot {
     Melee,
     Shield,
+    Head,
+    Torso,
+    Legs,
+    Feet,
+    Hands,
 }
 
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -157,12 +162,6 @@ pub struct Equippable {
 pub struct Equipped {
     pub owner: Entity,
     pub slot: EquipmentSlot,
-}
-
-#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-#[uuid = "9c0725df-a532-488c-a890-84a7dc186686"]
-pub struct DefenseBonus {
-    pub defense: i32,
 }
 
 #[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -287,4 +286,11 @@ pub struct MeleeWeapon {
     pub damage_die_type: i32,
     pub damage_bonus: i32,
     pub hit_bonus: i32,
+}
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "64f8327b-24cc-409e-8567-aa73ac9923ce"]
+pub struct Wearable {
+    pub armor_class: f32,
+    pub slot: EquipmentSlot,
 }

@@ -14,7 +14,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<Position>()
         .read_component::<HungerClock>()
         .with_query(<(Read<MeleeWeapon>, Read<Equipped>)>::query())
-        .with_query(<(Read<DefenseBonus>, Read<Equipped>)>::query())
+        .with_query(<(Read<Wearable>, Read<Equipped>)>::query())
         .write_resource::<GameLog>()
         .write_resource::<ParticleBuilder>()
         .write_resource::<RandomNumberGenerator>()
@@ -22,7 +22,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
             |command_buffer,
              world,
              (log, particle_builder, rng),
-             (query, query_melee, _query_defense)| {
+             (query, query_melee, query_defense)| {
                 for (entity, (wants_melee, attacker_attributes, attacker_skills, attacker_pools)) in
                     query.iter_entities(world)
                 {
@@ -85,11 +85,18 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                     + weapon_hit_bonus
                                     + status_hit_bonus;
 
+                                let mut armor_item_bonus_f = 0.0;
+                                for (armor, wielded) in query_defense.iter(world) {
+                                    if wielded.owner == wants_melee.target {
+                                        armor_item_bonus_f += armor.armor_class;
+                                    }
+                                }
+
                                 let base_armor_class = 10;
                                 let armor_quickness_bonus = target_attributes.quickness.bonus;
                                 let armor_skill_bonus =
                                     skill_bonus(Skill::Defense, &*target_skills);
-                                let armor_item_bonus = 0; // TODO: Once armor supports this
+                                let armor_item_bonus = armor_item_bonus_f as i32;
                                 let armor_class = base_armor_class
                                     + armor_quickness_bonus
                                     + armor_skill_bonus

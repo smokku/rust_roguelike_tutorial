@@ -206,8 +206,9 @@
                 bg: "#000000",
                 order: 2,
             ),
-            shield: (
-                defense_bonus: 1,
+            wearable: (
+                slot: "shield",
+                armor_class: 1.0,
             ),
         ),
         (
@@ -218,10 +219,51 @@
                 bg: "#000000",
                 order: 2,
             ),
-            shield: (
-                defense_bonus: 3,
+                wearable: (
+                slot: "shield",
+                armor_class: 2.0,
             ),
         ),
+
+        (
+            name: "Stained Tunic",
+            renderable: (
+                glyph: '[',
+                fg: "#00FF00",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "torso",
+                armor_class: 0.1,
+            ),
+        ),
+        (
+            name: "Torn Trousers",
+            renderable: (
+                glyph: '[',
+                fg: "#00FFFF",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "legs",
+                armor_class: 0.1,
+            ),
+        ),
+        (
+            name: "Old Boots",
+            renderable: (
+                glyph: '[',
+                fg: "#FF9999",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "legs",
+                armor_class: 0.1,
+            ),
+        )
     ],
 
     mobs: [
