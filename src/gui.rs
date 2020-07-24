@@ -31,6 +31,7 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     use rltk::to_cp437;
     let box_gray = RGB::from_hex("#999999").expect("Cannot convert color");
     let black = RGB::named(rltk::BLACK);
+    let white = RGB::named(rltk::WHITE);
 
     draw_hollow_box(ctx, 0, 0, 79, 59, box_gray, black); // Overall box
     draw_hollow_box(ctx, 0, 0, 49, 45, box_gray, black); // Map box
@@ -42,6 +43,18 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     ctx.set(49, 45, box_gray, black, to_cp437('┴'));
     ctx.set(79, 8, box_gray, black, to_cp437('┤'));
     ctx.set(79, 45, box_gray, black, to_cp437('┤'));
+
+    // Draw the town name
+    let map = resources.get::<Map>().unwrap();
+    let mut name = map.name.clone();
+    std::mem::drop(map);
+    const MAX_TOWN_NAME_LENGTH: i32 = 44;
+    name.truncate(MAX_TOWN_NAME_LENGTH as usize);
+    let name_length = name.len() as i32;
+    let x_pos = (MAX_TOWN_NAME_LENGTH - name_length) / 2;
+    ctx.set(x_pos, 0, box_gray, black, to_cp437('┤'));
+    ctx.print_color(x_pos + 1, 0, white, black, name);
+    ctx.set(x_pos + 1 + name_length, 0, box_gray, black, to_cp437('├'));
 }
 
 fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {

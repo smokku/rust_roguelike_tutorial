@@ -89,12 +89,12 @@ pub struct BuilderChain {
 }
 
 impl BuilderChain {
-    pub fn new(depth: i32, width: i32, height: i32) -> Self {
+    pub fn new<S: ToString>(depth: i32, width: i32, height: i32, name: S) -> Self {
         BuilderChain {
             starter: None,
             builders: Vec::new(),
             build_data: BuilderMap {
-                map: Map::new(depth, width, height),
+                map: Map::new(depth, width, height, name),
                 starting_position: None,
                 rooms: None,
                 corridors: None,
@@ -268,13 +268,14 @@ fn random_shape_finish(rng: &mut rltk::RandomNumberGenerator, builder: &mut Buil
     builder.with(DistantExit::new());
 }
 
-pub fn random_builder(
+pub fn random_builder<S: ToString>(
     depth: i32,
     width: i32,
     height: i32,
+    name: S,
     rng: &mut RandomNumberGenerator,
 ) -> BuilderChain {
-    let mut builder = BuilderChain::new(depth, width, height);
+    let mut builder = BuilderChain::new(depth, width, height, name);
     let type_roll = rng.roll_dice(1, 2);
     match type_roll {
         1 => random_room_builder(rng, &mut builder),
@@ -298,15 +299,16 @@ pub fn random_builder(
     builder
 }
 
-pub fn level_builder(
+pub fn level_builder<S: ToString>(
     depth: i32,
     width: i32,
     height: i32,
+    name: S,
     rng: &mut RandomNumberGenerator,
 ) -> BuilderChain {
     rltk::console::log(format!("Depth: {}", depth));
     match depth {
         1 => town_builder(depth, width, height, rng),
-        _ => random_builder(depth, width, height, rng),
+        _ => random_builder(depth, width, height, name, rng),
     }
 }
