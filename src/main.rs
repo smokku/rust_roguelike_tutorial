@@ -398,10 +398,7 @@ impl State {
 }
 
 fn main() -> rltk::BError {
-    let mut context = RltkBuilder::simple80x50()
-        .with_title("Roguelike Tutorial")
-        .build()
-        .unwrap();
+    let mut context = RltkBuilder::simple(80, 60).unwrap().build()?;
     context.with_post_scanlines(true);
 
     prefabs::load_prefabs();
