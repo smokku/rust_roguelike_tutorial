@@ -529,6 +529,30 @@ pub fn spawn_named_mob(
             }
         }
 
+        if let Some(natural) = &mob_template.natural {
+            let mut nad = NaturalAttackDefense {
+                armor_class: natural.armor_class,
+                attacks: Vec::new(),
+            };
+            if let Some(attacks) = &natural.attacks {
+                for attack in attacks.iter() {
+                    let (damage_n_dice, damage_die_type, damage_bonus) =
+                        parse_dice_string(&attack.damage);
+                    let na = NaturalAttack {
+                        name: attack.name.clone(),
+                        hit_bonus: attack.hit_bonus,
+                        damage_n_dice,
+                        damage_die_type,
+                        damage_bonus,
+                    };
+                    nad.attacks.push(na);
+                }
+            }
+            world
+                .add_component(entity, nad)
+                .expect("Cannot add component");
+        }
+
         if mob_template.blocks_tile {
             world
                 .add_tag(entity, BlocksTile {})

@@ -396,6 +396,7 @@ fn get_serializer() -> SerializeImpl {
         ComponentRegistration::of::<Pools>(),
         ComponentRegistration::of::<MeleeWeapon>(),
         ComponentRegistration::of::<Wearable>(),
+        ComponentRegistration::of::<NaturalAttackDefense>(),
     ];
     let tag_registrations = [
         TagRegistration::of::<Player>(),

@@ -550,6 +550,12 @@
                 "melee": -1,
                 "defense": -1,
             },
+            natural: (
+                armor_class: 11,
+                attacks: [
+                    ( name: "bite", hit_bonus: 0, damage: "1d4" ),
+                ],
+            ),
         ),
         (
             name: "Orc",

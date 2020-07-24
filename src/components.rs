@@ -294,3 +294,19 @@ pub struct Wearable {
     pub armor_class: f32,
     pub slot: EquipmentSlot,
 }
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct NaturalAttack {
+    pub name: String,
+    pub damage_n_dice: i32,
+    pub damage_die_type: i32,
+    pub damage_bonus: i32,
+    pub hit_bonus: i32,
+}
+
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "3ad801a0-461e-4af3-81c5-3925eba81a6f"]
+pub struct NaturalAttackDefense {
+    pub armor_class: Option<i32>,
+    pub attacks: Vec<NaturalAttack>,
+}
