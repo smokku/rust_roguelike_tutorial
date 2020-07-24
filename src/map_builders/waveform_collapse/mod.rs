@@ -35,6 +35,7 @@ impl WaveformCollapseBuilder {
                 build_data.map.depth,
                 build_data.map.width,
                 build_data.map.height,
+                build_data.map.name.clone(),
             );
             let mut solver = Solver::new(constraints.clone(), CHUNK_SIZE, &build_data.map);
             while !solver.iteration(&mut build_data.map, rng) {
@@ -65,6 +66,7 @@ impl WaveformCollapseBuilder {
             build_data.map.depth,
             build_data.map.width,
             build_data.map.height,
+            build_data.map.name.clone(),
         );
         let mut counter = 0;
         let mut x = 1;
@@ -85,6 +87,7 @@ impl WaveformCollapseBuilder {
                         build_data.map.depth,
                         build_data.map.width,
                         build_data.map.height,
+                        build_data.map.name.clone(),
                     );
 
                     x = 1;
