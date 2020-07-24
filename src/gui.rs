@@ -2,89 +2,46 @@ use super::{camera, components::*, gamelog::GameLog, rex_assets::RexAssets, Map,
 use legion::prelude::*;
 use rltk::{FontCharType, Point, Rltk, VirtualKeyCode, RGB};
 
+pub fn draw_hollow_box(
+    console: &mut Rltk,
+    sx: i32,
+    sy: i32,
+    width: i32,
+    height: i32,
+    fg: RGB,
+    bg: RGB,
+) {
+    use rltk::to_cp437;
+
+    console.set(sx, sy, fg, bg, to_cp437('┌'));
+    console.set(sx + width, sy, fg, bg, to_cp437('┐'));
+    console.set(sx, sy + height, fg, bg, to_cp437('└'));
+    console.set(sx + width, sy + height, fg, bg, to_cp437('┘'));
+    for x in sx + 1..sx + width {
+        console.set(x, sy, fg, bg, to_cp437('─'));
+        console.set(x, sy + height, fg, bg, to_cp437('─'));
+    }
+    for y in sy + 1..sy + height {
+        console.set(sx, y, fg, bg, to_cp437('│'));
+        console.set(sx + width, y, fg, bg, to_cp437('│'));
+    }
+}
+
 pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
-    ctx.draw_box(
-        0,
-        43,
-        79,
-        6,
-        RGB::named(rltk::WHITE),
-        RGB::named(rltk::BLACK),
-    );
+    use rltk::to_cp437;
+    let box_gray = RGB::from_hex("#999999").expect("Cannot convert color");
+    let black = RGB::named(rltk::BLACK);
 
-    let player = resources.get::<Entity>().unwrap();
-
-    let stats = world.get_component::<Pools>(*player).unwrap();
-    let health = format!(
-        " HP: {} / {}",
-        stats.hit_points.current, stats.hit_points.max
-    );
-    ctx.print_color(
-        12,
-        43,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        &health,
-    );
-    ctx.draw_bar_horizontal(
-        28,
-        43,
-        51,
-        stats.hit_points.current,
-        stats.hit_points.max,
-        RGB::named(rltk::RED),
-        RGB::named(rltk::BLACK),
-    );
-
-    let hunger = world.get_component::<HungerClock>(*player).unwrap();
-    match hunger.state {
-        HungerState::WellFed => ctx.print_color(
-            71,
-            42,
-            RGB::named(rltk::GREEN),
-            RGB::named(rltk::BLACK),
-            "Well Fed",
-        ),
-        HungerState::Normal => {}
-        HungerState::Hungry => ctx.print_color(
-            71,
-            42,
-            RGB::named(rltk::ORANGE),
-            RGB::named(rltk::BLACK),
-            "Hungry",
-        ),
-        HungerState::Starving => ctx.print_color(
-            71,
-            42,
-            RGB::named(rltk::RED),
-            RGB::named(rltk::BLACK),
-            "Starving",
-        ),
-    }
-
-    let map = resources.get::<Map>().unwrap();
-    let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(
-        2,
-        43,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        depth,
-    );
-
-    let log = resources.get::<GameLog>().unwrap();
-    let mut y = 44;
-    for s in log.entries.iter().rev() {
-        if y < 49 {
-            ctx.print(2, y, s);
-        }
-        y += 1;
-    }
-
-    // Draw mouse cursor
-    let mouse_pos = ctx.mouse_pos();
-    ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::MAGENTA));
-    draw_tooltips(world, resources, ctx);
+    draw_hollow_box(ctx, 0, 0, 79, 59, box_gray, black); // Overall box
+    draw_hollow_box(ctx, 0, 0, 49, 45, box_gray, black); // Map box
+    draw_hollow_box(ctx, 0, 45, 79, 14, box_gray, black); // Log box
+    draw_hollow_box(ctx, 49, 0, 30, 8, box_gray, black); // Top-right panel
+    ctx.set(0, 45, box_gray, black, to_cp437('├'));
+    ctx.set(49, 8, box_gray, black, to_cp437('├'));
+    ctx.set(49, 0, box_gray, black, to_cp437('┬'));
+    ctx.set(49, 45, box_gray, black, to_cp437('┴'));
+    ctx.set(79, 8, box_gray, black, to_cp437('┤'));
+    ctx.set(79, 45, box_gray, black, to_cp437('┤'));
 }
 
 fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
