@@ -3,10 +3,12 @@ use legion::prelude::*;
 use rltk::{Point, Rltk, RGB};
 
 const SHOW_BOUNDARIES: bool = true;
+const MAP_OFFSET_X: i32 = 1;
+const MAP_OFFSET_Y: i32 = 1;
 
-pub fn get_screen_bounds(resources: &Resources, ctx: &Rltk) -> (i32, i32, i32, i32) {
+pub fn get_screen_bounds(resources: &Resources, _ctx: &Rltk) -> (i32, i32, i32, i32) {
     let player_pos = resources.get::<Point>().unwrap();
-    let (x_chars, y_chars) = ctx.get_char_size();
+    let (x_chars, y_chars) = (48, 44);
 
     let center_x = (x_chars / 2) as i32;
     let center_y = (y_chars / 2) as i32;
@@ -24,9 +26,9 @@ pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let (min_x, max_x, min_y, max_y) = get_screen_bounds(resources, ctx);
 
     // Draw the Map
-    let mut y = 0;
+    let mut y = MAP_OFFSET_Y;
     for ty in min_y..max_y {
-        let mut x = 0;
+        let mut x = MAP_OFFSET_X;
         for tx in min_x..max_x {
             if tx >= 0 && tx < map.width && ty >= 0 && ty < map.height {
                 let idx = map.xy_idx(tx, ty);
@@ -63,8 +65,8 @@ pub fn render_camera(world: &World, resources: &Resources, ctx: &mut Rltk) {
                 && entity_screen_y < map.height
             {
                 ctx.set(
-                    entity_screen_x,
-                    entity_screen_y,
+                    entity_screen_x + MAP_OFFSET_X,
+                    entity_screen_y + MAP_OFFSET_Y,
                     render.fg,
                     render.bg,
                     render.glyph,
