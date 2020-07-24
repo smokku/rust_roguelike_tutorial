@@ -15,6 +15,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<HungerClock>()
         .with_query(<(Read<MeleeWeapon>, Read<Equipped>)>::query())
         .with_query(<(Read<Wearable>, Read<Equipped>)>::query())
+        .read_component::<NaturalAttackDefense>()
         .write_resource::<GameLog>()
         .write_resource::<ParticleBuilder>()
         .write_resource::<RandomNumberGenerator>()
@@ -56,6 +57,23 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                     damage_bonus: 0,
                                 };
 
+                                if let Some(nat) =
+                                    world.get_component::<NaturalAttackDefense>(entity)
+                                {
+                                    if !nat.attacks.is_empty() {
+                                        let attack_index = if nat.attacks.len() == 1 {
+                                            0
+                                        } else {
+                                            rng.roll_dice(1, nat.attacks.len() as i32) as usize - 1
+                                        };
+                                        let attack = &nat.attacks[attack_index];
+                                        weapon_info.hit_bonus = attack.hit_bonus;
+                                        weapon_info.damage_n_dice = attack.damage_n_dice;
+                                        weapon_info.damage_die_type = attack.damage_die_type;
+                                        weapon_info.damage_bonus = attack.damage_bonus;
+                                    }
+                                }
+
                                 for (melee, wielded) in query_melee.iter(world) {
                                     if wielded.owner == entity
                                         && wielded.slot == EquipmentSlot::Melee
@@ -92,7 +110,11 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                     }
                                 }
 
-                                let base_armor_class = 10;
+                                let base_armor_class =
+                                    match world.get_component::<NaturalAttackDefense>(target) {
+                                        None => 10,
+                                        Some(nat) => nat.armor_class.unwrap_or(10),
+                                    };
                                 let armor_quickness_bonus = target_attributes.quickness.bonus;
                                 let armor_skill_bonus =
                                     skill_bonus(Skill::Defense, &*target_skills);
