@@ -101,6 +101,21 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
             y += 1;
         }
     }
+
+    // Consumables
+    y += 1;
+    let green = RGB::from_f32(0.0, 1.0, 0.0);
+    let yellow = RGB::named(rltk::YELLOW);
+    let query = <(Read<InBackpack>, Read<Name>)>::query().filter(tag::<Consumable>());
+    let mut index = 1;
+    for (carried_by, item_name) in query.iter(world) {
+        if carried_by.owner == *player && index < 10 {
+            ctx.print_color(50, y, yellow, black, &format!("↑{}", index));
+            ctx.print_color(53, y, green, black, &item_name.name);
+            y += 1;
+            index += 1;
+        }
+    }
 }
 
 fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
