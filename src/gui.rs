@@ -143,6 +143,16 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
             "Starving",
         ),
     }
+
+    // Draw the log
+    let log = resources.get::<GameLog>().unwrap();
+    let mut y = 46;
+    for s in log.entries.iter().rev() {
+        if y < 59 {
+            ctx.print(2, y, s);
+        }
+        y += 1;
+    }
 }
 
 fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
