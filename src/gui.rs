@@ -55,6 +55,66 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     ctx.set(x_pos, 0, box_gray, black, to_cp437('┤'));
     ctx.print_color(x_pos + 1, 0, white, black, name);
     ctx.set(x_pos + 1 + name_length, 0, box_gray, black, to_cp437('├'));
+
+    // Draw stats
+    let player = resources.get::<Entity>().unwrap();
+    let stats = world.get_component::<Pools>(*player).unwrap();
+    let health = format!(
+        "Health: {}/{}",
+        stats.hit_points.current, stats.hit_points.max
+    );
+    let mana = format!("Mana:   {}/{}", stats.mana.current, stats.mana.max);
+    ctx.print_color(50, 1, white, black, &health);
+    ctx.print_color(50, 2, white, black, &mana);
+    ctx.draw_bar_horizontal(
+        64,
+        1,
+        14,
+        stats.hit_points.current,
+        stats.hit_points.max,
+        RGB::named(rltk::RED),
+        RGB::named(rltk::BLACK),
+    );
+    ctx.draw_bar_horizontal(
+        64,
+        2,
+        14,
+        stats.mana.current,
+        stats.mana.max,
+        RGB::named(rltk::BLUE),
+        RGB::named(rltk::BLACK),
+    );
+
+    // Attributes
+    let attr = world.get_component::<Attributes>(*player).unwrap();
+    draw_attribute("Might:", &attr.might, 4, ctx);
+    draw_attribute("Quickness:", &attr.quickness, 5, ctx);
+    draw_attribute("Fitness:", &attr.fitness, 6, ctx);
+    draw_attribute("Intelligence:", &attr.intelligence, 7, ctx);
+}
+
+fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
+    let black = RGB::named(rltk::BLACK);
+    let attr_gray: RGB = RGB::from_hex("#CCCCCC").expect("Oops");
+    ctx.print_color(50, y, attr_gray, black, name);
+    let color: RGB = if attribute.modifiers < 0 {
+        RGB::from_f32(1.0, 0.0, 0.0)
+    } else if attribute.modifiers == 0 {
+        RGB::named(rltk::WHITE)
+    } else {
+        RGB::from_f32(0.0, 1.0, 0.0)
+    };
+    ctx.print_color(
+        67,
+        y,
+        color,
+        black,
+        &format!("{}", attribute.base + attribute.modifiers),
+    );
+    ctx.print_color(73, y, color, black, &format!("{}", attribute.bonus));
+    if attribute.bonus > 0 {
+        ctx.set(72, y, color, black, rltk::to_cp437('+'));
+    }
 }
 
 fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
