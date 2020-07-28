@@ -153,6 +153,8 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         }
         y += 1;
     }
+
+    draw_tooltips(world, resources, ctx);
 }
 
 fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
@@ -184,7 +186,7 @@ fn draw_tooltips(world: &World, resources: &Resources, ctx: &mut Rltk) {
     let (min_x, _max_x, min_y, _max_y) = camera::get_screen_bounds(resources, ctx);
 
     let mouse_pos = ctx.mouse_pos();
-    let mouse_map_pos = (mouse_pos.0 + min_x, mouse_pos.1 + min_y);
+    let mouse_map_pos = (mouse_pos.0 + min_x - 1, mouse_pos.1 + min_y - 1);
     if mouse_map_pos.0 >= map.width - 1
         || mouse_map_pos.1 >= map.height - 1
         || mouse_map_pos.0 < 1
