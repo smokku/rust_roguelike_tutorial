@@ -116,6 +116,33 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
             index += 1;
         }
     }
+
+    // Status
+    let hunger = world.get_component::<HungerClock>(*player).unwrap();
+    match hunger.state {
+        HungerState::WellFed => ctx.print_color(
+            50,
+            44,
+            RGB::named(rltk::GREEN),
+            RGB::named(rltk::BLACK),
+            "Well Fed",
+        ),
+        HungerState::Normal => {}
+        HungerState::Hungry => ctx.print_color(
+            50,
+            44,
+            RGB::named(rltk::ORANGE),
+            RGB::named(rltk::BLACK),
+            "Hungry",
+        ),
+        HungerState::Starving => ctx.print_color(
+            50,
+            44,
+            RGB::named(rltk::RED),
+            RGB::named(rltk::BLACK),
+            "Starving",
+        ),
+    }
 }
 
 fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
