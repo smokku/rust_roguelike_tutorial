@@ -91,6 +91,16 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
     draw_attribute("Quickness:", &attr.quickness, 5, ctx);
     draw_attribute("Fitness:", &attr.fitness, 6, ctx);
     draw_attribute("Intelligence:", &attr.intelligence, 7, ctx);
+
+    // Equipped
+    let mut y = 9;
+    let query = <(Read<Equipped>, Read<Name>)>::query();
+    for (equipped_by, item_name) in query.iter(world) {
+        if equipped_by.owner == *player {
+            ctx.print_color(50, y, white, black, &item_name.name);
+            y += 1;
+        }
+    }
 }
 
 fn draw_attribute(name: &str, attribute: &Attribute, y: i32, ctx: &mut Rltk) {
