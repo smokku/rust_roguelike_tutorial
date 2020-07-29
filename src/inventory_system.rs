@@ -327,3 +327,21 @@ pub fn item_remove() -> Box<(dyn Schedulable + 'static)> {
             }
         })
 }
+
+pub fn activate_item(world: &mut World, resources: &Resources, item: Entity) -> RunState {
+    if let Some(ranged) = world.get_component::<Ranged>(item) {
+        return RunState::ShowTargeting {
+            range: ranged.range,
+            item,
+        };
+    }
+
+    world
+        .add_component(
+            *resources.get::<Entity>().unwrap(),
+            WantsToUseItem { item, target: None },
+        )
+        .expect("Unable to insert intent");
+
+    return RunState::PlayerTurn;
+}

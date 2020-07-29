@@ -1,4 +1,6 @@
-use super::{components::*, gamelog::GameLog, Map, RunState, State, TileType, Viewshed};
+use super::{
+    activate_item, components::*, gamelog::GameLog, Map, RunState, State, TileType, Viewshed,
+};
 use legion::prelude::*;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use std::cmp::{max, min};
@@ -164,7 +166,48 @@ fn skip_turn(gs: &mut State) -> RunState {
     RunState::PlayerTurn
 }
 
+fn use_consumable_hotkey(gs: &mut State, key: i32) -> RunState {
+    let mut carried_consumables = Vec::new();
+    let player = gs.resources.get::<Entity>().unwrap();
+    // FIXME: this has to be the same query as in gui.rs - this may become nondeterministic!
+    let query = <(Read<InBackpack>, Read<Name>)>::query().filter(tag::<Consumable>());
+    for (entity, (carried_by, _item_name)) in query.iter_entities(&gs.world) {
+        if carried_by.owner == *player {
+            carried_consumables.push(entity);
+        }
+    }
+
+    if (key as usize) < carried_consumables.len() {
+        return activate_item(
+            &mut gs.world,
+            &gs.resources,
+            carried_consumables[key as usize],
+        );
+    }
+
+    RunState::PlayerTurn
+}
+
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
+    // Hotkeys
+    if ctx.shift && ctx.key.is_some() {
+        let key = match ctx.key.unwrap() {
+            VirtualKeyCode::Key1 => Some(1),
+            VirtualKeyCode::Key2 => Some(2),
+            VirtualKeyCode::Key3 => Some(3),
+            VirtualKeyCode::Key4 => Some(4),
+            VirtualKeyCode::Key5 => Some(5),
+            VirtualKeyCode::Key6 => Some(6),
+            VirtualKeyCode::Key7 => Some(7),
+            VirtualKeyCode::Key8 => Some(8),
+            VirtualKeyCode::Key9 => Some(9),
+            _ => None,
+        };
+        if let Some(key) = key {
+            return use_consumable_hotkey(gs, key - 1);
+        }
+    }
+
     // Player movement
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
@@ -204,7 +247,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             // Skip turn
             VirtualKeyCode::Numpad5 | VirtualKeyCode::Space => return skip_turn(gs),
 
-            _ => return RunState::PlayerTurn,
+            _ => return RunState::AwaitingInput,
         },
     }
     RunState::PlayerTurn

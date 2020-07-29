@@ -27,6 +27,7 @@ mod trigger_system;
 mod visibility_system;
 pub use components::*;
 pub use game_system::*;
+pub use inventory_system::activate_item;
 pub use map::*;
 pub use player::*;
 pub use rect::*;
@@ -151,26 +152,7 @@ impl GameState for State {
                     gui::ItemMenuResult::NoResponse => {}
                     gui::ItemMenuResult::Selected => {
                         let item = item.unwrap();
-
-                        let mut ranged: Option<Ranged> = None;
-                        if let Some(ranged_component) = self.world.get_component::<Ranged>(item) {
-                            ranged = Some(*ranged_component);
-                        }
-
-                        if let Some(ranged) = ranged {
-                            runstate = RunState::ShowTargeting {
-                                range: ranged.range,
-                                item,
-                            }
-                        } else {
-                            self.world
-                                .add_component(
-                                    *self.resources.get::<Entity>().unwrap(),
-                                    WantsToUseItem { item, target: None },
-                                )
-                                .expect("Unable to insert intent");
-                            runstate = RunState::PlayerTurn;
-                        }
+                        runstate = activate_item(&mut self.world, &self.resources, item);
                     }
                 }
             }
