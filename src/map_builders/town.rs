@@ -52,8 +52,10 @@ impl TownBuilder {
         let doors = self.add_doors(rng, build_data, &mut buildings, wall_gap_y);
         self.add_paths(build_data, &doors);
 
-        let exit_idx = build_data.map.xy_idx(build_data.map.width - 5, wall_gap_y);
-        build_data.map.tiles[exit_idx] = TileType::DownStairs;
+        for y in wall_gap_y - 3..wall_gap_y + 4 {
+            let exit_idx = build_data.map.xy_idx(build_data.map.width - 1, y);
+            build_data.map.tiles[exit_idx] = TileType::DownStairs;
+        }
         build_data.take_snapshot();
 
         let building_size = self.sort_buildings(&buildings);
