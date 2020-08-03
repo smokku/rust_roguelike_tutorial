@@ -60,6 +60,8 @@ mod door_placement;
 use door_placement::DoorPlacement;
 mod town;
 use town::town_builder;
+mod forest;
+use forest::forest_builder;
 
 pub struct BuilderMap {
     pub map: Map,
@@ -309,6 +311,7 @@ pub fn level_builder<S: ToString>(
     rltk::console::log(format!("Depth: {}", depth));
     match depth {
         1 => town_builder(depth, width, height, rng),
+        2 => forest_builder(depth, width, height, rng),
         _ => random_builder(depth, width, height, name, rng),
     }
 }
