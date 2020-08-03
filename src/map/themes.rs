@@ -3,7 +3,7 @@ use rltk::{FontCharType, RGB};
 
 pub fn tile_glyph(idx: usize, map: &Map) -> (FontCharType, RGB, RGB) {
     let (glyph, mut fg, mut bg) = match map.depth {
-        // 2 => get_forest_glyph(idx, map),
+        2 => get_forest_glyph(idx, map),
         _ => get_tile_glyph_default(idx, map),
     };
 
@@ -20,8 +20,8 @@ pub fn tile_glyph(idx: usize, map: &Map) -> (FontCharType, RGB, RGB) {
 
 fn get_tile_glyph_default(idx: usize, map: &Map) -> (FontCharType, RGB, RGB) {
     let glyph;
-    let mut fg;
-    let mut bg = RGB::from_f32(0.0, 0.0, 0.0);
+    let fg;
+    let bg = RGB::from_f32(0.0, 0.0, 0.0);
 
     match map.tiles[idx] {
         TileType::Floor => {
@@ -117,4 +117,51 @@ fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     }
     let idx = map.xy_idx(x, y);
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]
+}
+
+fn get_forest_glyph(idx: usize, map: &Map) -> (FontCharType, RGB, RGB) {
+    let glyph;
+    let fg;
+    let bg = RGB::from_f32(0.0, 0.0, 0.0);
+
+    match map.tiles[idx] {
+        TileType::Wall => {
+            glyph = rltk::to_cp437('♣');
+            fg = RGB::from_f32(0.0, 0.6, 0.0);
+        }
+        TileType::Bridge => {
+            glyph = rltk::to_cp437('.');
+            fg = RGB::named(rltk::CHOCOLATE);
+        }
+        TileType::Road => {
+            glyph = rltk::to_cp437('≡');
+            fg = RGB::named(rltk::YELLOW);
+        }
+        TileType::Grass => {
+            glyph = rltk::to_cp437('"');
+            fg = RGB::named(rltk::GREEN);
+        }
+        TileType::ShallowWater => {
+            glyph = rltk::to_cp437('~');
+            fg = RGB::named(rltk::CYAN);
+        }
+        TileType::DeepWater => {
+            glyph = rltk::to_cp437('~');
+            fg = RGB::named(rltk::BLUE);
+        }
+        TileType::Gravel => {
+            glyph = rltk::to_cp437(';');
+            fg = RGB::from_f32(0.5, 0.5, 0.5);
+        }
+        TileType::DownStairs => {
+            glyph = rltk::to_cp437('>');
+            fg = RGB::from_f32(0.0, 1.0, 1.0);
+        }
+        _ => {
+            glyph = rltk::to_cp437('"');
+            fg = RGB::from_f32(0.0, 0.6, 0.0);
+        }
+    }
+
+    (glyph, fg, bg)
 }
