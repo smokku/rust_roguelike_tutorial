@@ -1,4 +1,7 @@
-use super::{gamelog::GameLog, Map, Name, Player, Pools, Position, RunState, SufferDamage};
+use super::{
+    gamelog::GameLog, Equipped, InBackpack, Map, Name, Player, Pools, Position, RunState,
+    SufferDamage,
+};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -26,8 +29,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
 
 pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
     let mut dead = Vec::new();
-    let query = Read::<Pools>::query();
-    for (victim, stats) in query.iter_entities(world) {
+    for (victim, stats) in Read::<Pools>::query().iter_entities(world) {
         if stats.hit_points.current < 1 {
             if let Some(_player) = world.get_tag::<Player>(victim) {
                 resources.insert(RunState::GameOver);
@@ -37,15 +39,41 @@ pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
         }
     }
 
+    // Drop everything held by dead people
+    let mut to_drop = Vec::new();
+    for victim in dead.iter() {
+        if let Some(pos) = world.get_component::<Position>(*victim) {
+            // Drop their stuff
+            for (entity, equipped) in Read::<Equipped>::query().iter_entities(world) {
+                if equipped.owner == *victim {
+                    to_drop.push((entity, (*pos).clone()));
+                }
+            }
+            for (entity, backpack) in Read::<InBackpack>::query().iter_entities(world) {
+                if backpack.owner == *victim {
+                    to_drop.push((entity, (*pos).clone()));
+                }
+            }
+        }
+    }
+    for (entity, pos) in to_drop.drain(..) {
+        world
+            .remove_components::<(Equipped, InBackpack)>(entity)
+            .expect("Dropping item failed");
+        world
+            .add_component(entity, pos)
+            .expect("Positioning dropped item failed");
+    }
+
     let mut log = resources.get_mut::<GameLog>().unwrap();
-    for victim in dead {
-        let name = if let Some(name) = world.get_component::<Name>(victim) {
+    for victim in dead.iter() {
+        let name = if let Some(name) = world.get_component::<Name>(*victim) {
             name.name.clone()
         } else {
             "-Unnamed-".to_string()
         };
         log.entries
             .push(format!("{} is pushing up the daisies.", name));
-        world.delete(victim);
+        world.delete(*victim);
     }
 }
