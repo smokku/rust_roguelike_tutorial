@@ -16,6 +16,9 @@
         ( name: "Bear Trap", weight: 5, min_depth: 0, max_depth: 100 ),
         ( name: "Battleaxe", weight: 1, min_depth: 2, max_depth: 100 ),
         ( name: "Kobold", weight: 15, min_depth: 3, max_depth: 3 ),
+        ( name: "Rat", weight: 15, min_depth: 2, max_depth: 3 ),
+        ( name: "Mangy Wolf", weight: 13, min_depth: 2, max_depth: 3 ),
+        ( name: "Fox", weight: 15, min_depth: 2, max_depth: 3 ),
     ],
 
     items: [
@@ -535,6 +538,58 @@
             name: "Rat",
             renderable: (
                 glyph: 'r',
+                fg: "#FF0000",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            vision_range: 8,
+            ai: "melee",
+            attributes : (
+                might: 3,
+                fitness: 3,
+            ),
+            skills: {
+                "melee": -1,
+                "defense": -1,
+            },
+            natural: (
+                armor_class: 11,
+                attacks: [
+                    ( name: "bite", hit_bonus: 0, damage: "1d4" ),
+                ],
+            ),
+        ),
+        (
+            name: "Mangy Wolf",
+            renderable: (
+                glyph: 'w',
+                fg: "#FF0000",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            vision_range: 8,
+            ai: "melee",
+            attributes : (
+                might: 3,
+                fitness: 3,
+            ),
+            skills: {
+                "melee": -1,
+                "defense": -1,
+            },
+            natural: (
+                armor_class: 12,
+                attacks: [
+                    ( name: "bite", hit_bonus: 0, damage: "1d6" ),
+                ],
+            ),
+        ),
+        (
+            name: "Fox",
+            renderable: (
+                glyph: 'f',
                 fg: "#FF0000",
                 bg: "#000000",
                 order: 1,
