@@ -70,7 +70,7 @@ impl YellowBrickRoad {
         }
     }
 
-    fn build(&mut self, _rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn build(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         let starting_pos = build_data.starting_position.as_ref().unwrap().clone();
 
         let (end_x, end_y) = self.find_exit(
@@ -96,6 +96,35 @@ impl YellowBrickRoad {
                 self.paint_road(build_data, x + 1, y);
                 self.paint_road(build_data, x, y - 1);
                 self.paint_road(build_data, x, y + 1);
+            }
+        }
+        build_data.take_snapshot();
+
+        // Place exit
+        let exit_dir = rng.roll_dice(1, 2);
+        let (seed_x, seed_y, stream_startx, stream_starty) = if exit_dir == 1 {
+            (build_data.map.width - 1, 0, 0, build_data.map.height - 1)
+        } else {
+            (build_data.map.width - 1, build_data.map.height - 1, 0, 0)
+        };
+
+        let (stairs_x, stairs_y) = self.find_exit(build_data, seed_x, seed_y);
+        let stairs_idx = build_data.map.xy_idx(stairs_x, stairs_y);
+        build_data.map.tiles[stairs_idx] = TileType::DownStairs;
+
+        let (stream_x, stream_y) = self.find_exit(build_data, stream_startx, stream_starty);
+        let stream = a_star_search(
+            Point::new(stairs_x, stairs_y),
+            Point::new(stream_x, stream_y),
+            0.0,
+            &build_data.map,
+        );
+        // FIXME: First trace the stream, then draw the road.
+        // Now the stream flows using road tiles.
+        for tile in stream.unwrap().0.iter() {
+            let idx = build_data.map.xy_idx(tile.x, tile.y);
+            if build_data.map.tiles[idx] == TileType::Floor {
+                build_data.map.tiles[idx] = TileType::ShallowWater;
             }
         }
         build_data.take_snapshot();
