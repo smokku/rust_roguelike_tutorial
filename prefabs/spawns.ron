@@ -19,6 +19,7 @@
         ( name: "Rat", weight: 15, min_depth: 2, max_depth: 3 ),
         ( name: "Mangy Wolf", weight: 13, min_depth: 2, max_depth: 3 ),
         ( name: "Fox", weight: 15, min_depth: 2, max_depth: 3 ),
+        ( name: "Deer", weight: 14, min_depth: 2, max_depth: 3 ),
     ],
 
     items: [
@@ -597,6 +598,32 @@
             blocks_tile: true,
             vision_range: 8,
             ai: "melee",
+            attributes : (
+                might: 3,
+                fitness: 3,
+            ),
+            skills: {
+                "melee": -1,
+                "defense": -1,
+            },
+            natural: (
+                armor_class: 11,
+                attacks: [
+                    ( name: "bite", hit_bonus: 0, damage: "1d4" ),
+                ],
+            ),
+        ),
+        (
+            name: "Deer",
+            renderable: (
+                glyph: 'd',
+                fg: "#FFFF00",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            vision_range: 8,
+            ai: "bystander",
             attributes : (
                 might: 3,
                 fitness: 3,
