@@ -20,6 +20,7 @@
         ( name: "Mangy Wolf", weight: 13, min_depth: 2, max_depth: 3 ),
         ( name: "Fox", weight: 15, min_depth: 2, max_depth: 3 ),
         ( name: "Deer", weight: 14, min_depth: 2, max_depth: 3 ),
+        ( name: "Bandit", weight: 9, min_depth: 2, max_depth: 3 ),
     ],
 
     loot_tables: [
@@ -205,6 +206,21 @@
             ),
         ),
         (
+            name: "Shortsword",
+            renderable: (
+                glyph: '/',
+                fg: "#FFAAFF",
+                bg: "#000000",
+                order: 2,
+            ),
+            weapon: (
+                range: "melee",
+                attribute: "might",
+                base_damage: "1d6",
+                hit_bonus: 0,
+            ),
+        ),
+        (
             name: "Longsword",
             renderable: (
                 glyph: '/',
@@ -312,7 +328,7 @@
                 order: 2,
             ),
             wearable: (
-                slot: "legs",
+                slot: "feet",
                 armor_class: 0.1,
             ),
         ),
@@ -351,8 +367,34 @@
                 order: 2,
             ),
             wearable: (
-                slot: "Legs",
+                slot: "Feet",
                 armor_class: 0.1,
+            ),
+        ),
+        (
+            name: "Leather Armor",
+            renderable: (
+                glyph: '[',
+                fg: "#00FF00",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "Torso",
+                armor_class: 1.0,
+            ),
+        ),
+        (
+            name: "Leather Boots",
+            renderable: (
+                glyph: '[',
+                fg: "#00FF00",
+                bg: "#000000",
+                order: 2,
+            ),
+            wearable: (
+                slot: "Feet",
+                armor_class: 0.2,
             ),
         ),
     ],
@@ -673,6 +715,21 @@
                 ],
             ),
             loot_table: "Animal",
+        ),
+        (
+            name: "Bandit",
+            renderable: (
+                glyph: '☻',
+                fg: "#FF0000",
+                bg: "#000000",
+                order: 1,
+            ),
+            blocks_tile: true,
+            vision_range: 4,
+            ai: "melee",
+            quips: [ "Stand and deliver!", "Alright, hand it over" ],
+            attributes : (),
+            equipped: [ "Shortsword", "Shield", "Leather Armor", "Leather Boots" ],
         ),
         (
             name: "Orc",
