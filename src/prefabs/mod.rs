@@ -11,6 +11,8 @@ mod prop_structs;
 use prop_structs::*;
 mod spawn_table_structs;
 use spawn_table_structs::*;
+mod loot_structs;
+use loot_structs::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Prefabs {
@@ -18,6 +20,7 @@ pub struct Prefabs {
     pub items: Vec<Item>,
     pub mobs: Vec<Mob>,
     pub props: Vec<Prop>,
+    pub loot_tables: Vec<LootTable>,
 }
 
 lazy_static! {

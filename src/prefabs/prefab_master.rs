@@ -37,6 +37,7 @@ pub struct PrefabMaster {
     item_index: HashMap<String, usize>,
     mob_index: HashMap<String, usize>,
     prop_index: HashMap<String, usize>,
+    loot_index: HashMap<String, usize>,
 }
 
 impl PrefabMaster {
@@ -47,10 +48,12 @@ impl PrefabMaster {
                 items: Vec::new(),
                 mobs: Vec::new(),
                 props: Vec::new(),
+                loot_tables: Vec::new(),
             },
             item_index: HashMap::new(),
             mob_index: HashMap::new(),
             prop_index: HashMap::new(),
+            loot_index: HashMap::new(),
         }
     }
 
@@ -88,6 +91,9 @@ impl PrefabMaster {
             }
             self.prop_index.insert(prop.name.clone(), i);
             used_names.insert(prop.name.clone());
+        }
+        for (i, loot) in self.prefabs.loot_tables.iter().enumerate() {
+            self.loot_index.insert(loot.name.clone(), i);
         }
 
         for spawn in self.prefabs.spawn_table.iter() {
@@ -522,6 +528,17 @@ pub fn spawn_named_mob(
             .add_component(entity, skills)
             .expect("Cannot add component");
 
+        if let Some(loot) = &mob_template.loot_table {
+            world
+                .add_component(
+                    entity,
+                    LootTable {
+                        table: loot.clone(),
+                    },
+                )
+                .expect("Cannot add component");
+        }
+
         // Are they wielding anything?
         if let Some(wielding) = &mob_template.equipped {
             for tag in wielding.iter() {
@@ -668,4 +685,21 @@ pub fn get_spawn_table_for_depth(pm: &PrefabMaster, depth: i32) -> RandomTable {
     }
 
     rt
+}
+
+pub fn get_item_drop(
+    pm: &PrefabMaster,
+    rng: &mut rltk::RandomNumberGenerator,
+    table: &str,
+) -> Option<String> {
+    if pm.loot_index.contains_key(table) {
+        let mut rt = RandomTable::new();
+        let available_options = &pm.prefabs.loot_tables[pm.loot_index[table]];
+        for item in available_options.drops.iter() {
+            rt = rt.add(item.name.clone(), item.weight);
+        }
+        return rt.roll(rng);
+    }
+
+    None
 }

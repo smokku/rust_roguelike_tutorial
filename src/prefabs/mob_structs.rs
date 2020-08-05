@@ -17,6 +17,7 @@ pub struct Mob {
     pub mana: Option<i32>,
     pub equipped: Option<Vec<String>>,
     pub natural: Option<MobNatural>,
+    pub loot_table: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]

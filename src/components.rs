@@ -310,3 +310,9 @@ pub struct NaturalAttackDefense {
     pub armor_class: Option<i32>,
     pub attacks: Vec<NaturalAttack>,
 }
+
+#[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "4c71d15e-1263-4505-ab49-e4e18abbac22"]
+pub struct LootTable {
+    pub table: String,
+}

@@ -1,7 +1,8 @@
 use super::{
-    gamelog::GameLog, Equipped, InBackpack, Map, Name, Player, Pools, Position, RunState,
-    SufferDamage,
+    gamelog::GameLog, Equipped, InBackpack, LootTable, Map, Name, Player, Pools, Position,
+    RunState, SufferDamage,
 };
+use crate::prefabs::{get_item_drop, spawn_named_item, SpawnType, PREFABS};
 use legion::prelude::*;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
@@ -41,6 +42,7 @@ pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
 
     // Drop everything held by dead people
     let mut to_drop = Vec::new();
+    let mut to_spawn = Vec::new();
     for victim in dead.iter() {
         if let Some(pos) = world.get_component::<Position>(*victim) {
             // Drop their stuff
@@ -54,6 +56,13 @@ pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
                     to_drop.push((entity, (*pos).clone()));
                 }
             }
+
+            if let Some(loot) = world.get_component::<LootTable>(*victim) {
+                let mut rng = resources.get_mut::<rltk::RandomNumberGenerator>().unwrap();
+                if let Some(drop) = get_item_drop(&PREFABS.lock().unwrap(), &mut rng, &loot.table) {
+                    to_spawn.push((drop, (*pos).clone()));
+                }
+            }
         }
     }
     for (entity, pos) in to_drop.drain(..) {
@@ -63,6 +72,15 @@ pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {
         world
             .add_component(entity, pos)
             .expect("Positioning dropped item failed");
+    }
+
+    for (tag, pos) in to_spawn.drain(..) {
+        spawn_named_item(
+            &PREFABS.lock().unwrap(),
+            world,
+            &tag,
+            SpawnType::AtPosition { x: pos.x, y: pos.y },
+        );
     }
 
     let mut log = resources.get_mut::<GameLog>().unwrap();
