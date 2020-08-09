@@ -413,6 +413,8 @@ fn get_serializer() -> SerializeImpl {
         TagRegistration::of::<BlocksVisibility>(),
         TagRegistration::of::<Bystander>(),
         TagRegistration::of::<Vendor>(),
+        TagRegistration::of::<Carnivore>(),
+        TagRegistration::of::<Herbivore>(),
     ];
 
     SerializeImpl {
