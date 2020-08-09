@@ -1,6 +1,7 @@
 use legion::prelude::*;
 use rltk::{GameState, Point, RandomNumberGenerator, Rltk, RltkBuilder};
 
+mod animal_ai_system;
 mod bystander_ai_system;
 mod camera;
 mod components;
@@ -408,6 +409,7 @@ fn main() -> rltk::BError {
             .add_system(visibility_system::build())
             .build(),
         Schedule::builder()
+            .add_system(animal_ai_system::build())
             .add_system(bystander_ai_system::build())
             .add_system(monster_ai_system::build())
             .add_system(melee_combat_system::build()) // Creates SufferDamage out of WantsToMelee

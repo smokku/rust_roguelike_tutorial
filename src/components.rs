@@ -316,3 +316,11 @@ pub struct NaturalAttackDefense {
 pub struct LootTable {
     pub table: String,
 }
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "1da8957d-829f-4155-b111-339369eaebf4"]
+pub struct Carnivore;
+
+#[derive(TypeUuid, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[uuid = "53e61565-1f50-4559-980b-fffe8d9406af"]
+pub struct Herbivore;
