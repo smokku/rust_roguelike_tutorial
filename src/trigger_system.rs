@@ -40,7 +40,12 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                         rltk::to_cp437('‼'),
                                         200.0,
                                     );
-                                    SufferDamage::new_damage(command_buffer, entity, damage.damage);
+                                    SufferDamage::new_damage(
+                                        command_buffer,
+                                        entity,
+                                        damage.damage,
+                                        false,
+                                    );
                                 }
 
                                 // If it is single activation, it needs to be removed

@@ -64,8 +64,10 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         stats.hit_points.current, stats.hit_points.max
     );
     let mana = format!("Mana:   {}/{}", stats.mana.current, stats.mana.max);
+    let xp = format!("Level:  {}", stats.level);
     ctx.print_color(50, 1, white, black, &health);
     ctx.print_color(50, 2, white, black, &mana);
+    ctx.print_color(50, 3, white, black, &xp);
     ctx.draw_bar_horizontal(
         64,
         1,
@@ -82,6 +84,16 @@ pub fn draw_ui(world: &World, resources: &Resources, ctx: &mut Rltk) {
         stats.mana.current,
         stats.mana.max,
         RGB::named(rltk::BLUE),
+        RGB::named(rltk::BLACK),
+    );
+    let xp_level_start = (stats.level - 1) * 1000;
+    ctx.draw_bar_horizontal(
+        64,
+        3,
+        14,
+        stats.experience - xp_level_start,
+        1000,
+        RGB::named(rltk::GOLD),
         RGB::named(rltk::BLACK),
     );
 

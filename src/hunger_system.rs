@@ -51,7 +51,7 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                             .to_string(),
                                     );
                                     }
-                                    SufferDamage::new_damage(command_buffer, entity, 1);
+                                    SufferDamage::new_damage(command_buffer, entity, 1, false);
                                 }
                             }
                         }

@@ -19,10 +19,11 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .write_resource::<GameLog>()
         .write_resource::<ParticleBuilder>()
         .write_resource::<RandomNumberGenerator>()
+        .read_resource::<Entity>()
         .build(
             |command_buffer,
              world,
-             (log, particle_builder, rng),
+             (log, particle_builder, rng, player_entity),
              (query, query_melee, query_defense)| {
                 for (entity, (wants_melee, attacker_attributes, attacker_skills, attacker_pools)) in
                     query.iter_entities(world)
@@ -158,7 +159,12 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                                             + skill_damage_bonus
                                             + weapon_damage_bonus,
                                     );
-                                    SufferDamage::new_damage(&command_buffer, target, damage);
+                                    SufferDamage::new_damage(
+                                        &command_buffer,
+                                        target,
+                                        damage,
+                                        entity == **player_entity,
+                                    );
                                     log.entries.push(format!(
                                         "{} hits {}, for {} hp.",
                                         &attacker_name, &target_name, damage

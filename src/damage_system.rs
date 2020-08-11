@@ -1,6 +1,6 @@
 use super::{
-    gamelog::GameLog, Equipped, InBackpack, LootTable, Map, Name, Player, Pools, Position,
-    RunState, SufferDamage,
+    gamelog::GameLog, mana_at_level, player_hp_at_level, Attributes, Equipped, InBackpack,
+    LootTable, Map, Name, Player, Pools, Position, RunState, SufferDamage,
 };
 use crate::prefabs::{get_item_drop, spawn_named_item, SpawnType, PREFABS};
 use legion::prelude::*;
@@ -11,21 +11,55 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .write_component::<Pools>()
         .read_component::<Position>()
         .write_resource::<Map>()
-        .build(|command_buffer, world, map, query| unsafe {
-            for (entity, mut damage) in query.iter_entities_unchecked(world) {
-                if let Some(mut stats) = world.get_component_mut_unchecked::<Pools>(entity) {
-                    stats.hit_points.current -= damage.amount.iter().sum::<i32>();
+        .read_resource::<Entity>()
+        .read_component::<Attributes>()
+        .build(
+            |command_buffer, world, (map, player_entity), query| unsafe {
+                let mut xp_gain = 0;
+                for (entity, mut damage) in query.iter_entities_unchecked(world) {
+                    if let Some(mut stats) = world.get_component_mut_unchecked::<Pools>(entity) {
+                        for (dmg, from_player) in damage.amount.iter() {
+                            stats.hit_points.current -= dmg;
+
+                            if stats.hit_points.current < 1 && *from_player {
+                                xp_gain += stats.level * 100;
+                            }
+                        }
+
+                        if let Some(pos) = world.get_component::<Position>(entity) {
+                            let idx = map.xy_idx(pos.x, pos.y);
+                            map.bloodstains.insert(idx);
+                        }
+                    }
+
+                    damage.amount.clear();
+                    command_buffer.remove_component::<SufferDamage>(entity);
                 }
 
-                if let Some(pos) = world.get_component::<Position>(entity) {
-                    let idx = map.xy_idx(pos.x, pos.y);
-                    map.bloodstains.insert(idx);
+                if xp_gain != 0 {
+                    let player_attributes =
+                        *(world.get_component::<Attributes>(**player_entity).unwrap());
+                    let mut player_stats =
+                        world.get_component_mut::<Pools>(**player_entity).unwrap();
+                    player_stats.experience += xp_gain;
+                    if player_stats.experience >= player_stats.level * 1000 {
+                        // We've gone up a level!
+                        player_stats.level = player_stats.experience / 1000 + 1;
+                        player_stats.hit_points.max = player_hp_at_level(
+                            player_attributes.fitness.base + player_attributes.fitness.modifiers,
+                            player_stats.level,
+                        );
+                        player_stats.hit_points.current = player_stats.hit_points.max;
+                        player_stats.mana.max = mana_at_level(
+                            player_attributes.intelligence.base
+                                + player_attributes.intelligence.modifiers,
+                            player_stats.level,
+                        );
+                        player_stats.mana.current = player_stats.mana.max;
+                    }
                 }
-
-                damage.amount.clear();
-                command_buffer.remove_component::<SufferDamage>(entity);
-            }
-        })
+            },
+        )
 }
 
 pub fn delete_the_dead(world: &mut World, resources: &mut Resources) {

@@ -54,11 +54,16 @@ pub struct WantsToMelee {
 #[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[uuid = "56a6359c-d947-438a-a13f-dfe65174cb6d"]
 pub struct SufferDamage {
-    pub amount: Vec<i32>,
+    pub amount: Vec<(i32, bool)>,
 }
 
 impl SufferDamage {
-    pub fn new_damage(command_buffer: &CommandBuffer, victim: Entity, amount: i32) {
+    pub fn new_damage(
+        command_buffer: &CommandBuffer,
+        victim: Entity,
+        amount: i32,
+        from_player: bool,
+    ) {
         command_buffer.exec_mut(move |world| {
             let mut dmg = if let Some(suffering) = world.get_component::<SufferDamage>(victim) {
                 (*suffering).clone()
@@ -66,7 +71,7 @@ impl SufferDamage {
                 SufferDamage { amount: Vec::new() }
             };
 
-            dmg.amount.push(amount);
+            dmg.amount.push((amount, from_player));
             world
                 .add_component(victim, dmg)
                 .expect("Unable to insert damage");

@@ -216,7 +216,7 @@ pub fn item_use() -> Box<(dyn Schedulable + 'static)> {
                         for (target_entity, target_name) in targets.iter() {
                             let target_entity = *target_entity;
                             let damage = damages.damage;
-                            SufferDamage::new_damage(command_buffer, target_entity, damage);
+                            SufferDamage::new_damage(command_buffer, target_entity, damage, true);
                             if let Some(pos) = world.get_component::<Position>(target_entity) {
                                 particle_builder.request(
                                     pos.x,
