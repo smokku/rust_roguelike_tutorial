@@ -12,12 +12,14 @@ pub enum TileType {
     WoodFloor,
     Bridge,
     Gravel,
+    UpStairs,
 }
 
 pub fn tile_walkable(tt: TileType) -> bool {
     match tt {
         TileType::Floor
         | TileType::DownStairs
+        | TileType::UpStairs
         | TileType::Road
         | TileType::Grass
         | TileType::ShallowWater
@@ -33,6 +35,7 @@ pub fn tile_opaque(tt: TileType) -> bool {
         TileType::Wall => true,
         TileType::Floor
         | TileType::DownStairs
+        | TileType::UpStairs
         | TileType::Road
         | TileType::Grass
         | TileType::ShallowWater
@@ -51,6 +54,7 @@ pub fn tile_cost(tt: TileType) -> f32 {
         TileType::Wall
         | TileType::Floor
         | TileType::DownStairs
+        | TileType::UpStairs
         | TileType::DeepWater
         | TileType::WoodFloor
         | TileType::Bridge
