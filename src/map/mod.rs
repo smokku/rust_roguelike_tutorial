@@ -12,6 +12,7 @@ mod astar;
 pub use astar::a_star_search;
 mod themes;
 pub use themes::tile_glyph;
+pub mod dungeon;
 
 #[derive(TypeUuid, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[uuid = "09e57cda-e925-47f0-a3f6-107c86fa76bd"]
