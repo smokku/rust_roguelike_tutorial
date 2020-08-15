@@ -1,9 +1,8 @@
 use super::{
-    a_star_search, particle_system::ParticleBuilder, Confusion, Map, Monster, Position, RunState,
-    Viewshed, WantsToMelee,
+    a_star_search, particle_system::ParticleBuilder, Confusion, Map, Monster, Point, Position,
+    RunState, Viewshed, WantsToMelee,
 };
 use legion::prelude::*;
-use rltk::Point;
 
 pub fn build() -> Box<(dyn Schedulable + 'static)> {
     SystemBuilder::new("monster_ai")

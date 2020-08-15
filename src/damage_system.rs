@@ -1,6 +1,7 @@
 use super::{
-    gamelog::GameLog, mana_at_level, player_hp_at_level, Attributes, Equipped, InBackpack,
-    LootTable, Map, Name, Player, Pools, Position, RunState, SufferDamage,
+    gamelog::GameLog, mana_at_level, particle_system::ParticleBuilder, player_hp_at_level,
+    Attributes, Equipped, InBackpack, LootTable, Map, Name, Player, Point, Pools, Position,
+    RunState, SufferDamage,
 };
 use crate::prefabs::{get_item_drop, spawn_named_item, SpawnType, PREFABS};
 use legion::prelude::*;
@@ -12,9 +13,15 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
         .read_component::<Position>()
         .write_resource::<Map>()
         .read_resource::<Entity>()
+        .write_resource::<GameLog>()
         .read_component::<Attributes>()
+        .write_resource::<ParticleBuilder>()
+        .read_resource::<Point>()
         .build(
-            |command_buffer, world, (map, player_entity), query| unsafe {
+            |command_buffer,
+             world,
+             (map, player_entity, log, particles, player_pos),
+             query| unsafe {
                 let mut xp_gain = 0;
                 for (entity, mut damage) in query.iter_entities_unchecked(world) {
                     if let Some(mut stats) = world.get_component_mut_unchecked::<Pools>(entity) {
@@ -45,6 +52,10 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                     if player_stats.experience >= player_stats.level * 1000 {
                         // We've gone up a level!
                         player_stats.level = player_stats.experience / 1000 + 1;
+                        log.entries.push(format!(
+                            "Congratulations, you are now level {}",
+                            player_stats.level
+                        ));
                         player_stats.hit_points.max = player_hp_at_level(
                             player_attributes.fitness.base + player_attributes.fitness.modifiers,
                             player_stats.level,
@@ -56,6 +67,19 @@ pub fn build() -> Box<(dyn Schedulable + 'static)> {
                             player_stats.level,
                         );
                         player_stats.mana.current = player_stats.mana.max;
+
+                        for i in 0..10 {
+                            if player_pos.y - i > 1 {
+                                particles.request(
+                                    player_pos.x,
+                                    player_pos.y - i,
+                                    rltk::RGB::named(rltk::GOLD),
+                                    rltk::RGB::named(rltk::BLACK),
+                                    rltk::to_cp437('░'),
+                                    400.0,
+                                );
+                            }
+                        }
                     }
                 }
             },
